@@ -1,0 +1,14 @@
+rootProject.name = 'sixpang'
+
+include("eureka-server")
+include("gateway-server")
+include("common-server")
+include("user-service")
+include("company-service")
+include("auth-service")
+include("delivery-service")
+include("product-service")
+include("notification-service")
+include("order-service")
+include("prediction-service")
+include("hub-service")
