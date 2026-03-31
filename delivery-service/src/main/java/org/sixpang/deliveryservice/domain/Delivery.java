@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sixpang.deliveryservice.domain.DeliveryStatus;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /*
@@ -34,7 +36,7 @@ import java.util.UUID;
 * */
 @Entity
 @Getter
-@Table(name="p_delivery")
+@Table(name="p_delivery", schema = "delivery")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Delivery {
     @Id
@@ -45,7 +47,8 @@ public class Delivery {
     private UUID orderId;
 
     @Enumerated(EnumType.STRING)
-    private DeliveryStatus status;
+    @Column(nullable = false)
+    private DeliveryStatus status = DeliveryStatus.HUB_WAITING;
 
     @Column(name="departure_hub", nullable=false)
     private UUID departureHub;
@@ -62,4 +65,6 @@ public class Delivery {
     @Column(name="delivery_manager_id", nullable=false)
     private UUID deliveryManagerId;
 
+    @OneToMany(mappedBy = "delivery", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DeliveryRoute> deliveryRoutes = new ArrayList<>();
 }
