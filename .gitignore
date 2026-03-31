@@ -38,3 +38,7 @@ out/
 
 ### DB ###
 .env
+postgres-data/
+
+### Microservices (Exclude from this repo) ###
+sixpang.delivery-service/
