@@ -13,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserQueryDto {
 
-    //목록 조회용
+    /**목록 조회용**/
     @Getter
     @AllArgsConstructor
     public static class UserInfo {
@@ -25,7 +25,7 @@ public class UserQueryDto {
         private UserStatus status;
     }
 
-    //상세 조회용
+    /**상세 조회용**/
     @Getter
     @AllArgsConstructor
     public static class UserDetail {

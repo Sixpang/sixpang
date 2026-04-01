@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.sixpang.userservice.application.dto.UserServiceDto;
 import org.sixpang.userservice.domain.model.entity.User;
 import org.sixpang.userservice.domain.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,8 +17,9 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    //회원가입
+    /**회원가입**/
     public UUID signUp(UserServiceDto.SignUp dto) {
 
         // 이메일 중복 체크
@@ -30,10 +32,13 @@ public class UserService {
             throw new IllegalArgumentException("이미 존재하는 전화번호입니다.");
         }
 
+        // 비밀번호 암호화
+        String encodedPassword = passwordEncoder.encode(dto.getPassword());
+
         // 유저 생성
         User user = User.create(
                 dto.getEmail(),
-                dto.getPassword(),
+                encodedPassword,
                 dto.getName(),
                 dto.getPhone(),
                 dto.getRole(),
@@ -42,13 +47,13 @@ public class UserService {
                 dto.getCompanyId()
         );
 
-        //  저장
+        // 저장
         userRepository.save(user);
 
         return user.getId();
     }
 
-    //회원 정보 수정
+    /**회원 정보 수정**/
     public void updateUser(UUID userId, UserServiceDto.Update dto) {
 
         User user = userRepository.findById(userId)
@@ -61,17 +66,23 @@ public class UserService {
         );
     }
 
-    //비밀번호 변경
     public void changePassword(UUID userId, UserServiceDto.ChangePassword dto) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
 
-        // TODO: 기존 비밀번호 검증 필요 (PasswordEncoder)
-        user.changePassword(dto.getNewPassword());
+        // 현재 비밀번호 검증
+        if (!passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
+        }
+
+        // 새 비밀번호 암호화
+        String encodedPassword = passwordEncoder.encode(dto.getNewPassword());
+
+        user.changePassword(encodedPassword);
     }
 
-    //회원 승인
+    /**회원 승인**/
     public void approveUser(UUID userId) {
 
         User user = userRepository.findById(userId)
@@ -80,7 +91,7 @@ public class UserService {
         user.approve();
     }
 
-    //회원 거절
+    /**회원 거절**/
     public void rejectUser(UUID userId) {
 
         User user = userRepository.findById(userId)
@@ -89,7 +100,7 @@ public class UserService {
         user.reject();
     }
 
-    //회원 삭제 (소프트 삭제)
+    /**회원 삭제 (소프트 삭제)**/
     public void deleteUser(UUID userId) {
 
         User user = userRepository.findById(userId)

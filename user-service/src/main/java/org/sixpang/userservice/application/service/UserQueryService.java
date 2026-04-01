@@ -17,7 +17,7 @@ public class UserQueryService {
 
     private final UserRepository userRepository;
 
-    //단건 조회 (상세)
+    /**단건 조회 (상세)**/
     public UserQueryDto.UserDetail getUser(UUID userId) {
 
         User user = userRepository.findById(userId)
@@ -37,7 +37,7 @@ public class UserQueryService {
         );
     }
 
-    //목록 조회
+    /**목록 조회**/
     public List<UserQueryDto.UserInfo> getUsers() {
 
         return userRepository.findAll().stream()

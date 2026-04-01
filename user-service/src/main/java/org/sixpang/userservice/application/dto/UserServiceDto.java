@@ -8,11 +8,10 @@ import org.sixpang.userservice.domain.model.enums.UserRole;
 
 import java.util.UUID;
 
-//UserService에서 사용하는 DTO
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserServiceDto {
 
-    //회원가입 DTO
+    /**회원가입 DTO**/
     @Getter
     @Builder
     public static class SignUp {
@@ -29,7 +28,7 @@ public class UserServiceDto {
         private final UUID companyId;   // 선택: 소속 회사 ID
     }
 
-    //회원 정보 수정 DTO (수정가능한 필드만)
+    /**회원 정보 수정 DTO (수정가능한 필드만)**/
     @Getter
     @Builder
     public static class Update {
@@ -39,7 +38,7 @@ public class UserServiceDto {
         private final String slackId;   // 슬랙 ID 변경
     }
 
-    //비밀번호 변경 DTO
+    /**비밀번호 변경 DTO**/
     @Getter
     @Builder
     public static class ChangePassword {
