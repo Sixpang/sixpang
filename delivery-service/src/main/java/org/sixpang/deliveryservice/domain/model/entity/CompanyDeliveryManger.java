@@ -1,4 +1,4 @@
-package org.sixpang.deliveryservice.domain;
+package org.sixpang.deliveryservice.domain.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -9,13 +9,10 @@ import java.util.UUID;
 
 @Entity
 @Getter
+@Table(name="p_company_delivery_manager", schema = "delivery")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name="p_hub_delivery_manager", schema = "delivery")
-public class HubDeliveryManager extends DeliveryBaseEntity{
+public class CompanyDeliveryManger extends DeliveryBaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    @Column(name="hub_id", nullable = false)
-    private UUID hub_id;
 }

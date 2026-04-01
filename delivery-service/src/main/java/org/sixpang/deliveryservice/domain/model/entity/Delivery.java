@@ -1,10 +1,10 @@
-package org.sixpang.deliveryservice.domain;
+package org.sixpang.deliveryservice.domain.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.sixpang.deliveryservice.domain.DeliveryStatus;
+import org.sixpang.deliveryservice.domain.model.enums.DeliveryStatus;
 
 import java.util.ArrayList;
 import java.util.List;

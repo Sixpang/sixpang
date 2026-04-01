@@ -1,6 +1,7 @@
-package org.sixpang.deliveryservice.domain;
+package org.sixpang.deliveryservice.domain.model.entity;
 
 import jakarta.persistence.*;
+import org.sixpang.deliveryservice.domain.model.enums.DeliveryManagerStatus;
 
 import java.util.UUID;
 

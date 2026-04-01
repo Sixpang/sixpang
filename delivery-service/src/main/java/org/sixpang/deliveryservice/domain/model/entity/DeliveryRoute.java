@@ -1,11 +1,11 @@
-package org.sixpang.deliveryservice.domain;
+package org.sixpang.deliveryservice.domain.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import org.sixpang.deliveryservice.domain.DeliveryRouteStatus;
+import org.sixpang.deliveryservice.domain.model.enums.DeliveryRouteStatus;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
