@@ -21,7 +21,7 @@ public class Hub extends BaseEntity {
     private UUID id;
 
     @Column(length = 100, name = "hub_name", nullable = false)
-    private String hubName;
+    private String name;
 
     @Column(nullable = false)
     private String address;
@@ -38,22 +38,22 @@ public class Hub extends BaseEntity {
 
     @Builder(access = AccessLevel.PRIVATE)
     private Hub(
-            String hubName,
+            String name,
             String address,
             BigDecimal latitude,
             BigDecimal longitude,
             HubStatus status
     ) {
-        this.hubName = hubName;
+        this.name = name;
         this.address = address;
         this.latitude = latitude;
         this.longitude = longitude;
         this.status = status;
     }
 
-    public static Hub of(String hubName, String address, BigDecimal latitude, BigDecimal longitude, HubStatus status) {
+    public static Hub of(String name, String address, BigDecimal latitude, BigDecimal longitude, HubStatus status) {
         return Hub.builder()
-                .hubName(hubName)
+                .name(name)
                 .address(address)
                 .latitude(latitude)
                 .longitude(longitude)

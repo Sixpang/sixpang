@@ -14,7 +14,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class HubResponseDto {
     private UUID id;
-    private String hubName;
+    private String name;
     private String address;
     private BigDecimal latitude;
     private BigDecimal longitude;
@@ -23,7 +23,7 @@ public class HubResponseDto {
     public static HubResponseDto from(Hub hub){
         return HubResponseDto.builder()
                 .id(hub.getId())
-                .hubName(hub.getHubName())
+                .name(hub.getName())
                 .address(hub.getAddress())
                 .latitude(hub.getLatitude())
                 .longitude(hub.getLongitude())
