@@ -12,15 +12,56 @@ spring:
     compatibility-verifier:
       enabled: false
     gateway:
-      routes: # Spring Cloud Gateway? ??? ??(???)
+      routes:
         - id: user-service
-          uri: lb://USER-SERVICE
+          uri: lb://user-service
           predicates:
             - Path=/user/**
-          filters:
-            - StripPrefix=1
+
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/auth/**
+
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/order/**
+
+        - id: product-service
+          uri: lb://product-service
+          predicates:
+            - Path=/product/**
+
+        - id: company-service
+          uri: lb://company-service
+          predicates:
+            - Path=/company/**
+
+        - id: delivery-service
+          uri: lb://delivery-service
+          predicates:
+            - Path=/deliveries/**
+
+        - id: hub-service
+          uri: lb://hub-service
+          predicates:
+            - Path=/hub/**
+
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/notification/**
+
+        - id: prediction-service
+          uri: lb://prediction-service
+          predicates:
+            - Path=/prediction/**
 
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
+
+  instance:
+    instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
