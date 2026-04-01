@@ -1,10 +1,12 @@
-package org.sixpang.userservice.domain;
+package org.sixpang.userservice.domain.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sixpang.commonserver.entity.BaseEntity;
+import org.sixpang.userservice.domain.model.enums.UserRole;
+import org.sixpang.userservice.domain.model.enums.UserStatus;
 
 import java.util.UUID;
 
