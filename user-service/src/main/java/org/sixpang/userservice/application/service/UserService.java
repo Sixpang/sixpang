@@ -99,13 +99,4 @@ public class UserService {
 
         user.reject();
     }
-
-    /**회원 삭제 (소프트 삭제)**/
-    public void deleteUser(UUID userId) {
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
-
-        userRepository.delete(user);
-    }
 }
