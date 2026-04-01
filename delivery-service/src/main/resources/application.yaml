@@ -8,11 +8,13 @@ spring:
     username: ${DB_USER}
     password: ${DB_PASSWORD}
 
+
   jpa:
     hibernate:
       ddl-auto: update
     properties:
       hibernate:
+        default_schema: delivery
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
     show-sql: true
