@@ -1,4 +1,4 @@
-package org.sixpang.companyservice.domain;
+package org.sixpang.companyservice.domain.model;
 
 
 import jakarta.persistence.*;
@@ -33,10 +33,10 @@ public class Company extends BaseEntity{
     @Column(name="company_address",nullable = false, length = 225)
     private String address;
 
-    public Company(String name, CompanyType type, UUID hubId, String address){
+    public Company(String name, String address, CompanyType type, UUID hubId){
         this.name = name;
+        this.address = address;
         this.type = type;
         this.hubId = hubId;
-        this.address = address;
     }
 }

@@ -1,4 +1,4 @@
-package org.sixpang.companyservice.domain;
+package org.sixpang.companyservice.domain.model;
 
 public enum CompanyType {
 
