@@ -1,4 +1,4 @@
-package org.sixpang.userservice.domain;
+package org.sixpang.userservice.domain.model.enums;
 
 public enum UserStatus {
     PENDING,  //대기

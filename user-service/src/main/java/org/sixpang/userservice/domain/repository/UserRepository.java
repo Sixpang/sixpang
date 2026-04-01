@@ -1,6 +1,7 @@
-package org.sixpang.userservice.domain;
+package org.sixpang.userservice.domain.repository;
 
 
+import org.sixpang.userservice.domain.model.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
