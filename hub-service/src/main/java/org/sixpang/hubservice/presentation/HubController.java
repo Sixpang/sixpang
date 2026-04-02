@@ -52,6 +52,16 @@ public class HubController {
     }
 
     @PreAuthorize("hasRole('MASTER')")
+    @PatchMapping("/hubs/{id}")
+    public ResponseEntity<ApiResponse<HubResponseDto>> updateHubInfo(
+            @PathVariable UUID id,
+            @RequestBody @Valid HubRequestDto requestDto
+    ){
+        HubResponseDto responseDto = hubService.updateHubInfo(id, requestDto);
+        return ResponseEntity.ok(ApiResponse.of("허브 정보가 수정되었습니다.", responseDto));
+    }
+
+    @PreAuthorize("hasRole('MASTER')")
     @DeleteMapping("/hubs/{id}")
     public ResponseEntity<ApiResponse<HubResponseDto>> deleteHub(
             @PathVariable UUID id
