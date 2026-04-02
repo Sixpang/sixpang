@@ -7,8 +7,6 @@ import org.sixpang.hubservice.application.dto.HubRequestDto;
 import org.sixpang.hubservice.application.dto.HubResponseDto;
 import org.sixpang.hubservice.domain.model.entity.Hub;
 import org.sixpang.hubservice.domain.repository.HubRepository;
-import org.sixpang.userservice.domain.model.entity.User;
-import org.sixpang.userservice.domain.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,15 +19,10 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class HubService {
     private final HubRepository hubRepository;
-    private final UserRepository userRepository;
 
     // 허브 등록
     @Transactional
     public HubResponseDto register(HubRequestDto requestDto, Long userId){
-        User user = userRepository.findByIdAndDeletedAtIsNull(userId).orElseThrow(
-                () -> new CustomException(ErrorCode.USER_NOT_FOUND)
-        );
-
         if (hubRepository.existsByNameAndDeletedAtIsNull(requestDto.getName())) {
             throw new CustomException(ErrorCode.EXISTS_HUB);
         }
