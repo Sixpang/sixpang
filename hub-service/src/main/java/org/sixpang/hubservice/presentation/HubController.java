@@ -6,13 +6,14 @@ import org.sixpang.commonserver.response.ApiResponse;
 import org.sixpang.hubservice.application.dto.HubRequestDto;
 import org.sixpang.hubservice.application.dto.HubResponseDto;
 import org.sixpang.hubservice.application.service.HubService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class HubController {
     private final HubService hubService;
 
-    @PreAuthorize("hasRole('SURVEYEE')")
+    @PreAuthorize("hasRole('MASTER')")
     @PostMapping("/hubs")
     public ResponseEntity<ApiResponse<HubResponseDto>> register(
             @RequestBody @Valid HubRequestDto requestDto
@@ -29,4 +30,13 @@ public class HubController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.of("허브가 성공적으로 생성되었습니다.", responseDto));
     }
 
+    @PreAuthorize("hasRole('MASTER')")
+    @GetMapping("/hubs")
+    public ResponseEntity<ApiResponse<Page<HubResponseDto>>> getHubList(
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable
+    ){
+        Page<HubResponseDto> page = hubService.getAllHubInfo(pageable);
+        return ResponseEntity.ok(ApiResponse.of("허브 목록이 조회되었습니다.", page));
+    }
 }
