@@ -22,7 +22,7 @@ public class HubService {
 
     // 허브 등록
     @Transactional
-    public HubResponseDto register(HubRequestDto requestDto){
+    public HubResponseDto register(HubRequestDto requestDto, UUID userId){
         if (hubRepository.existsByNameAndDeletedAtIsNull(requestDto.getName())) {
             throw new CustomException(ErrorCode.EXISTS_HUB);
         }
@@ -69,25 +69,23 @@ public class HubService {
 
     // 허브 정보 수정
     @Transactional
-    public HubResponseDto updateHubInfo(UUID id, HubRequestDto requestDto) {
+    public HubResponseDto updateHubInfo(UUID id, UUID userId, HubRequestDto requestDto) {
         Hub hub = findHub(id);
 
         validateDuplicatedHub(hub, requestDto);
 
         hub.updateInfo(requestDto.getName(), requestDto.getAddress(), requestDto.getLatitude(),
-                requestDto.getLatitude(), requestDto.getStatus());
+                requestDto.getLongitude(), requestDto.getStatus());
 
         return HubResponseDto.from(hub);
     }
 
     // 허브 삭제
     @Transactional
-    public void deleteHub(UUID id) {
-        Hub hub = hubRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(
-                () -> new CustomException(ErrorCode.HUB_NOT_FOUND)
-        );
+    public void deleteHub(UUID id, UUID userId) {
+        Hub hub = findHub(id);
 
-        hub.delete(id);
+        hub.delete(userId);
     }
 
     // ID로 허브 찾기
