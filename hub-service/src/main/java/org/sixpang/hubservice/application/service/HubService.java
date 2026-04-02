@@ -9,6 +9,9 @@ import org.sixpang.hubservice.domain.model.entity.Hub;
 import org.sixpang.hubservice.domain.repository.HubRepository;
 import org.sixpang.userservice.domain.model.entity.User;
 import org.sixpang.userservice.domain.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,6 +52,26 @@ public class HubService {
     public HubResponseDto getHubInfo(UUID id){
         Hub hub = findHub(id);
         return HubResponseDto.from(hub);
+    }
+
+    // 허브 정보 목록 조회
+    @Transactional(readOnly = true)
+    public Page<HubResponseDto> getAllHubInfo(Pageable pageable){
+        int requestedSize = pageable.getPageSize();
+
+        int size = (requestedSize == 10 || requestedSize == 30 || requestedSize == 50)
+                ? requestedSize
+                : 10;
+
+        Pageable adjustedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                size,
+                pageable.getSort()
+        );
+
+        Page<Hub> hubPage = hubRepository.findAllByDeletedAtIsNull(adjustedPageable);
+
+        return hubPage.map(HubResponseDto::from);
     }
 
     // 허브 정보 수정
