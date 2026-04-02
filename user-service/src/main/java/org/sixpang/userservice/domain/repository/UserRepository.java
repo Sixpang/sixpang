@@ -1,14 +1,19 @@
 package org.sixpang.userservice.domain.repository;
 
-
 import org.sixpang.userservice.domain.model.entity.User;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 import java.util.UUID;
 
-//사용자 조회 및 저장 ,중복 체크
-public interface UserRepository extends JpaRepository<User, UUID> {
+public interface UserRepository {
+
+    User save(User user);
+
+    Optional<User> findById(UUID id);
+
+    Optional<User> findByEmail(String email);
 
     boolean existsByEmail(String email);
 
@@ -16,5 +21,5 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     boolean existsByPhoneAndIdNot(String phone, UUID id);
 
-    Optional<User> findByEmail(String email);
+    Page<User> findAll(Pageable pageable);
 }

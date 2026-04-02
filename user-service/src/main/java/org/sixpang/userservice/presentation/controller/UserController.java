@@ -8,6 +8,8 @@ import org.sixpang.userservice.application.service.UserService;
 import org.sixpang.userservice.domain.model.enums.UserRole;
 import org.sixpang.userservice.presentation.dto.UserRequestDto;
 import org.sixpang.userservice.presentation.dto.UserResponseDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -70,19 +72,17 @@ public class UserController {
 
     /**목록 조회**/
     @GetMapping
-    public ResponseEntity<List<UserResponseDto.UserResponse>> getUsers() {
+    public ResponseEntity<Page<UserResponseDto.UserResponse>> getUsers(Pageable pageable) {
 
-        List<UserQueryDto.UserInfo> users = userQueryService.getUsers();
+        Page<UserQueryDto.UserInfo> users = userQueryService.getUsers(pageable);
 
         return ResponseEntity.ok(
-                users.stream()
-                        .map(dto -> new UserResponseDto.UserResponse(
-                                dto.getId(),
-                                dto.getEmail(),
-                                dto.getName(),
-                                dto.getStatus().name()
-                        ))
-                        .toList()
+                users.map(dto -> new UserResponseDto.UserResponse(
+                        dto.getId(),
+                        dto.getEmail(),
+                        dto.getName(),
+                        dto.getStatus().name()
+                ))
         );
     }
 
