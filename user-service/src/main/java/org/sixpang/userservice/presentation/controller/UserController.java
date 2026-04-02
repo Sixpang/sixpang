@@ -115,7 +115,7 @@ public class UserController {
         );
     }
 
-    /**회원 정보 수정**/
+    /**회원 정보 수정***/
     @PatchMapping("/{id}")
     public ResponseEntity<ApiResponse<UserResponseDto.UserUpdateResponse>> updateUser(
             @PathVariable UUID id,
