@@ -43,7 +43,7 @@ public class HubController {
     }
 
     @PreAuthorize("hasRole('MASTER')")
-    @GetMapping("/hubs")
+    @GetMapping("/hubs/{id}")
     public ResponseEntity<ApiResponse<HubResponseDto>> getHubInfo(
             @PathVariable UUID id
     ){
