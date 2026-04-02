@@ -52,4 +52,20 @@ public class UserQueryService {
                         user.getStatus()
                 ));
     }
+
+    /** 로그인용 이메일 조회 (AuthService에서 사용) **/
+    public UserQueryDto.AuthUser getUserByEmail(String email) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
+
+        return new UserQueryDto.AuthUser(
+                user.getId(),
+                user.getEmail(),
+                user.getPassword(),
+                user.getRole(),
+                user.getStatus()
+        );
+    }
+
 }

@@ -40,4 +40,15 @@ public class UserQueryDto {
         private UUID companyId;
         private LocalDateTime createdAt;
     }
+
+    /** 로그인용 유저 정보 DTO (비밀번호 포함) **/
+    @Getter
+    @AllArgsConstructor
+    public static class AuthUser {
+        private UUID id;
+        private String email;
+        private String password;
+        private UserRole role;
+        private UserStatus status;
+    }
 }
