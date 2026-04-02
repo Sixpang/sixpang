@@ -1,16 +1,19 @@
 package org.sixpang.companyservice.application;
 
 import lombok.RequiredArgsConstructor;
+import org.sixpang.companyservice.application.dto.CompanyResponse;
 import org.sixpang.companyservice.application.dto.CreateCompanyRequest;
 import org.sixpang.companyservice.application.dto.UpdateCompanyRequest;
 import org.sixpang.companyservice.domain.model.Company;
-import org.sixpang.companyservice.domain.model.CompanyType;
 import org.sixpang.companyservice.domain.repository.CompanyRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+
 import java.util.UUID;
+
 
 @Service
 @RequiredArgsConstructor
@@ -19,19 +22,20 @@ public class CompanyService {
     private final CompanyRepository companyRepository;
 
     @Transactional
-    public Company createCompany(CreateCompanyRequest request){
+    public CompanyResponse createCompany(CreateCompanyRequest request) {
         Company company = new Company(
                 request.name(),
                 request.address(),
                 request.type(),
-                request.HubId()
+                request.hubId()
         );
+        Company savedCompany = companyRepository.save(company);
 
-        return companyRepository.save(company);
+        return CompanyResponse.from(savedCompany);
     }
 
     @Transactional
-    public Company updateCompany(UUID companyId, UpdateCompanyRequest request){
+    public CompanyResponse updateCompany(UUID companyId, UpdateCompanyRequest request) {
         Company company = companyRepository.findByIdAndDeletedAtIsNull(companyId)
                 .orElseThrow(() -> new RuntimeException("업체를 찾을 수 없습니다."));
 
@@ -42,28 +46,28 @@ public class CompanyService {
                 request.hubId()
         );
 
-        return company;
-        }
+        return CompanyResponse.from(company);
+    }
 
     @Transactional
-    public Company deleteCompany(UUID companyId){
+    public void deleteCompany(UUID companyId) {
         Company company = companyRepository.findByIdAndDeletedAtIsNull(companyId)
                 .orElseThrow(() -> new RuntimeException("업체를 찾을 수 없습니다."));
 
         company.delete();
-
-        return company;
     }
 
     @Transactional(readOnly = true)
-    public Company getCompany(UUID companyId){
-        return companyRepository.findByIdAndDeletedAtIsNull(companyId)
+    public CompanyResponse getCompany(UUID companyId) {
+        Company company = companyRepository.findByIdAndDeletedAtIsNull(companyId)
                 .orElseThrow(() -> new RuntimeException(("업체를 찾을 수 없습니다.")));
+
+        return CompanyResponse.from(company);
     }
 
     @Transactional(readOnly = true)
-    public List<Company> getCompanies(){
-        return companyRepository.findAllByDeletedAtIsNull();
-
+    public Page<CompanyResponse> getCompanies(Pageable pageable) {
+        return companyRepository.findAllByDeletedAtIsNull(pageable)
+                .map(company -> CompanyResponse.from(company));
     }
 }
