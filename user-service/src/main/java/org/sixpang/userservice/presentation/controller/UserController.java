@@ -1,5 +1,6 @@
 package org.sixpang.userservice.presentation.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.sixpang.commonserver.response.ApiResponse;
 import org.sixpang.userservice.application.dto.UserQueryDto;
@@ -29,7 +30,7 @@ public class UserController {
     /**회원가입**/
     @PostMapping
     public ResponseEntity<ApiResponse<UserResponseDto.UserSimpleResponse>> signup(
-            @RequestBody UserRequestDto.SignUpRequest request
+            @Valid @RequestBody UserRequestDto.SignUpRequest request
     ) {
         UUID userId = userService.signUp(
                 UserServiceDto.SignUp.builder()
@@ -87,7 +88,6 @@ public class UserController {
 
         Page<UserQueryDto.UserInfo> users = userQueryService.getUsers(pageable);
 
-        //content 추출
         List<UserResponseDto.UserResponse> content =
                 users.map(dto -> new UserResponseDto.UserResponse(
                         dto.getId(),
@@ -98,7 +98,6 @@ public class UserController {
                         dto.getStatus().name()
                 )).getContent();
 
-        // PageResponseDto 생성
         PageResponseDto<List<UserResponseDto.UserResponse>> response =
                 new PageResponseDto<>(
                         content,
@@ -109,7 +108,6 @@ public class UserController {
                         )
                 );
 
-        // 반환
         return ResponseEntity.ok(
                 ApiResponse.of("회원 목록 조회 성공", response)
         );
@@ -119,7 +117,7 @@ public class UserController {
     @PatchMapping("/{id}")
     public ResponseEntity<ApiResponse<UserResponseDto.UserUpdateResponse>> updateUser(
             @PathVariable UUID id,
-            @RequestBody UserRequestDto.UpdateUserRequest request
+            @Valid @RequestBody UserRequestDto.UpdateUserRequest request
     ) {
         userService.updateUser(
                 id,
@@ -130,7 +128,6 @@ public class UserController {
                         .build()
         );
 
-        // 수정 후 조회해서 실제 값 반환
         UserQueryDto.UserDetail dto = userQueryService.getUser(id);
 
         return ResponseEntity.ok(
@@ -151,7 +148,7 @@ public class UserController {
     @PatchMapping("/{id}/password")
     public ResponseEntity<ApiResponse<Void>> changePassword(
             @PathVariable UUID id,
-            @RequestBody UserRequestDto.ChangePasswordRequest request
+            @Valid @RequestBody UserRequestDto.ChangePasswordRequest request
     ) {
         userService.changePassword(
                 id,
@@ -164,7 +161,7 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.of("비밀번호 변경 성공", null));
     }
 
-    /**회원 상태 변경(승인,거절) **/
+    /**회원 상태 변경**/
     @PatchMapping("/{id}/status")
     public ResponseEntity<ApiResponse<UserResponseDto.UserSimpleResponse>> changeStatus(
             @PathVariable UUID id,
@@ -187,7 +184,7 @@ public class UserController {
         );
     }
 
-    /**회원 (논리적)삭제**/
+    /**회원 삭제**/
     @DeleteMapping("/{userId}")
     public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable UUID userId) {
 
@@ -200,8 +197,7 @@ public class UserController {
         );
     }
 
-
-    /** 로그인용 이메일 조회 Auth에게 넘겨줄 API **/
+    /** 이메일 조회 **/
     @GetMapping("/email")
     public ResponseEntity<ApiResponse<UserQueryDto.AuthUser>> getUserByEmail(
             @RequestParam String email
