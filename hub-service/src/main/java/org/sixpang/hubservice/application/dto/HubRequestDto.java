@@ -1,4 +1,4 @@
-package org.sixpang.hubservice.domain.application.dto;
+package org.sixpang.hubservice.application.dto;
 
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;

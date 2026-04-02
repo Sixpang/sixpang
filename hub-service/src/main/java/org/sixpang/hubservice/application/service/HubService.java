@@ -1,4 +1,4 @@
-package org.sixpang.hubservice.domain.application.service;
+package org.sixpang.hubservice.application.service;
 
 import lombok.Getter;
 import org.springframework.stereotype.Service;

@@ -1,4 +1,4 @@
-package org.sixpang.hubservice.domain.infrastructure.repository;
+package org.sixpang.hubservice.infrastructure.repository;
 
 import org.sixpang.hubservice.domain.model.entity.Hub;
 import org.springframework.data.domain.Page;
