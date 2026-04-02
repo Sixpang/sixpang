@@ -52,7 +52,10 @@ public class User extends BaseEntity {
             String password,
             String name,
             String phone,
-            UserRole role
+            UserRole role,
+            String slackId,
+            UUID hubId,
+            UUID companyId
     ) {
         User user = new User();
         user.email = email;
@@ -60,7 +63,12 @@ public class User extends BaseEntity {
         user.name = name;
         user.phone = phone;
         user.role = role;
-        user.status = UserStatus.PENDING; //기본값 : 대기
+        user.status = UserStatus.PENDING;
+
+        user.slackId = slackId;
+        user.hubId = hubId;
+        user.companyId = companyId;
+
         return user;
     }
 
@@ -72,8 +80,21 @@ public class User extends BaseEntity {
     public void approve() {
         this.status = UserStatus.APPROVED;
     }
+
     //회원 거절
     public void reject() {
         this.status = UserStatus.REJECTED;
+    }
+
+    // 회원 정보 수정
+    public void update(String name, String phone, String slackId) {
+        this.name = name;
+        this.phone = phone;
+        this.slackId = slackId;
+    }
+
+    // 비밀번호 변경
+    public void changePassword(String newPassword) {
+        this.password = newPassword;
     }
 }
