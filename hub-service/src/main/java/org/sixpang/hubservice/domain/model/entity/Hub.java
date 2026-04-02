@@ -7,8 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sixpang.commonserver.entity.BaseEntity;
 import org.sixpang.commonserver.global.CustomException;
-import org.sixpang.commonserver.global.ErrorCode;
 import org.sixpang.hubservice.domain.model.enums.HubStatus;
+import org.sixpang.hubservice.exception.HubErrorCode;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -75,7 +75,7 @@ public class Hub extends BaseEntity {
     // 삭제
     public void delete(UUID id) {
         if (this.isDeleted()) {
-            throw new CustomException(ErrorCode.HUB_ALREADY_DELETED);
+            throw new CustomException(HubErrorCode.HUB_ALREADY_DELETED);
         }
         this.softDelete(id);
     }

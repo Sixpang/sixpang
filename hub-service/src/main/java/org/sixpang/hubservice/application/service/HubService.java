@@ -7,6 +7,7 @@ import org.sixpang.hubservice.application.dto.HubRequestDto;
 import org.sixpang.hubservice.application.dto.HubResponseDto;
 import org.sixpang.hubservice.domain.model.entity.Hub;
 import org.sixpang.hubservice.domain.repository.HubRepository;
+import org.sixpang.hubservice.exception.HubErrorCode;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,7 +25,7 @@ public class HubService {
     @Transactional
     public HubResponseDto register(UUID userId, HubRequestDto requestDto){
         if (hubRepository.existsByNameAndDeletedAtIsNull(requestDto.getName())) {
-            throw new CustomException(ErrorCode.EXISTS_HUB);
+            throw new CustomException(HubErrorCode.EXISTS_HUB);
         }
 
         Hub hub = Hub.of(
@@ -91,14 +92,14 @@ public class HubService {
     // ID로 허브 찾기
     private Hub findHub(UUID id) {
         return hubRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(() -> new CustomException(ErrorCode.HUB_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(HubErrorCode.HUB_NOT_FOUND));
     }
 
     // 허브 중복 여부 검사
     private void validateDuplicatedHub(Hub hub, HubRequestDto requestDto){
         if(!hub.getName().equals(requestDto.getName())
                 && hubRepository.existsByNameAndDeletedAtIsNull(requestDto.getName())){
-            throw new CustomException(ErrorCode.EXISTS_HUB);
+            throw new CustomException(HubErrorCode.EXISTS_HUB);
         }
     }
 }
