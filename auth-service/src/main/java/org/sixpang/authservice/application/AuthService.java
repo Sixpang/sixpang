@@ -28,7 +28,7 @@ public class AuthService {
         }
 
         // 3. JWT 생성
-        String accessToken = jwtProvider.createToken(user.getId());
+        String accessToken = jwtProvider.createToken(user.getId(), user.getRole());
 
         // 4. 응답 생성
         return new LoginResponseDto(

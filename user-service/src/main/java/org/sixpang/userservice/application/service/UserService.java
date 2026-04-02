@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.sixpang.userservice.application.dto.UserServiceDto;
 import org.sixpang.userservice.domain.model.entity.User;
 import org.sixpang.userservice.domain.repository.UserRepository;
+import org.sixpang.userservice.exception.UserErrorCode;
+import org.sixpang.userservice.exception.UserException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,12 +26,12 @@ public class UserService {
 
         // 이메일 중복 체크
         if (userRepository.existsByEmail(dto.getEmail())) {
-            throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
+            throw new UserException(UserErrorCode.EXISTS_EMAIL);
         }
 
         // 전화번호 중복 체크
         if (userRepository.existsByPhone(dto.getPhone())) {
-            throw new IllegalArgumentException("이미 존재하는 전화번호입니다.");
+            throw new UserException(UserErrorCode.EXISTS_PHONE);
         }
 
         // 비밀번호 암호화
@@ -56,12 +58,12 @@ public class UserService {
     /**회원 정보 수정**/
     public void updateUser(UUID userId, UserServiceDto.Update dto) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
+        User user = userRepository.findByIdAndDeletedAtIsNull(userId)
+                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
-        //  전화번호 중복 체크 (
+        // 전화번호 중복 체크
         if (userRepository.existsByPhoneAndIdNot(dto.getPhone(), userId)) {
-            throw new IllegalArgumentException("이미 존재하는 전화번호입니다.");
+            throw new UserException(UserErrorCode.EXISTS_PHONE);
         }
 
         user.update(
@@ -73,12 +75,12 @@ public class UserService {
 
     public void changePassword(UUID userId, UserServiceDto.ChangePassword dto) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
+        User user = userRepository.findByIdAndDeletedAtIsNull(userId)
+                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
         // 현재 비밀번호 검증
         if (!passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
+            throw new UserException(UserErrorCode.INVALID_PASSWORD);
         }
 
         // 새 비밀번호 암호화
@@ -87,21 +89,30 @@ public class UserService {
         user.changePassword(encodedPassword);
     }
 
-    /**회원 승인**/
-    public void approveUser(UUID userId) {
+    /**회원 상태 변경(승인, 거절)**/
+    public void changeStatus(UUID userId, String status) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
+        User user = userRepository.findByIdAndDeletedAtIsNull(userId)
+                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
-        user.approve();
+        switch (status) {
+            case "APPROVED":
+                user.approve();
+                break;
+            case "REJECTED":
+                user.reject();
+                break;
+            default:
+                throw new UserException(UserErrorCode.INVALID_STATUS);
+        }
     }
 
-    /**회원 거절**/
-    public void rejectUser(UUID userId) {
+    /**회원삭제**/
+    public void deleteUser(UUID userId, UUID currentUserId) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
+        User user = userRepository.findByIdAndDeletedAtIsNull(userId)
+                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
-        user.reject();
+        user.delete(currentUserId);
     }
 }
