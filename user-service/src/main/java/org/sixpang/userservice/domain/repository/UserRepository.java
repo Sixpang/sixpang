@@ -1,19 +1,27 @@
 package org.sixpang.userservice.domain.repository;
 
-
 import org.sixpang.userservice.domain.model.entity.User;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 import java.util.UUID;
 
-//사용자 조회 및 저장 ,중복 체크
-public interface UserRepository extends JpaRepository<User, UUID> {
-    Optional<User> findByIdAndDeletedAtIsNull(Long userId);
+public interface UserRepository {
+
+    //Command
+    User save(User user);
+
+    //Query
+    Optional<User> findById(UUID id);
+
+    Optional<User> findByEmail(String email);
 
     boolean existsByEmail(String email);
 
     boolean existsByPhone(String phone);
 
-    Optional<User> findByEmail(String email);
+    boolean existsByPhoneAndIdNot(String phone, UUID id);
+
+    Page<User> findAll(Pageable pageable);
 }
