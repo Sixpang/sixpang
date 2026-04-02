@@ -1,11 +1,14 @@
 package org.sixpang.deliveryservice.domain.repository;
 
+import org.sixpang.deliveryservice.domain.model.entity.CompanyDeliveryManger;
 import org.sixpang.deliveryservice.domain.model.entity.Delivery;
+import org.sixpang.deliveryservice.domain.model.entity.HubDeliveryManager;
 import org.sixpang.deliveryservice.domain.model.enums.DeliveryStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public interface DeliveryRepository extends JpaRepository<Delivery, UUID> {

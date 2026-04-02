@@ -38,7 +38,7 @@ import java.util.UUID;
 @Getter
 @Table(name="p_delivery", schema = "delivery")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Delivery {
+public class Delivery extends BaseEntity {
     @Id
     @GeneratedValue(strategy= GenerationType.UUID)
     private UUID id;
