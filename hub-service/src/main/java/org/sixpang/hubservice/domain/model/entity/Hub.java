@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sixpang.commonserver.entity.BaseEntity;
+import org.sixpang.commonserver.global.CustomException;
+import org.sixpang.commonserver.global.ErrorCode;
 import org.sixpang.hubservice.domain.model.enums.HubStatus;
 
 import java.math.BigDecimal;
@@ -61,11 +63,20 @@ public class Hub extends BaseEntity {
                 .build();
     }
 
+    // 정보 수정
     public void updateInfo(String name, String address, BigDecimal latitude, BigDecimal longitude, HubStatus status) {
         this.name = name;
         this.address = address;
         this.latitude = latitude;
         this.longitude = longitude;
         this.status = status;
+    }
+
+    // 삭제
+    public void delete(UUID id) {
+        if (this.isDeleted()) {
+            throw new CustomException(ErrorCode.HUB_ALREADY_DELETED);
+        }
+        this.softDelete(id);
     }
 }

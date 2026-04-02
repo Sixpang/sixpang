@@ -65,6 +65,14 @@ public class HubService {
         return HubResponseDto.from(hub);
     }
 
+    @Transactional
+    public void deleteHub(UUID id) {
+        Hub hub = hubRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(
+                () -> new CustomException(ErrorCode.HUB_NOT_FOUND)
+        );
+
+        hub.delete(id);
+    }
 
     // ID로 허브 찾기
     private Hub findHub(UUID id) {
