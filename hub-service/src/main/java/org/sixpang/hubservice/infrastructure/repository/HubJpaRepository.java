@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface HubJpaRepository  extends JpaRepository<Hub, UUID> {
+public interface HubJpaRepository extends JpaRepository<Hub, UUID> {
     Optional<Hub> findByIdAndDeletedAtIsNull(UUID id);
 
     Optional<Hub> findByNameAndDeletedAtIsNull(String name);

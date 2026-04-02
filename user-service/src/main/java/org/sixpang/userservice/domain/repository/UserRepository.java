@@ -9,6 +9,7 @@ import java.util.UUID;
 
 //사용자 조회 및 저장 ,중복 체크
 public interface UserRepository extends JpaRepository<User, UUID> {
+    Optional<User> findByIdAndDeletedAtIsNull(Long userId);
 
     boolean existsByEmail(String email);
 
