@@ -22,13 +22,13 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public Optional<User> findById(UUID id) {
-        return userJpaRepository.findById(id);
+    public Optional<User> findByIdAndDeletedAtIsNull(UUID id) {
+        return userJpaRepository.findByIdAndDeletedAtIsNull(id);
     }
 
     @Override
-    public Optional<User> findByEmail(String email) {
-        return userJpaRepository.findByEmail(email);
+    public Optional<User> findByEmailAndDeletedAtIsNull(String email) {
+        return userJpaRepository.findByEmailAndDeletedAtIsNull(email);
     }
 
     @Override
@@ -47,7 +47,7 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public Page<User> findAll(Pageable pageable) {
-        return userJpaRepository.findAll(pageable);
+    public Page<User> findAllByDeletedAtIsNull(Pageable pageable) {
+        return userJpaRepository.findAllByDeletedAtIsNull(pageable);
     }
 }

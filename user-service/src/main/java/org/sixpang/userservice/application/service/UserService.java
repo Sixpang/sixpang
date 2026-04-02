@@ -58,7 +58,7 @@ public class UserService {
     /**회원 정보 수정**/
     public void updateUser(UUID userId, UserServiceDto.Update dto) {
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdAndDeletedAtIsNull(userId)
                 .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
         // 전화번호 중복 체크
@@ -75,7 +75,7 @@ public class UserService {
 
     public void changePassword(UUID userId, UserServiceDto.ChangePassword dto) {
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdAndDeletedAtIsNull(userId)
                 .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
         // 현재 비밀번호 검증
@@ -92,7 +92,7 @@ public class UserService {
     /**회원 상태 변경(승인, 거절)**/
     public void changeStatus(UUID userId, String status) {
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdAndDeletedAtIsNull(userId)
                 .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
         switch (status) {
@@ -105,5 +105,14 @@ public class UserService {
             default:
                 throw new UserException(UserErrorCode.INVALID_STATUS);
         }
+    }
+
+    /**회원삭제**/
+    public void deleteUser(UUID userId, UUID currentUserId) {
+
+        User user = userRepository.findByIdAndDeletedAtIsNull(userId)
+                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+
+        user.delete(currentUserId);
     }
 }

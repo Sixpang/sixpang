@@ -21,6 +21,7 @@ public class UserServiceApplication {
         SpringApplication.run(UserServiceApplication.class, args);
     }
 
+    //모든 auditing 값이 랜덤 UUID로 들어감
     @Bean
     public AuditorAware<UUID> auditorProvider() {
         return () -> Optional.of(UUID.randomUUID());

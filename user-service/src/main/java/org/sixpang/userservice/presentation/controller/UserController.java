@@ -187,7 +187,21 @@ public class UserController {
         );
     }
 
-    /** 로그인용 이메일 조회 **/
+    /**회원 (논리적)삭제**/
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable UUID userId) {
+
+        UUID currentUserId = UUID.randomUUID();
+
+        userService.deleteUser(userId, currentUserId);
+
+        return ResponseEntity.ok(
+                ApiResponse.of("회원 삭제가 완료되었습니다.", null)
+        );
+    }
+
+
+    /** 로그인용 이메일 조회 Auth에게 넘겨줄 API **/
     @GetMapping("/email")
     public ResponseEntity<ApiResponse<UserQueryDto.AuthUser>> getUserByEmail(
             @RequestParam String email

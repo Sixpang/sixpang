@@ -23,7 +23,7 @@ public class UserQueryService {
     /**단건 조회 (상세)**/
     public UserQueryDto.UserDetail getUser(UUID userId) {
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdAndDeletedAtIsNull(userId)
                 .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
         return new UserQueryDto.UserDetail(
@@ -43,7 +43,7 @@ public class UserQueryService {
     /**목록 조회**/
     public Page<UserQueryDto.UserInfo> getUsers(Pageable pageable) {
 
-        return userRepository.findAll(pageable)
+        return userRepository.findAllByDeletedAtIsNull(pageable)
                 .map(user -> new UserQueryDto.UserInfo(
                         user.getId(),
                         user.getEmail(),
@@ -57,7 +57,7 @@ public class UserQueryService {
     /** 로그인용 이메일 조회 (AuthService에서 사용) **/
     public UserQueryDto.AuthUser getUserByEmail(String email) {
 
-        User user = userRepository.findByEmail(email)
+        User user = userRepository.findByEmailAndDeletedAtIsNull(email)
                 .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
         return new UserQueryDto.AuthUser(
