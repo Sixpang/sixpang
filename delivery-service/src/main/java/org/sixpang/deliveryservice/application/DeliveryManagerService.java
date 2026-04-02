@@ -31,7 +31,7 @@ public class DeliveryManagerService {
     private static final int COMPANY_MANAGER_PER_HUB_MAX = 10;
 
     //배송 담당자 생성
-    //role부분 인증/인가 처리되면 수정하기
+    //수정예약:role부분 인증/인가 처리되면 수정하기
     public DeliveryManagerResponse create(DeliveryManagerCreateRequest request, String role, UUID requestUserId) {
         validateCreatePermission(role, request.type());
         validateUserExists(request.userId());
@@ -59,7 +59,8 @@ public class DeliveryManagerService {
         if (request.hubId() == null)
             throw new IllegalArgumentException("업체 배송 담당자는 허브 ID가 필요합니다.");
 
-        validateHubExists(request.hubId());
+        //수정예약:이거 허브 기능 구현되면 주석 풀어야함
+        //validateHubExists(request.hubId());
 
         if (companyDeliveryManagerRepository.countByHubIdAndDeletedAtIsNull(request.hubId()) >= COMPANY_MANAGER_PER_HUB_MAX)
             throw new IllegalStateException("해당 허브의 업체 배송 담당자 정원 초과");
@@ -113,8 +114,7 @@ public class DeliveryManagerService {
         if (type == DeliveryManagerType.HUB) {
             HubDeliveryManager manager = findHubManagerOrThrow(managerId);
             validateModifyPermission(role, requestUserId, requestHubId, null);
-            manager.setDeletedAt(LocalDateTime.now());
-            manager.setDeletedBy(requestUserId);
+            manager.softDelete(requestUserId);
             hubDeliveryManagerRepository.save(manager);
         } else {
             CompanyDeliveryManager manager = findCompanyManagerOrThrow(managerId);

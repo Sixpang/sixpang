@@ -14,8 +14,8 @@ public record DeliveryManagerResponse(
         Integer deliverySequence,
         DeliveryManagerStatus status,
         DeliveryManagerType type,
-        UUID hubId,         // HUB 타입만 값 있음
-        LocalDateTime createdAt
+        UUID hubId,         // 6번째 인수
+        LocalDateTime createdAt // 7번째 인수
 ) {
     public static DeliveryManagerResponse fromHub(HubDeliveryManager entity) {
         return new DeliveryManagerResponse(
@@ -24,8 +24,8 @@ public record DeliveryManagerResponse(
                 entity.getDeliverySequence(),
                 entity.getStatus(),
                 DeliveryManagerType.HUB,
-                entity.getHubId(),
-                entity.getCreatedAt()
+                null,               // 허브 매니저는 소속 허브가 없으므로 null 전달 (6번째)
+                entity.getCreatedAt() // (7번째)
         );
     }
 
@@ -36,9 +36,8 @@ public record DeliveryManagerResponse(
                 entity.getDeliverySequence(),
                 entity.getStatus(),
                 DeliveryManagerType.COMPANY,
-                null,  // hubId 없음
-                entity.getCreatedAt()
+                entity.getHubId(),    // 업체 매니저는 허브 ID 전달 (6번째)
+                entity.getCreatedAt() // (7번째)
         );
     }
-
 }

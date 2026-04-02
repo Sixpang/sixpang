@@ -1,6 +1,6 @@
 package org.sixpang.deliveryservice.application;
 
-import org.antlr.v4.runtime.misc.NotNull;
+import jakarta.validation.constraints.NotNull;
 import org.sixpang.deliveryservice.domain.model.enums.DeliveryManagerType;
 
 import java.util.UUID;

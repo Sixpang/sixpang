@@ -9,6 +9,6 @@ import java.util.UUID;
 
 @FeignClient(name="user-service")
 public interface UserClient {
-    @GetMapping("/api/users/{userId}")
+    @GetMapping("/users/{userId}")
     void checkExists(@PathVariable UUID userId);
 }

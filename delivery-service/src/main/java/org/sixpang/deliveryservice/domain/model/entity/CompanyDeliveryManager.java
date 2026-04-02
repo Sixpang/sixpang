@@ -5,13 +5,16 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.DynamicInsert;
 import org.sixpang.commonserver.entity.BaseEntity;
 import org.sixpang.deliveryservice.domain.model.enums.DeliveryManagerStatus;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
 @Getter
+@DynamicInsert
 @Table(name="p_company_delivery_manager", schema = "delivery")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CompanyDeliveryManager extends BaseEntity {
@@ -49,5 +52,10 @@ public class CompanyDeliveryManager extends BaseEntity {
 
     public void updateStatus(DeliveryManagerStatus Status){
         this.status = Status;
+    }
+
+    @Override
+    public void softDelete(UUID deletedBy) {
+        super.softDelete(deletedBy); // 부모의 protected 메서드를 호출
     }
 }

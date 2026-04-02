@@ -1,0 +1,9 @@
+### 배송 담당자 생성 (POST)
+POST http://localhost:53870/api/deliveries/managers
+Content-Type: application/json
+
+{
+  "userId": "550e8400-e29b-41d4-a716-446655440000",
+  "type": "COMPANY",
+  "hubId": "330e8400-e29b-41d4-a716-446655441111"
+}

@@ -25,10 +25,10 @@ public class HubDeliveryManager extends BaseEntity {
 
     @Column(
             name = "delivery_sequence",
-            nullable = false,
+            nullable = true,    // false에서 true로 변경 (어차피 DB SERIAL이 채워줌)
             unique = true,
             updatable = false,
-            insertable = false, //DB에서 생성하게 두기 위해 false 설정
+            insertable = false,
             columnDefinition = "SERIAL"
     )
     private Integer deliverySequence;
@@ -46,5 +46,10 @@ public class HubDeliveryManager extends BaseEntity {
 
     public void updateStatus(DeliveryManagerStatus Status){
         this.status = Status;
+    }
+
+    @Override
+    public void softDelete(UUID deletedBy) {
+        super.softDelete(deletedBy); // 부모의 protected 메서드를 호출
     }
 }

@@ -11,9 +11,4 @@ public class DeliveryService {
     private final DeliveryManagerService managerService;
     private final DeliveryRepository deliveryRepository;
 
-    @Transactional
-    public void createDelivery(DeliveryRequestDto request){
-        DeliveryAssignmentResult result = managerService.assignManagers(request.getArrivalHub());
-
-    }
 }
