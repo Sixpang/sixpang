@@ -21,9 +21,9 @@ public class UserServiceApplication {
         SpringApplication.run(UserServiceApplication.class, args);
     }
 
-
     @Bean
     public AuditorAware<UUID> auditorProvider() {
         return () -> Optional.of(UUID.randomUUID());
+
     }
 }
