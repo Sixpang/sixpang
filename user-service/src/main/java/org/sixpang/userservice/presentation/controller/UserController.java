@@ -134,4 +134,12 @@ public class UserController {
         userService.rejectUser(id);
         return ResponseEntity.ok().build();
     }
+
+    /** 로그인용 이메일 조회 (AuthService에서 사용-> 자동호출) **/
+    @GetMapping("/email")
+    public ResponseEntity<UserQueryDto.AuthUser> getUserByEmail(
+            @RequestParam String email
+    ) {
+        return ResponseEntity.ok(userQueryService.getUserByEmail(email));
+    }
 }
