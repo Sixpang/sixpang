@@ -73,7 +73,7 @@ public class User extends BaseEntity {
     }
 
 
-    /**비지니스 로직**/
+    /**그 외 비지니스 로직**/
 
     //회원 승인
     public void approve() {
@@ -87,9 +87,9 @@ public class User extends BaseEntity {
 
     // 회원 정보 수정
     public void update(String name, String phone, String slackId) {
-        this.name = name;
-        this.phone = phone;
-        this.slackId = slackId;
+        if (name != null) this.name = name;
+        if (phone != null) this.phone = phone;
+        if (slackId != null) this.slackId = slackId;
     }
 
     // 비밀번호 변경
