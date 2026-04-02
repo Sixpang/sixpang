@@ -16,5 +16,5 @@ dependencyManagement {
     }
 }
 
-bootJar { enabled = true }
-jar { enabled = false }
+bootJar { enabled = false   }
+jar { enabled = true }
