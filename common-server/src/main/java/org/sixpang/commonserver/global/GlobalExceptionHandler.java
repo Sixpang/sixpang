@@ -7,7 +7,6 @@ import org.sixpang.commonserver.response.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.servlet.View;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,10 +14,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    private final View error;
-
-    public GlobalExceptionHandler(View error){ this.error = error; }
-
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<ErrorResponse> handlerCustomException(CustomException e){
         ErrorCode errorCode = e.getErrorCode();

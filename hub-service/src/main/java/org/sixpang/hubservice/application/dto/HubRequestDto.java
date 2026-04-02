@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class HubRequestDto {
     @NotBlank(message = "허브명을 입력해주세요")
-    @Pattern(regexp = "^[a-zA-Z가-힣0-9]+$", message = "허브명에는 특수문자를 사용할 수 없습니다.")
+    @Pattern(regexp = "^[a-zA-Z가-힣0-9\\s]+$", message = "허브명에는 특수문자를 사용할 수 없습니다.")
     private String name;
 
     @NotBlank(message = "주소를 입력해주세요.")
