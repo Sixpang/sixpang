@@ -26,6 +26,11 @@ public class HubRepositoryImpl implements HubRepository {
     }
 
     @Override
+    public boolean existsByNameAndDeletedAtIsNull(String name){
+        return hubJpaRepository.existsByNameAndDeletedAtIsNull(name);
+    };
+
+    @Override
     public Page<Hub> findAllByDeletedAtIsNull(Pageable pageable){
         return hubJpaRepository.findAllByDeletedAtIsNull(pageable);
     }

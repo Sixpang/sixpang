@@ -13,5 +13,7 @@ public interface HubJpaRepository extends JpaRepository<Hub, UUID> {
 
     Optional<Hub> findByNameAndDeletedAtIsNull(String name);
 
+    boolean existsByNameAndDeletedAtIsNull(String name);
+
     Page<Hub> findAllByDeletedAtIsNull(Pageable pageable);
 }
