@@ -2,12 +2,20 @@ spring:
   application:
     name: auth-service
 
+#Auth 서비스는 DB 사용 안 하는데 common 모듈 때문에 JPA 포함되서 자동 설정 제외
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+
 server:
   port: 0
+
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
+    fetch-registry: true
   instance:
     instance-id:
       ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
