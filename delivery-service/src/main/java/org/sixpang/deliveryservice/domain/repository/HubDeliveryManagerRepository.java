@@ -1,0 +1,18 @@
+package org.sixpang.deliveryservice.domain.repository;
+
+import org.sixpang.deliveryservice.domain.model.entity.HubDeliveryManager;
+import org.sixpang.deliveryservice.domain.model.enums.DeliveryManagerStatus;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+import java.util.UUID;
+
+public interface HubDeliveryManagerRepository extends JpaRepository<HubDeliveryManager, UUID> {
+    boolean existsByUserId(UUID userId);
+
+    //전국 WAIT 중 순번 가장 낮은 사람
+    Optional<HubDeliveryManager> findTopByStatusOrderByDeliverySequenceAsc(
+            DeliveryManagerStatus status);
+
+    int countByDeletedAtIsNull(); // 전국 10명 제한
+}

@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.sixpang.commonserver.entity.BaseEntity;
 import org.sixpang.deliveryservice.domain.model.enums.DeliveryManagerStatus;
 
 import java.util.UUID;
@@ -12,13 +14,10 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name="p_hub_delivery_manager", schema = "delivery")
-public class HubDeliveryManager{
+public class HubDeliveryManager extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    @Column(name="hub_id", nullable = false)
-    private UUID hubId;
 
     //
     @Column(name = "user_id", nullable = false, unique = true)
@@ -32,16 +31,15 @@ public class HubDeliveryManager{
             insertable = false, //DB에서 생성하게 두기 위해 false 설정
             columnDefinition = "SERIAL"
     )
-    private Long deliverySequence;
+    private Integer deliverySequence;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private DeliveryManagerStatus status = DeliveryManagerStatus.WAIT;
 
-    public static HubDeliveryManager create(UUID userId, UUID hubId){
+    public static HubDeliveryManager create(UUID userId){
         HubDeliveryManager manager = new HubDeliveryManager();
         manager.userId = userId;
-        manager.hubId = hubId;
         manager.status = DeliveryManagerStatus.WAIT;
         return manager;
     }
@@ -49,6 +47,4 @@ public class HubDeliveryManager{
     public void updateStatus(DeliveryManagerStatus Status){
         this.status = Status;
     }
-}
-
 }

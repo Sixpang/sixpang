@@ -1,6 +1,6 @@
 package org.sixpang.deliveryservice.application;
 
-import org.sixpang.deliveryservice.domain.model.entity.DeliveryBaseEntity;
+import org.sixpang.deliveryservice.domain.model.entity.CompanyDeliveryManager;
 import org.sixpang.deliveryservice.domain.model.entity.HubDeliveryManager;
 import org.sixpang.deliveryservice.domain.model.enums.DeliveryManagerStatus;
 import org.sixpang.deliveryservice.domain.model.enums.DeliveryManagerType;
@@ -11,19 +11,34 @@ import java.util.UUID;
 public record DeliveryManagerResponse(
         UUID id,
         UUID userId,
-        int deliverySequence,
+        Integer deliverySequence,
         DeliveryManagerStatus status,
         DeliveryManagerType type,
         UUID hubId,         // HUB 타입만 값 있음
         LocalDateTime createdAt
 ) {
-    public static DeliveryManagerResponse from(DeliveryBaseEntity entity) {
-        UUID hubId = entity instanceof HubDeliveryManager hub ? hub.getHubId() : null;
-        DeliveryManagerType type = entity instanceof HubDeliveryManager
-                ? DeliveryManagerType.HUB : DeliveryManagerType.COMPANY;
+    public static DeliveryManagerResponse fromHub(HubDeliveryManager entity) {
         return new DeliveryManagerResponse(
-                entity.getId(), entity.getUserId(), entity.getDeliverySequence(),
-                entity.getStatus(), type, hubId, entity.getCreatedAt()
+                entity.getId(),
+                entity.getUserId(),
+                entity.getDeliverySequence(),
+                entity.getStatus(),
+                DeliveryManagerType.HUB,
+                entity.getHubId(),
+                entity.getCreatedAt()
         );
     }
+
+    public static DeliveryManagerResponse fromCompany(CompanyDeliveryManager entity) {
+        return new DeliveryManagerResponse(
+                entity.getId(),
+                entity.getUserId(),
+                entity.getDeliverySequence(),
+                entity.getStatus(),
+                DeliveryManagerType.COMPANY,
+                null,  // hubId 없음
+                entity.getCreatedAt()
+        );
+    }
+
 }

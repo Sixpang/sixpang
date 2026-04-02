@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import org.sixpang.commonserver.entity.BaseEntity;
 import org.sixpang.deliveryservice.domain.model.enums.DeliveryRouteStatus;
 
 import java.time.LocalDateTime;
@@ -14,7 +15,7 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor(access=AccessLevel.PROTECTED)
 @Table(name="p_delivery_route", schema = "delivery")
-public class DeliveryRoute {
+public class DeliveryRoute extends BaseEntity {
     @Id
     @GeneratedValue(strategy=GenerationType.UUID)
     private UUID id;

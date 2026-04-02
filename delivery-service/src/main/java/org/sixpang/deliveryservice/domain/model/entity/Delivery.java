@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.sixpang.commonserver.entity.BaseEntity;
 import org.sixpang.deliveryservice.domain.model.enums.DeliveryStatus;
 
 import java.util.ArrayList;
