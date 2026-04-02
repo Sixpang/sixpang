@@ -12,16 +12,21 @@ import org.sixpang.deliveryservice.infrastructure.client.HubClient;
 import org.sixpang.deliveryservice.infrastructure.client.UserClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class DeliveryManagerService {
+    private final RedisTemplate<String, String> redisTemplate;
+    private static final String REDIS_HUB_KEY_PREFIX = "delivery:managers:hub:";
+
     private final HubDeliveryManagerRepository hubDeliveryManagerRepository;
     private final CompanyDeliveryManagerRepository companyDeliveryManagerRepository;
     private final UserClient userClient;
@@ -34,7 +39,8 @@ public class DeliveryManagerService {
     //수정예약:role부분 인증/인가 처리되면 수정하기
     public DeliveryManagerResponse create(DeliveryManagerCreateRequest request, String role, UUID requestUserId) {
         validateCreatePermission(role, request.type());
-        validateUserExists(request.userId());
+        //수정예약:user쪽 기능 완성되면 주석 풀기
+        //validateUserExists(request.userId());
 
         if (hubDeliveryManagerRepository.existsByUserId(request.userId()) ||
             companyDeliveryManagerRepository.existsByUserId(request.userId())) {
@@ -72,6 +78,8 @@ public class DeliveryManagerService {
     //조회
     @Transactional(readOnly = true)
     public DeliveryManagerResponse getById(UUID managerId, DeliveryManagerType type, String role, UUID requestUserId) {
+        System.out.println("매니저 조회 시작:"+managerId);
+
         if (type == DeliveryManagerType.HUB){
             HubDeliveryManager manager = findHubManagerOrThrow(managerId);
             validateReadPermission(role, requestUserId, manager.getUserId());
@@ -125,6 +133,7 @@ public class DeliveryManagerService {
     }
 
     // ──────────────── 배정 (DeliveryService에서 호출) ────────────────
+    /*
     public HubDeliveryManager assignHubManager() {
         HubDeliveryManager manager = hubDeliveryManagerRepository
                 .findTopByStatusOrderByDeliverySequenceAsc(DeliveryManagerStatus.WAIT)
@@ -132,7 +141,78 @@ public class DeliveryManagerService {
         manager.updateStatus(DeliveryManagerStatus.ON_TASK);
         return hubDeliveryManagerRepository.save(manager);
     }
+     */
+    public HubDeliveryManager assignHubManager() {
+        // 실제로는 '전체 허브 담당자' 키를 사용하거나 로직에 맞게 키를 정하세요.
+        String redisKey = REDIS_HUB_KEY_PREFIX + "all";
 
+        // 1. Redis에서 순서대로 ID 하나 가져오기 (오른쪽에서 꺼내서 왼쪽으로 다시 넣음 -> 순환)
+        String managerIdStr = redisTemplate.opsForList()
+                .rightPopAndLeftPush(redisKey, redisKey);
+
+        if (managerIdStr == null) {
+            // Redis에 데이터가 없으면 DB에서 WAIT 상태인 애들을 긁어와서 채워주는 로직이 필요함
+            refreshRedisCache(redisKey);
+            managerIdStr = redisTemplate.opsForList().rightPopAndLeftPush(redisKey, redisKey);
+
+            if (managerIdStr == null) throw new IllegalStateException("배정 가능한 담당자가 없습니다.");
+        }
+
+        // 2. DB에서 엔티티 조회 및 상태 변경
+        HubDeliveryManager manager = hubDeliveryManagerRepository.findById(UUID.fromString(managerIdStr))
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 담당자입니다."));
+
+        manager.updateStatus(DeliveryManagerStatus.ON_TASK);
+        return hubDeliveryManagerRepository.save(manager);
+    }
+
+    // Redis 캐시가 비었을 때 DB 데이터로 채워주는 헬퍼 메서드
+    private void refreshRedisCache(String key) {
+        List<HubDeliveryManager> waiters = hubDeliveryManagerRepository.findAllByStatus(DeliveryManagerStatus.WAIT);
+        for (HubDeliveryManager m : waiters) {
+            redisTemplate.opsForList().leftPush(key, m.getId().toString());
+        }
+    }
+
+    public CompanyDeliveryManager assignCompanyManager(UUID hubId) {
+        String redisKey = "delivery:managers:company:" + hubId.toString();
+
+        // 1. Redis에서 담당자 ID 하나를 완전히 꺼내기 (RPOPLPUSH 대신 rightPop 사용)
+        // 배정된 사람은 다시 큐에 넣지 않아야 다른 사람이 배정됩니다.
+        String managerIdStr = redisTemplate.opsForList().rightPop(redisKey);
+
+        // 2. 만약 Redis가 비어있다면 DB에서 해당 허브의 'WAIT' 상태인 담당자들을 로딩
+        if (managerIdStr == null) {
+            List<CompanyDeliveryManager> managers = companyDeliveryManagerRepository
+                    .findAllByHubIdAndStatus(hubId, DeliveryManagerStatus.WAIT);
+
+            if (managers.isEmpty()) {
+                throw new IllegalStateException("해당 허브에 대기 중인 업체 배송 담당자가 없습니다.");
+            }
+
+            // DB에서 가져온 대기자들을 Redis에 적재
+            for (CompanyDeliveryManager m : managers) {
+                redisTemplate.opsForList().leftPush(redisKey, m.getId().toString());
+            }
+
+            // 적재 후 다시 하나 꺼내기
+            managerIdStr = redisTemplate.opsForList().rightPop(redisKey);
+        }
+
+        // 3. DB 상태 업데이트 및 반환
+        CompanyDeliveryManager manager = findCompanyManagerOrThrow(UUID.fromString(managerIdStr));
+
+        // 이미 업무 중인지 한 번 더 검증 (동시성 방어)
+        if (manager.getStatus() != DeliveryManagerStatus.WAIT) {
+            // 만약 누군가 가로챘다면 재귀 호출로 다음 사람 찾기
+            return assignCompanyManager(hubId);
+        }
+
+        manager.updateStatus(DeliveryManagerStatus.ON_TASK);
+        return companyDeliveryManagerRepository.save(manager);
+    }
+
+    /*
     public CompanyDeliveryManager assignCompanyManager(UUID hubId) {
         CompanyDeliveryManager manager = companyDeliveryManagerRepository
                 .findTopByHubIdAndStatusOrderByDeliverySequenceAsc(hubId, DeliveryManagerStatus.WAIT)
@@ -140,6 +220,7 @@ public class DeliveryManagerService {
         manager.updateStatus(DeliveryManagerStatus.ON_TASK);
         return companyDeliveryManagerRepository.save(manager);
     }
+     */
 
     // ──────────────── 외부 서비스 검증 ────────────────
     // TODO: 공통 예외 처리 확정 후 CustomException으로 수정

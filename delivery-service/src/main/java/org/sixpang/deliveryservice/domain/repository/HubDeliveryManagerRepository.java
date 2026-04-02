@@ -4,6 +4,7 @@ import org.sixpang.deliveryservice.domain.model.entity.HubDeliveryManager;
 import org.sixpang.deliveryservice.domain.model.enums.DeliveryManagerStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -15,4 +16,6 @@ public interface HubDeliveryManagerRepository extends JpaRepository<HubDeliveryM
             DeliveryManagerStatus status);
 
     int countByDeletedAtIsNull(); // 전국 10명 제한
+
+    List<HubDeliveryManager> findAllByStatus(DeliveryManagerStatus status);
 }

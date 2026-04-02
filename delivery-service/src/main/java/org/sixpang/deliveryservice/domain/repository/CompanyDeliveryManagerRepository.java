@@ -4,6 +4,7 @@ import org.sixpang.deliveryservice.domain.model.entity.CompanyDeliveryManager;
 import org.sixpang.deliveryservice.domain.model.enums.DeliveryManagerStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,4 +17,6 @@ public interface CompanyDeliveryManagerRepository extends JpaRepository<CompanyD
 
     // 허브당 10명 제한 체크
     int countByHubIdAndDeletedAtIsNull(UUID hubId);
+
+    List<CompanyDeliveryManager> findAllByHubIdAndStatus(UUID hubId, DeliveryManagerStatus status);
 }

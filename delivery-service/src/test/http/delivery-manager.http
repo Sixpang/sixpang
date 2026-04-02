@@ -1,9 +1,51 @@
-### 배송 담당자 생성 (POST)
-POST http://localhost:53870/api/deliveries/managers
+### 변수 설정
+@port = 59186
+### 할때마다 바꿔줘야함
+@baseUrl = http://localhost:{{port}}/api/deliveries/managers
+@managerId = b57cbb93-c1ae-47d7-8da6-bdda2f272d96
+### 1번째 사람 550e8400-e29b-41d4-a716-446655440000
+### b57cbb93-c1ae-47d7-8da6-bdda2f272d96
+### 2번째 사람 bf5a60f7-f67a-419d-8778-2473b4af7e93
+### 0c85471d-7866-4538-a653-2dd5d066b14d
+
+### 1. 배송 담당자 생성 (HUB 타입)
+POST {{baseUrl}}
 Content-Type: application/json
 
 {
-  "userId": "550e8400-e29b-41d4-a716-446655440000",
+  "userId": "110e8400-e29b-41d4-a716-446655440000",
+  "type": "HUB"
+}
+
+### 2. 배송 담당자 생성 (COMPANY 타입)
+POST {{baseUrl}}
+Content-Type: application/json
+
+{
+  "userId": "bf5a60f7-f67a-419d-8778-2473b4af7e93",
   "type": "COMPANY",
   "hubId": "330e8400-e29b-41d4-a716-446655441111"
 }
+
+### 3. 배송 담당자 단건 조회
+GET {{baseUrl}}/{{managerId}}?type=COMPANY
+
+### 4. 배송 담당자 상태 수정 (PATCH)
+PATCH {{baseUrl}}/{{managerId}}?type=COMPANY
+Content-Type: application/json
+
+{
+  "status": "ON_TASK"
+}
+
+### 5. 배송 담당자 삭제 (Soft Delete)
+DELETE {{baseUrl}}/{{managerId}}?type=HUB
+
+### -----------------------------------------------------------
+### 🚀 Redis 순번 배정 테스트 (Assign)
+
+### 6. 허브 배송 담당자 배정
+POST {{baseUrl}}/assign/hub
+
+### 7. 업체 배송 담당자 배정
+POST {{baseUrl}}/assign/company?hubId=330e8400-e29b-41d4-a716-446655441111
