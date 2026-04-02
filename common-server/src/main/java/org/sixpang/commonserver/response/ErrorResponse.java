@@ -1,7 +1,6 @@
 package org.sixpang.commonserver.response;
 
 import lombok.Getter;
-import org.sixpang.commonserver.global.ErrorCode;
 
 import java.time.LocalDateTime;
 
