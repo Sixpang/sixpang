@@ -44,6 +44,7 @@ public class HubService {
         return HubResponseDto.from(hub);
     }
 
+    // 허브 정보 단일 조회
     @Transactional(readOnly = true)
     public HubResponseDto getHubInfo(UUID id){
         Hub hub = findHub(id);
