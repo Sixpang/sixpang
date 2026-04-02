@@ -1,6 +1,7 @@
 package org.sixpang.userservice.application.service;
 
 import lombok.RequiredArgsConstructor;
+import org.sixpang.commonserver.global.CustomException;
 import org.sixpang.userservice.application.dto.UserServiceDto;
 import org.sixpang.userservice.domain.model.entity.User;
 import org.sixpang.userservice.domain.repository.UserRepository;
@@ -87,21 +88,22 @@ public class UserService {
         user.changePassword(encodedPassword);
     }
 
-    /**회원 승인**/
-    public void approveUser(UUID userId) {
+    /**회원 상태 변경(승인, 거절)**/
+    public void changeStatus(UUID userId, String status) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
 
-        user.approve();
+        switch (status) {
+            case "APPROVED":
+                user.approve();
+                break;
+            case "REJECTED":
+                user.reject();
+                break;
+            default:
+                throw new IllegalArgumentException("잘못된 상태 값");
+        }
     }
 
-    /**회원 거절**/
-    public void rejectUser(UUID userId) {
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
-
-        user.reject();
-    }
 }
