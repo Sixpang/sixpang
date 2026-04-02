@@ -46,7 +46,7 @@ public class User extends BaseEntity {
 
     private UUID companyId;
 
-    //==생성 메서드==
+    /**생성 메서드**/
     public static User create(
             String email,
             String password,
@@ -73,8 +73,7 @@ public class User extends BaseEntity {
     }
 
 
-    //====비즈니스 메서드(최소기능)====
-    //TODO: 추후 공통에러형식으로 방어 로직 생성 및 메서드 추가
+    /**비지니스 로직**/
 
     //회원 승인
     public void approve() {
@@ -96,5 +95,10 @@ public class User extends BaseEntity {
     // 비밀번호 변경
     public void changePassword(String newPassword) {
         this.password = newPassword;
+    }
+
+    //회원 (논리적)삭제
+    public void delete(UUID deletedBy) {
+        super.softDelete(deletedBy);
     }
 }
