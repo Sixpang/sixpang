@@ -8,6 +8,6 @@ public record CreateCompanyRequest (
         String name,
         String address,
         CompanyType type,
-        UUID HubId
+        UUID hubId
 ){
 }

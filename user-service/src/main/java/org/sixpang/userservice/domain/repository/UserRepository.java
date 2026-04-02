@@ -9,13 +9,13 @@ import java.util.UUID;
 
 public interface UserRepository {
 
-    //Command
+    // Command
     User save(User user);
 
-    //Query
-    Optional<User> findById(UUID id);
+    // Query
+    Optional<User> findByIdAndDeletedAtIsNull(UUID id);
 
-    Optional<User> findByEmail(String email);
+    Optional<User> findByEmailAndDeletedAtIsNull(String email);
 
     boolean existsByEmail(String email);
 
@@ -23,5 +23,5 @@ public interface UserRepository {
 
     boolean existsByPhoneAndIdNot(String phone, UUID id);
 
-    Page<User> findAll(Pageable pageable);
+    Page<User> findAllByDeletedAtIsNull(Pageable pageable);
 }
