@@ -50,4 +50,13 @@ public class HubController {
         HubResponseDto responseDto = hubService.getHubInfo(id);
         return ResponseEntity.ok(ApiResponse.of("허브 상세 정보가 조회되었습니다.", responseDto));
     }
+
+    @PreAuthorize("hasRole('MASTER')")
+    @DeleteMapping("/hubs/{id}")
+    public ResponseEntity<ApiResponse<HubResponseDto>> deleteHub(
+            @PathVariable UUID id
+    ){
+        hubService.deleteHub(id);
+        return ResponseEntity.ok(ApiResponse.of("허브가 삭제되었습니다.", null));
+    }
 }
