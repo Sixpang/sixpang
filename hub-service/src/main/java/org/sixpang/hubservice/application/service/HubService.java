@@ -9,9 +9,6 @@ import org.sixpang.hubservice.domain.model.entity.Hub;
 import org.sixpang.hubservice.domain.repository.HubRepository;
 import org.sixpang.userservice.domain.model.entity.User;
 import org.sixpang.userservice.domain.repository.UserRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +20,7 @@ public class HubService {
     private final HubRepository hubRepository;
     private final UserRepository userRepository;
 
+    // 허브 등록
     @Transactional
     public HubResponseDto register(HubRequestDto requestDto, Long userId){
         User user = userRepository.findByIdAndDeletedAtIsNull(userId).orElseThrow(
@@ -52,7 +50,7 @@ public class HubService {
         return HubResponseDto.from(hub);
     }
 
-    // 내 정보 수정
+    // 허브 정보 수정
     @Transactional
     public HubResponseDto updateHubInfo(UUID id, HubRequestDto requestDto) {
         Hub hub = findHub(id);
@@ -65,6 +63,7 @@ public class HubService {
         return HubResponseDto.from(hub);
     }
 
+    // 허브 삭제
     @Transactional
     public void deleteHub(UUID id) {
         Hub hub = hubRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(
