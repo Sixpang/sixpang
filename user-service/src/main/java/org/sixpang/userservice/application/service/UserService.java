@@ -59,6 +59,11 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
 
+        //  전화번호 중복 체크 (
+        if (userRepository.existsByPhoneAndIdNot(dto.getPhone(), userId)) {
+            throw new IllegalArgumentException("이미 존재하는 전화번호입니다.");
+        }
+
         user.update(
                 dto.getName(),
                 dto.getPhone(),

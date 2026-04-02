@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.sixpang.userservice.application.dto.UserQueryDto;
 import org.sixpang.userservice.domain.model.entity.User;
 import org.sixpang.userservice.domain.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,9 +40,9 @@ public class UserQueryService {
     }
 
     /**목록 조회**/
-    public List<UserQueryDto.UserInfo> getUsers() {
+    public Page<UserQueryDto.UserInfo> getUsers(Pageable pageable) {
 
-        return userRepository.findAll().stream()
+        return userRepository.findAll(pageable)
                 .map(user -> new UserQueryDto.UserInfo(
                         user.getId(),
                         user.getEmail(),
@@ -48,7 +50,6 @@ public class UserQueryService {
                         user.getPhone(),
                         user.getRole(),
                         user.getStatus()
-                ))
-                .toList();
+                ));
     }
 }
