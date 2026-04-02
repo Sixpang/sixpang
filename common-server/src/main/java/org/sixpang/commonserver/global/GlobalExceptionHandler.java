@@ -7,7 +7,6 @@ import org.sixpang.commonserver.response.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.servlet.View;
 
 import java.util.List;
@@ -30,59 +29,46 @@ public class GlobalExceptionHandler {
                 .body(errorResponse);
     }
 
+    // DTO 유효성 검사 예외 처리
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponseDto> handleMethodArgumentNotValidException(
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(
             MethodArgumentNotValidException e
     ){
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
 
-        //요청 필드 에러 메시지 리스트
+        // 요청 필드 에러 메시지 리스트
         List errorMessages = e.getBindingResult()
                 .getFieldErrors()
                 .stream()
                 .map(error -> error.getDefaultMessage())
                 .collect(Collectors.toList());
 
-        //모든 메시지 하나로 합침
+        // 모든 메시지를 하나로 묶기
         String errorMessage = String.join(", ", errorMessages);
 
-        ErrorResponseDto errorResponseDto = new ErrorResponseDto(
+        ErrorResponse errorResponse = new ErrorResponse(
                 httpStatus,
                 errorMessage
         );
 
         return ResponseEntity
                 .status(httpStatus)
-                .body(errorResponseDto);
+                .body(errorResponse);
     }
 
-    @ExceptionHandler(HandlerMethodValidationException.class)
-    public ResponseEntity<ErrorResponseDto> handleMethodValidationException(HandlerMethodValidationException e){
-        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-
-        ErrorResponseDto errorResponseDto = new ErrorResponseDto(
-                httpStatus,
-                "Parameter 값이 잘못되었습니다."
-        );
-
-        return ResponseEntity
-                .status(httpStatus)
-                .body(errorResponseDto);
-
-    }
-
+    // 그 외 에러 처리
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponseDto> handleUnknownException(Exception e){
+    public ResponseEntity<ErrorResponse> handleGeneralException(Exception e){
         HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         log.error("[예외 발생] : ", e);
 
-        ErrorResponseDto errorResponseDto = new ErrorResponseDto(
+        ErrorResponse errorResponse = new ErrorResponse(
                 httpStatus,
                 e.getMessage()
         );
 
         return ResponseEntity
                 .status(httpStatus)
-                .body(errorResponseDto);
+                .body(errorResponse);
     }
 }
