@@ -22,7 +22,7 @@ public class HubService {
 
     // 허브 등록
     @Transactional
-    public HubResponseDto register(HubRequestDto requestDto, UUID userId){
+    public HubResponseDto register(UUID userId, HubRequestDto requestDto){
         if (hubRepository.existsByNameAndDeletedAtIsNull(requestDto.getName())) {
             throw new CustomException(ErrorCode.EXISTS_HUB);
         }

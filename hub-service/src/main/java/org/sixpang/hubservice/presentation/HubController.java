@@ -32,7 +32,7 @@ public class HubController {
             @RequestHeader(value = "X-User-Id", defaultValue = "123e4567-e89b-12d3-a456-426614174000") UUID userId,
             @RequestBody @Valid HubRequestDto requestDto
     ){
-        HubResponseDto responseDto = hubService.register(requestDto, userId);
+        HubResponseDto responseDto = hubService.register(userId, requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.of("허브가 성공적으로 생성되었습니다.", responseDto));
     }
 
