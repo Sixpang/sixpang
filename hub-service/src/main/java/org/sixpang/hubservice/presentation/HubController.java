@@ -15,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
@@ -38,5 +40,14 @@ public class HubController {
     ){
         Page<HubResponseDto> page = hubService.getAllHubInfo(pageable);
         return ResponseEntity.ok(ApiResponse.of("허브 목록이 조회되었습니다.", page));
+    }
+
+    @PreAuthorize("hasRole('MASTER')")
+    @GetMapping("/hubs")
+    public ResponseEntity<ApiResponse<HubResponseDto>> getHubInfo(
+            @PathVariable UUID id
+    ){
+        HubResponseDto responseDto = hubService.getHubInfo(id);
+        return ResponseEntity.ok(ApiResponse.of("허브 상세 정보가 조회되었습니다.", responseDto));
     }
 }
