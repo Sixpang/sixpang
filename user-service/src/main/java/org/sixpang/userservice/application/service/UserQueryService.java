@@ -26,32 +26,16 @@ public class UserQueryService {
         User user = userRepository.findByIdAndDeletedAtIsNull(userId)
                 .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
-        return new UserQueryDto.UserDetail(
-                user.getId(),
-                user.getEmail(),
-                user.getName(),
-                user.getPhone(),
-                user.getSlackId(),
-                user.getRole(),
-                user.getStatus(),
-                user.getHubId(),
-                user.getCompanyId(),
-                user.getCreatedAt()
-        );
+        // 코드 리뷰: DTO 생성 책임을 DTO로 이동 (from 메서드 사용)
+        return UserQueryDto.UserDetail.from(user);
     }
 
     /**목록 조회**/
     public Page<UserQueryDto.UserInfo> getUsers(Pageable pageable) {
 
         return userRepository.findAllByDeletedAtIsNull(pageable)
-                .map(user -> new UserQueryDto.UserInfo(
-                        user.getId(),
-                        user.getEmail(),
-                        user.getName(),
-                        user.getPhone(),
-                        user.getRole(),
-                        user.getStatus()
-                ));
+                // 코드 리뷰: 객체 생성 로직을 DTO로 위임
+                .map(UserQueryDto.UserInfo::from);
     }
 
     /** 로그인용 이메일 조회 (AuthService에서 사용) **/
@@ -60,12 +44,7 @@ public class UserQueryService {
         User user = userRepository.findByEmailAndDeletedAtIsNull(email)
                 .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
-        return new UserQueryDto.AuthUser(
-                user.getId(),
-                user.getEmail(),
-                user.getPassword(),
-                user.getRole(),
-                user.getStatus()
-        );
+        // 코드 리뷰: DTO 생성 책임을 DTO로 이동
+        return UserQueryDto.AuthUser.from(user);
     }
 }
