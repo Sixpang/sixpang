@@ -18,4 +18,5 @@ public interface HubDeliveryManagerJpaRepository extends JpaRepository<HubDelive
     int countByDeletedAtIsNull(); // 전국 10명 제한
 
     List<HubDeliveryManager> findAllByStatus(DeliveryManagerStatus status);
+
 }

@@ -12,8 +12,6 @@ import org.sixpang.deliveryservice.domain.model.enums.DeliveryManagerStatus;
 import org.sixpang.deliveryservice.domain.model.enums.DeliveryManagerType;
 import org.sixpang.deliveryservice.domain.repository.CompanyDeliveryManagerRepository;
 import org.sixpang.deliveryservice.domain.repository.HubDeliveryManagerRepository;
-import org.sixpang.deliveryservice.infrastructure.client.HubClient;
-//import org.sixpang.deliveryservice.infrastructure.client.UserClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -33,7 +31,7 @@ public class DeliveryManagerService {
     private final HubDeliveryManagerRepository hubDeliveryManagerRepository;
     private final CompanyDeliveryManagerRepository companyDeliveryManagerRepository;
     private final DeliveryUserClient deliveryUserClient;
-    private final HubClient hubClient;
+    private final DeliveryHubClient deliveryHubClient;
 
     private static final int HUB_MANAGER_TOTAL_MAX = 10;
     private static final int COMPANY_MANAGER_PER_HUB_MAX = 10;
@@ -237,7 +235,7 @@ public class DeliveryManagerService {
 
     private void validateHubExists(UUID hubId) {
         try {
-            hubClient.checkExists(hubId);
+            deliveryHubClient.checkExists(hubId);
         } catch (FeignException.NotFound e) {
             throw new IllegalArgumentException("존재하지 않는 허브입니다.");
         }

@@ -2,6 +2,7 @@ package org.sixpang.deliveryservice.domain.repository;
 
 import org.sixpang.deliveryservice.domain.model.entity.HubDeliveryManager;
 import org.sixpang.deliveryservice.domain.model.enums.DeliveryManagerStatus;
+import org.sixpang.deliveryservice.infrastructure.repository.HubDeliveryManagerJpaRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -18,4 +19,8 @@ public interface HubDeliveryManagerRepository {
     int countByDeletedAtIsNull(); // 전국 10명 제한
 
     List<HubDeliveryManager> findAllByStatus(DeliveryManagerStatus status);
+
+    HubDeliveryManager save(HubDeliveryManager manager);
+
+    Optional<HubDeliveryManager> findById(UUID userId);
 }
