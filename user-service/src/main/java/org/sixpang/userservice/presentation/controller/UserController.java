@@ -113,8 +113,8 @@ public class UserController {
         );
     }
 
-    /**회원 정보 수정**/
-    @PutMapping("/{id}")
+    /**회원 정보 수정***/
+    @PatchMapping("/{id}")
     public ResponseEntity<ApiResponse<UserResponseDto.UserUpdateResponse>> updateUser(
             @PathVariable UUID id,
             @Valid @RequestBody UserRequestDto.UpdateUserRequest request

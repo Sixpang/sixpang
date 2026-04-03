@@ -1,17 +1,15 @@
 package org.sixpang.userservice;
 
+import org.sixpang.commonserver.config.JpaConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.context.annotation.Bean;
-import org.springframework.data.domain.AuditorAware;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-import java.util.Optional;
-import java.util.UUID;
 
-@EnableJpaAuditing
+
+@Import(JpaConfig.class)
 @SpringBootApplication
 @EntityScan(basePackages = "org.sixpang")
 @EnableJpaRepositories(basePackages = "org.sixpang")
@@ -21,10 +19,4 @@ public class UserServiceApplication {
         SpringApplication.run(UserServiceApplication.class, args);
     }
 
-    //모든 auditing 값이 랜덤 UUID로 들어감
-    @Bean
-    public AuditorAware<UUID> auditorProvider() {
-        return () -> Optional.of(UUID.randomUUID());
-
-    }
 }

@@ -1,5 +1,7 @@
-package org.sixpang.deliveryservice.domain;
+package org.sixpang.deliveryservice.domain.repository;
 
+import org.sixpang.deliveryservice.domain.model.entity.Delivery;
+import org.sixpang.deliveryservice.domain.model.enums.DeliveryStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
