@@ -77,25 +77,15 @@ public class User extends BaseEntity {
 
     /**그 외 비지니스 로직**/
 
-    //회원 승인 (규칙: PENDING → APPROVED 가능 / APPROVED → 다시 APPROVED 불가)
+   //회원 승인 (규칙: PENDING → APPROVED 가능 / APPROVED → 다시 APPROVED 불가)
     public void approve() {
-        if (this.status == UserStatus.APPROVED) {
-            throw new UserException(UserErrorCode.ALREADY_APPROVED);
-        }
-        if (this.status != UserStatus.PENDING) {
-            throw new UserException(UserErrorCode.CANNOT_APPROVE);
-        }
+        this.status.validateApprove();
         this.status = UserStatus.APPROVED;
     }
 
     //회원 거절(규칙: PENDING → REJECTED 가능 / REJECTED → APPROVED 불가능)
     public void reject() {
-        if (this.status == UserStatus.REJECTED) {
-            throw new UserException(UserErrorCode.ALREADY_REJECTED);
-        }
-        if (this.status != UserStatus.PENDING) {
-            throw new UserException(UserErrorCode.CANNOT_REJECT);
-        }
+        this.status.validateReject();
         this.status = UserStatus.REJECTED;
     }
 
