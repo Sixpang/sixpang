@@ -1,6 +1,7 @@
 package org.sixpang.gatewayserver.filter;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.sixpang.gatewayserver.jwt.JwtProvider;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -19,6 +20,7 @@ import reactor.core.publisher.Mono;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     private final JwtProvider jwtProvider;
@@ -29,21 +31,28 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         String path = exchange.getRequest().getURI().getPath();
         HttpMethod method = exchange.getRequest().getMethod();
 
-       // 로그인 허용
+        log.info("[Gateway] Request Path: {}, Method: {}", path, method);
+
+        // 로그인 허용
         if (path.equals("/api/auth/login")) {
+            log.info("[Gateway] 로그인은 인증 X ");
             return chain.filter(exchange);
         }
 
         // 회원 가입 허용
         if (path.equals("/api/users") && HttpMethod.POST.equals(method)) {
+            log.info("[Gateway] Skip authentication - signup");
             return chain.filter(exchange);
         }
 
         // Authorization 헤더에서 토큰 추출
         String token = resolveToken(exchange);
 
-        //  토큰 없음 또는 유효하지 않음 → 401
+        log.info("[Gateway] Extracted Token: {}", token);
+
+        // 토큰 없음 또는 유효하지 않음 → 401
         if (token == null || !jwtProvider.validateToken(token)) {
+            log.warn("[Gateway] Invalid or missing token");
             return unauthorized(exchange);
         }
 
@@ -51,13 +60,17 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         String userId = jwtProvider.getUserId(token);
         String role = jwtProvider.getRole(token);
 
+        log.info("[Gateway] Parsed userId: {}, role: {}", userId, role);
+
         // 내부 서비스로 전달할 헤더 추가
         exchange.getRequest().mutate()
                 .header("X-User-Id", userId)
                 .header("X-User-Role", role)
                 .build();
 
-        // ➡ 다음 필터로 전달
+        log.info("[Gateway] Header set -> X-User-Id: {}, X-User-Role: {}", userId, role);
+
+        // 다음 필터로 전달
         return chain.filter(exchange);
     }
 
