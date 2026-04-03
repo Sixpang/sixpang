@@ -1,11 +1,13 @@
 package org.sixpang.userservice.presentation.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.sixpang.commonserver.response.ApiResponse;
 import org.sixpang.userservice.application.dto.UserQueryDto;
 import org.sixpang.userservice.application.dto.UserServiceDto;
 import org.sixpang.userservice.application.service.UserQueryService;
 import org.sixpang.userservice.application.service.UserService;
 import org.sixpang.userservice.domain.model.enums.UserRole;
+import org.sixpang.userservice.presentation.dto.PageResponseDto;
 import org.sixpang.userservice.presentation.dto.UserRequestDto;
 import org.sixpang.userservice.presentation.dto.UserResponseDto;
 import org.springframework.data.domain.Page;
@@ -15,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
-
 
 @RestController
 @RequestMapping("/users")
@@ -27,10 +28,9 @@ public class UserController {
 
     /**회원가입**/
     @PostMapping
-    public ResponseEntity<UUID> signup(
+    public ResponseEntity<ApiResponse<UserResponseDto.UserSimpleResponse>> signup(
             @RequestBody UserRequestDto.SignUpRequest request
     ) {
-        // RequestDto → ServiceDto 변환
         UUID userId = userService.signUp(
                 UserServiceDto.SignUp.builder()
                         .email(request.getEmail())
@@ -44,51 +44,80 @@ public class UserController {
                         .build()
         );
 
-        return ResponseEntity.ok(userId);
+        return ResponseEntity.ok(
+                ApiResponse.of("회원가입이 완료되었습니다. 관리자 승인 후 이용 가능합니다.",
+                        new UserResponseDto.UserSimpleResponse(
+                                userId,
+                                request.getEmail(),
+                                request.getName(),
+                                request.getRole(),
+                                "PENDING"
+                        )
+                )
+        );
     }
 
     /**단건 조회**/
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponseDto.UserDetailResponse> getUser(
+    public ResponseEntity<ApiResponse<UserResponseDto.UserDetailResponse>> getUser(
             @PathVariable UUID id
     ) {
         UserQueryDto.UserDetail dto = userQueryService.getUser(id);
 
-        // QueryDto → ResponseDto 변환
         return ResponseEntity.ok(
-                new UserResponseDto.UserDetailResponse(
-                        dto.getId(),
-                        dto.getEmail(),
-                        dto.getName(),
-                        dto.getPhone(),
-                        dto.getRole().name(),
-                        dto.getSlackId(),
-                        dto.getHubId(),
-                        dto.getCompanyId(),
-                        dto.getStatus().name()
+                ApiResponse.of("회원 상세 조회 성공",
+                        new UserResponseDto.UserDetailResponse(
+                                dto.getId(),
+                                dto.getEmail(),
+                                dto.getName(),
+                                dto.getPhone(),
+                                dto.getSlackId(),
+                                dto.getRole().name(),
+                                dto.getStatus().name(),
+                                dto.getHubId(),
+                                dto.getCompanyId()
+                        )
                 )
         );
     }
 
     /**목록 조회**/
     @GetMapping
-    public ResponseEntity<Page<UserResponseDto.UserResponse>> getUsers(Pageable pageable) {
+    public ResponseEntity<ApiResponse<PageResponseDto<List<UserResponseDto.UserResponse>>>> getUsers(Pageable pageable) {
 
         Page<UserQueryDto.UserInfo> users = userQueryService.getUsers(pageable);
 
-        return ResponseEntity.ok(
+        //content 추출
+        List<UserResponseDto.UserResponse> content =
                 users.map(dto -> new UserResponseDto.UserResponse(
                         dto.getId(),
                         dto.getEmail(),
                         dto.getName(),
+                        dto.getPhone(),
+                        dto.getRole().name(),
                         dto.getStatus().name()
-                ))
+                )).getContent();
+
+        // PageResponseDto 생성
+        PageResponseDto<List<UserResponseDto.UserResponse>> response =
+                new PageResponseDto<>(
+                        content,
+                        new PageResponseDto.Meta(
+                                users.getTotalElements(),
+                                users.getTotalPages(),
+                                users.getNumber()
+                        )
+                );
+
+        // 반환
+        return ResponseEntity.ok(
+                ApiResponse.of("회원 목록 조회 성공", response)
         );
     }
 
-    /**회원 정보 수정**/
-    @PutMapping("/{id}")
-    public ResponseEntity<Void> updateUser(
+    /**회원 정보 수정***/
+    @PatchMapping("/{id}")
+    public ResponseEntity<ApiResponse<UserResponseDto.UserUpdateResponse>> updateUser(
             @PathVariable UUID id,
             @RequestBody UserRequestDto.UpdateUserRequest request
     ) {
@@ -101,12 +130,26 @@ public class UserController {
                         .build()
         );
 
-        return ResponseEntity.ok().build();
+        // 수정 후 조회해서 실제 값 반환
+        UserQueryDto.UserDetail dto = userQueryService.getUser(id);
+
+        return ResponseEntity.ok(
+                ApiResponse.of("회원 정보 수정이 완료되었습니다.",
+                        new UserResponseDto.UserUpdateResponse(
+                                dto.getId(),
+                                dto.getName(),
+                                dto.getPhone(),
+                                dto.getRole().name(),
+                                dto.getHubId(),
+                                dto.getCompanyId()
+                        )
+                )
+        );
     }
 
     /**비밀번호 변경**/
     @PatchMapping("/{id}/password")
-    public ResponseEntity<Void> changePassword(
+    public ResponseEntity<ApiResponse<Void>> changePassword(
             @PathVariable UUID id,
             @RequestBody UserRequestDto.ChangePasswordRequest request
     ) {
@@ -118,28 +161,53 @@ public class UserController {
                         .build()
         );
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(ApiResponse.of("비밀번호 변경 성공", null));
     }
 
-    /**회원 승인**/
-    @PatchMapping("/{id}/approve")
-    public ResponseEntity<Void> approveUser(@PathVariable UUID id) {
-        userService.approveUser(id);
-        return ResponseEntity.ok().build();
+    /**회원 상태 변경(승인,거절) **/
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<ApiResponse<UserResponseDto.UserSimpleResponse>> changeStatus(
+            @PathVariable UUID id,
+            @RequestParam String status
+    ) {
+        userService.changeStatus(id, status);
+
+        UserQueryDto.UserDetail dto = userQueryService.getUser(id);
+
+        return ResponseEntity.ok(
+                ApiResponse.of("회원 상태가 성공적으로 변경되었습니다.",
+                        new UserResponseDto.UserSimpleResponse(
+                                dto.getId(),
+                                dto.getEmail(),
+                                dto.getName(),
+                                dto.getRole().name(),
+                                dto.getStatus().name()
+                        )
+                )
+        );
     }
 
-    /**회원 거절**/
-    @PatchMapping("/{id}/reject")
-    public ResponseEntity<Void> rejectUser(@PathVariable UUID id) {
-        userService.rejectUser(id);
-        return ResponseEntity.ok().build();
+    /**회원 (논리적)삭제**/
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable UUID userId) {
+
+        UUID currentUserId = UUID.randomUUID();
+
+        userService.deleteUser(userId, currentUserId);
+
+        return ResponseEntity.ok(
+                ApiResponse.of("회원 삭제가 완료되었습니다.", null)
+        );
     }
 
-    /** 로그인용 이메일 조회 (AuthService에서 사용-> 자동호출) **/
+
+    /** 로그인용 이메일 조회 Auth에게 넘겨줄 API **/
     @GetMapping("/email")
-    public ResponseEntity<UserQueryDto.AuthUser> getUserByEmail(
+    public ResponseEntity<ApiResponse<UserQueryDto.AuthUser>> getUserByEmail(
             @RequestParam String email
     ) {
-        return ResponseEntity.ok(userQueryService.getUserByEmail(email));
+        return ResponseEntity.ok(
+                ApiResponse.of("조회 성공", userQueryService.getUserByEmail(email))
+        );
     }
 }

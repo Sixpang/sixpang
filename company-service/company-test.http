@@ -1,0 +1,16 @@
+@host = http://localhost:55810
+@companyId = 11111111-1111-1111-1111-111111111111
+
+### 업체 생성
+POST {{host}}/api/companies
+Content-Type: application/json
+
+{
+  "name": "테스트 업체",
+  "address": "서울특별시 강남구",
+  "type": "PRODUCER",
+  "hubId": "22222222-2222-2222-2222-222222222222"
+}
+
+### 업체 단건 조회
+GET {{host}}/api/companies/{{companyId}}

@@ -1,11 +1,20 @@
 package org.sixpang.hubservice.domain.repository;
 
 import org.sixpang.hubservice.domain.model.entity.Hub;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
+import java.util.Optional;
 import java.util.UUID;
 
-@Repository
-public interface HubRepository extends JpaRepository<Hub, UUID> {
+public interface HubRepository {
+    Optional<Hub> findByIdAndDeletedAtIsNull(UUID id);
+
+    Optional<Hub> findByNameAndDeletedAtIsNull(String name);
+
+    boolean existsByNameAndDeletedAtIsNull(String name);
+
+    Page<Hub> findAllByDeletedAtIsNull(Pageable pageable);
+
+    Hub save(Hub hub);
 }

@@ -1,10 +1,7 @@
-package org.sixpang.deliveryservice.domain;
+package org.sixpang.deliveryservice.domain.model.enums;
 
-import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Getter
 @RequiredArgsConstructor

@@ -9,12 +9,13 @@ import java.security.Key;
 import java.util.Date;
 import java.util.UUID;
 
+/**토큰 생성**/
 @Component
 public class JwtProvider {
 
     private final String SECRET_KEY = "my-secret-key-my-secret-key-my-secret-key"; // 최소 32자
 
-    public String createToken(UUID userId) {
+    public String createToken(UUID userId , String role) {
 
         Date now = new Date();
         Date expiry = new Date(now.getTime() + 1000 * 60 * 60); // 1시간
@@ -23,6 +24,7 @@ public class JwtProvider {
 
         return Jwts.builder()
                 .setSubject(userId.toString())
+                .claim("role", role)
                 .setIssuedAt(now)
                 .setExpiration(expiry)
                 .signWith(key, SignatureAlgorithm.HS256)
