@@ -13,7 +13,7 @@ import org.sixpang.deliveryservice.domain.model.enums.DeliveryManagerType;
 import org.sixpang.deliveryservice.domain.repository.CompanyDeliveryManagerRepository;
 import org.sixpang.deliveryservice.domain.repository.HubDeliveryManagerRepository;
 import org.sixpang.deliveryservice.infrastructure.client.HubClient;
-import org.sixpang.deliveryservice.infrastructure.client.UserClient;
+//import org.sixpang.deliveryservice.infrastructure.client.UserClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -32,7 +32,7 @@ public class DeliveryManagerService {
 
     private final HubDeliveryManagerRepository hubDeliveryManagerRepository;
     private final CompanyDeliveryManagerRepository companyDeliveryManagerRepository;
-    private final UserClient userClient;
+    private final DeliveryUserClient deliveryUserClient;
     private final HubClient hubClient;
 
     private static final int HUB_MANAGER_TOTAL_MAX = 10;
@@ -43,7 +43,7 @@ public class DeliveryManagerService {
     public DeliveryManagerResponse create(DeliveryManagerCreateRequest request, String role, UUID requestUserId) {
         validateCreatePermission(role, request.type());
         //수정예약:user쪽 기능 완성되면 주석 풀기
-        //validateUserExists(request.userId());
+        validateUserExists(request.userId());
 
         if (hubDeliveryManagerRepository.existsByUserId(request.userId()) ||
             companyDeliveryManagerRepository.existsByUserId(request.userId())) {
@@ -229,7 +229,7 @@ public class DeliveryManagerService {
     // TODO: 공통 예외 처리 확정 후 CustomException으로 수정
     private void validateUserExists(UUID userId) {
         try {
-            userClient.checkExists(userId);
+            deliveryUserClient.checkExists(userId);
         } catch (FeignException.NotFound e) {
             throw new IllegalArgumentException("존재하지 않는 유저입니다.");
         }
