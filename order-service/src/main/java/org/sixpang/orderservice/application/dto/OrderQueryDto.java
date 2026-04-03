@@ -11,6 +11,8 @@ import org.sixpang.orderservice.domain.model.enums.OrderStatus;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -21,28 +23,39 @@ public class OrderQueryDto {
     @AllArgsConstructor
     public static class OrderInfo {
 
-        private UUID supplierId;       // 공급 업체 ID 필터
-        private UUID receiverId;       // 수령 업체 ID 필터
+        private UUID id;
+        private UUID supplierId;
+        private UUID receiverId;
+        private OrderStatus orderStatus;
+        private DeliveryStatus deliveryStatus;
+        private BigDecimal totalPrice;
+        private Timestamp deadlineAt;
+    }
 
-        @Enumerated(EnumType.STRING)
-        private OrderStatus orderStatus;       // 주문 상태 필터
+    // 상세 조회
+    @Getter
+    @AllArgsConstructor
+    public static class OrderDetail {
+        private UUID id;
+        private UUID supplierId;
+        private UUID receiverId;
+        private OrderStatus orderStatus;
+        private DeliveryStatus deliveryStatus;
+        private BigDecimal totalPrice;
+        private Timestamp deadlineAt;
+        private LocalDateTime createdAt;
+        private List<OrderItemInfo> orderItems;
+    }
 
-        @Enumerated(EnumType.STRING)
-        private DeliveryStatus deliveryStatus; // 배송 상태 필터
-
-        private Timestamp deadlineFrom;  // 납입 기한 시작
-        private Timestamp deadlineTo;    // 납입 기한 끝
-
-        private BigDecimal minTotalPrice; // 최소 주문 금액
-        private BigDecimal maxTotalPrice; // 최대 주문 금액
-
-        // 페이징
-        private int page = 0;
-        private int size = 10;
-
-        // 정렬
-        private String sortBy = "createdAt";  // 정렬 기준 컬럼
-        private String sortDir = "desc";      // asc / desc
+    // 주문 아이템 조회
+    @Getter
+    @AllArgsConstructor
+    public static class OrderItemInfo {
+        private UUID id;
+        private UUID productId;
+        private String productName;
+        private BigDecimal ProductPrice;
+        private Integer count;
     }
 
 }
