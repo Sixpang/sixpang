@@ -77,4 +77,9 @@ public class Order extends BaseEntity {
         this.orderstatus = OrderStatus.CANCELLED;
         this.deliveryStatus = DeliveryStatus.PENDING;
     }
+
+    // 주문 삭제
+    public  void delete(UUID id) {
+        super.softDelete(id);
+    }
 }
