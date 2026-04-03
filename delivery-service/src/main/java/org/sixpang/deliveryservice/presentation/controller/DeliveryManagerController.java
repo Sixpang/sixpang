@@ -2,10 +2,10 @@ package org.sixpang.deliveryservice.presentation.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.sixpang.deliveryservice.application.DeliveryManagerCreateRequest;
-import org.sixpang.deliveryservice.application.DeliveryManagerResponse;
-import org.sixpang.deliveryservice.application.DeliveryManagerService;
-import org.sixpang.deliveryservice.application.DeliveryManagerUpdateRequest;
+import org.sixpang.deliveryservice.application.dto.DeliveryManagerCreateRequest;
+import org.sixpang.deliveryservice.application.dto.DeliveryManagerResponse;
+import org.sixpang.deliveryservice.application.service.DeliveryManagerService;
+import org.sixpang.deliveryservice.application.dto.DeliveryManagerUpdateRequest;
 import org.sixpang.deliveryservice.domain.model.enums.DeliveryManagerType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -88,7 +88,7 @@ public class DeliveryManagerController {
     public ResponseEntity<DeliveryManagerResponse> assignCompanyManager(
             @RequestParam UUID hubId
     ) {
-        // 특정 허브 ID를 파라미터로 받아 해당 큐에서 배정합니다.
+        // 특정 허브 ID를 받아 해당 큐에서 배정
         return ResponseEntity.ok(DeliveryManagerResponse.fromCompany(deliveryManagerService.assignCompanyManager(hubId)));
     }
 

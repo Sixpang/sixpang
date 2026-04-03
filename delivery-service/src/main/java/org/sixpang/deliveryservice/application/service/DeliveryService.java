@@ -1,9 +1,8 @@
-package org.sixpang.deliveryservice.application;
+package org.sixpang.deliveryservice.application.service;
 
 import lombok.RequiredArgsConstructor;
 import org.sixpang.deliveryservice.domain.repository.DeliveryRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor

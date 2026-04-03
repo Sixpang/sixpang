@@ -1,4 +1,4 @@
-package org.sixpang.deliveryservice.application;
+package org.sixpang.deliveryservice.application.dto;
 
 import org.sixpang.deliveryservice.domain.model.enums.DeliveryManagerStatus;
 

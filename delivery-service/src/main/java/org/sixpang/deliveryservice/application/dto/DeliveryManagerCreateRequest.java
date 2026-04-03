@@ -1,4 +1,4 @@
-package org.sixpang.deliveryservice.application;
+package org.sixpang.deliveryservice.application.dto;
 
 import jakarta.validation.constraints.NotNull;
 import org.sixpang.deliveryservice.domain.model.enums.DeliveryManagerType;

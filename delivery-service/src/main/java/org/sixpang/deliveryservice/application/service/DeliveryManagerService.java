@@ -1,7 +1,11 @@
-package org.sixpang.deliveryservice.application;
+package org.sixpang.deliveryservice.application.service;
 
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import org.sixpang.deliveryservice.application.dto.DeliveryManagerCreateRequest;
+import org.sixpang.deliveryservice.application.dto.DeliveryManagerResponse;
+import org.sixpang.deliveryservice.application.dto.DeliveryManagerSearchCondition;
+import org.sixpang.deliveryservice.application.dto.DeliveryManagerUpdateRequest;
 import org.sixpang.deliveryservice.domain.model.entity.CompanyDeliveryManager;
 import org.sixpang.deliveryservice.domain.model.entity.HubDeliveryManager;
 import org.sixpang.deliveryservice.domain.model.enums.DeliveryManagerStatus;
@@ -16,7 +20,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -116,7 +119,7 @@ public class DeliveryManagerService {
         }
     }
 
-    // ──────────────── 삭제 ────────────────
+    //삭제
     public void delete(UUID managerId, DeliveryManagerType type,
                        String role, UUID requestUserId, UUID requestHubId) {
         if (type == DeliveryManagerType.HUB) {
@@ -132,7 +135,7 @@ public class DeliveryManagerService {
         }
     }
 
-    // ──────────────── 배정 (DeliveryService에서 호출) ────────────────
+    //배정
     /*
     public HubDeliveryManager assignHubManager() {
         HubDeliveryManager manager = hubDeliveryManagerRepository
@@ -177,11 +180,11 @@ public class DeliveryManagerService {
     public CompanyDeliveryManager assignCompanyManager(UUID hubId) {
         String redisKey = "delivery:managers:company:" + hubId.toString();
 
-        // 1. Redis에서 담당자 ID 하나를 완전히 꺼내기 (RPOPLPUSH 대신 rightPop 사용)
-        // 배정된 사람은 다시 큐에 넣지 않아야 다른 사람이 배정됩니다.
+        //Redis에서 담당자 ID 하나를 완전히 꺼내기 (RPOPLPUSH 대신 rightPop 사용)
+        //배정된 사람은 다시 큐에 넣지 않아야 다른 사람이 배정
         String managerIdStr = redisTemplate.opsForList().rightPop(redisKey);
 
-        // 2. 만약 Redis가 비어있다면 DB에서 해당 허브의 'WAIT' 상태인 담당자들을 로딩
+        //Redis가 비어있다면 DB에서 해당 허브의 'WAIT' 상태인 담당자들을 로딩
         if (managerIdStr == null) {
             List<CompanyDeliveryManager> managers = companyDeliveryManagerRepository
                     .findAllByHubIdAndStatus(hubId, DeliveryManagerStatus.WAIT);
@@ -190,21 +193,21 @@ public class DeliveryManagerService {
                 throw new IllegalStateException("해당 허브에 대기 중인 업체 배송 담당자가 없습니다.");
             }
 
-            // DB에서 가져온 대기자들을 Redis에 적재
+            //DB에서 가져온 대기자들 Redis에서 넣기
             for (CompanyDeliveryManager m : managers) {
                 redisTemplate.opsForList().leftPush(redisKey, m.getId().toString());
             }
 
-            // 적재 후 다시 하나 꺼내기
+            //적재 후 다시 하나 꺼내기
             managerIdStr = redisTemplate.opsForList().rightPop(redisKey);
         }
 
-        // 3. DB 상태 업데이트 및 반환
+        //DB 상태 업데이트 및 반환
         CompanyDeliveryManager manager = findCompanyManagerOrThrow(UUID.fromString(managerIdStr));
 
-        // 이미 업무 중인지 한 번 더 검증 (동시성 방어)
+        //이미 업무 중인지 한 번 더 검증
         if (manager.getStatus() != DeliveryManagerStatus.WAIT) {
-            // 만약 누군가 가로챘다면 재귀 호출로 다음 사람 찾기
+            //만약 누군가 가로챘다면 재귀 호출로 다음 사람 찾기
             return assignCompanyManager(hubId);
         }
 
@@ -222,7 +225,7 @@ public class DeliveryManagerService {
     }
      */
 
-    // ──────────────── 외부 서비스 검증 ────────────────
+    //외부 서비스 검증
     // TODO: 공통 예외 처리 확정 후 CustomException으로 수정
     private void validateUserExists(UUID userId) {
         try {
@@ -240,7 +243,7 @@ public class DeliveryManagerService {
         }
     }
 
-    // ──────────────── 권한 검증 ────────────────
+    //권한 검증
     private void validateCreatePermission(String role, DeliveryManagerType type) {
         if ("MASTER".equals(role)) return;
         if ("HUB_MANAGER".equals(role) && type == DeliveryManagerType.COMPANY) return;
@@ -262,7 +265,7 @@ public class DeliveryManagerService {
         throw new IllegalArgumentException("수정/삭제 권한이 없습니다.");
     }
 
-    // ──────────────── 공통 조회 ────────────────
+    //공통 조회
     private HubDeliveryManager findHubManagerOrThrow(UUID id) {
         return hubDeliveryManagerRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 허브 배송 담당자입니다."));
