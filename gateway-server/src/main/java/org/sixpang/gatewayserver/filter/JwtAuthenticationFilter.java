@@ -30,12 +30,12 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         HttpMethod method = exchange.getRequest().getMethod();
 
        // 로그인 허용
-        if (path.equals("/auth/login")) {
+        if (path.equals("/api/auth/login")) {
             return chain.filter(exchange);
         }
 
-        // 회원가입 허용
-        if (path.equals("/user") && HttpMethod.POST.equals(method)) {
+        // 회원 가입 허용
+        if (path.equals("/api/users") && HttpMethod.POST.equals(method)) {
             return chain.filter(exchange);
         }
 
