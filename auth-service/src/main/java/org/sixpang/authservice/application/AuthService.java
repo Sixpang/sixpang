@@ -17,6 +17,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
 
+    /**로그인 기능 **/
     public LoginResponseDto login(LoginRequestDto request) {
 
         // 1. 유저 조회 (User 서비스 호출)
