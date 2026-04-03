@@ -8,7 +8,8 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class SecurityConfig {
 
-    // 기본 의존성때문에 지꾸 막힘 Gateway가 인증하니까 전부 허용
+    // 임시 시큐리티 허용 파일
+    // Gateway가 인증 처리 완료해도 -> 기본 시큐리티 의존성 때문에 지꾸 막힘
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 

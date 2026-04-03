@@ -101,7 +101,7 @@ public class UserService {
     }
 
 
-    // ==================== 공통 조회 메서드 ====================
+    /** 공통 조회 메서드 **/
 
     //코드 리뷰: User 조회 공통 메서드로 관리
     private User findUser(UUID userId) {
