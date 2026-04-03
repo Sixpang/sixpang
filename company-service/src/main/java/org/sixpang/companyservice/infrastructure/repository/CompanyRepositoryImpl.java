@@ -1,6 +1,7 @@
 package org.sixpang.companyservice.infrastructure.repository;
 
 import lombok.RequiredArgsConstructor;
+import org.sixpang.companyservice.application.dto.CompanySearchRequest;
 import org.sixpang.companyservice.domain.model.Company;
 import org.sixpang.companyservice.domain.repository.CompanyRepository;
 import org.springframework.data.domain.Page;
@@ -30,4 +31,12 @@ public class CompanyRepositoryImpl implements CompanyRepository {
     public Page<Company> findAllByDeletedAtIsNull(Pageable pageable) {
         return companyJpaRepository.findAllByDeletedAtIsNull(pageable);
     }
+
+    @Override
+    public Page<Company> searchCompanies(CompanySearchRequest request, Pageable pageable) {
+
+        return companyJpaRepository.searchCompanies(request,pageable);
+    }
+
+
 }

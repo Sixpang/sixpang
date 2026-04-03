@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import org.sixpang.commonserver.entity.BaseEntity;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.UUID;
 
 @Entity

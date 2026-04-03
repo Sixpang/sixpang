@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface CompanyJpaRepository extends JpaRepository<Company, UUID>, JpaSpecificationExecutor<Company> {
+public interface CompanyJpaRepository extends JpaRepository<Company, UUID>, CompanyJpaRepositoryCustom {
 
     Optional<Company> findByIdAndDeletedAtIsNull(UUID companyId);
     Page<Company> findAllByDeletedAtIsNull(Pageable pageable);
