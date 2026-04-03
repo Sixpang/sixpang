@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 
 @Import(JpaConfig.class)
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "org.sixpang")
 @EntityScan(basePackages = "org.sixpang")
 @EnableJpaRepositories(basePackages = "org.sixpang")
 public class UserServiceApplication {
