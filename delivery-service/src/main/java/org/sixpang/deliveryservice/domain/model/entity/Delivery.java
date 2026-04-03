@@ -1,10 +1,11 @@
-package org.sixpang.deliveryservice.domain;
+package org.sixpang.deliveryservice.domain.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.sixpang.deliveryservice.domain.DeliveryStatus;
+import org.sixpang.commonserver.entity.BaseEntity;
+import org.sixpang.deliveryservice.domain.model.enums.DeliveryStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +39,7 @@ import java.util.UUID;
 @Getter
 @Table(name="p_delivery", schema = "delivery")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Delivery {
+public class Delivery extends BaseEntity {
     @Id
     @GeneratedValue(strategy= GenerationType.UUID)
     private UUID id;

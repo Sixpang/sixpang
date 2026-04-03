@@ -1,4 +1,4 @@
-package org.sixpang.deliveryservice.domain;
+package org.sixpang.deliveryservice.domain.model.enums;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
