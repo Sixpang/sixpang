@@ -12,8 +12,6 @@ import java.util.UUID;
 @EnableJpaAuditing
 public class JpaConfig {
 
-    @Bean
-    public AuditorAware<UUID> auditorProvider() {
-        return new AuditorAwareImpl();
-    }
 }
+
+
