@@ -6,7 +6,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sixpang.commonserver.entity.BaseEntity;
+import org.sixpang.commonserver.global.CustomException;
 import org.sixpang.hubservice.domain.model.enums.HubStatus;
+import org.sixpang.hubservice.exception.HubErrorCode;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -21,7 +23,7 @@ public class Hub extends BaseEntity {
     private UUID id;
 
     @Column(length = 100, name = "hub_name", nullable = false)
-    private String hubName;
+    private String name;
 
     @Column(nullable = false)
     private String address;
@@ -38,26 +40,43 @@ public class Hub extends BaseEntity {
 
     @Builder(access = AccessLevel.PRIVATE)
     private Hub(
-            String hubName,
+            String name,
             String address,
             BigDecimal latitude,
             BigDecimal longitude,
             HubStatus status
     ) {
-        this.hubName = hubName;
+        this.name = name;
         this.address = address;
         this.latitude = latitude;
         this.longitude = longitude;
         this.status = status;
     }
 
-    public static Hub of(String hubName, String address, BigDecimal latitude, BigDecimal longitude, HubStatus status) {
+    public static Hub of(String name, String address, BigDecimal latitude, BigDecimal longitude, HubStatus status) {
         return Hub.builder()
-                .hubName(hubName)
+                .name(name)
                 .address(address)
                 .latitude(latitude)
                 .longitude(longitude)
                 .status(status)
                 .build();
+    }
+
+    // 정보 수정
+    public void updateInfo(String name, String address, BigDecimal latitude, BigDecimal longitude, HubStatus status) {
+        this.name = name;
+        this.address = address;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.status = status;
+    }
+
+    // 삭제
+    public void delete(UUID id) {
+        if (this.isDeleted()) {
+            throw new CustomException(HubErrorCode.HUB_ALREADY_DELETED);
+        }
+        this.softDelete(id);
     }
 }
