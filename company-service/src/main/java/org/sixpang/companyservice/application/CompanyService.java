@@ -2,6 +2,7 @@ package org.sixpang.companyservice.application;
 
 import lombok.RequiredArgsConstructor;
 import org.sixpang.companyservice.application.dto.CompanyResponse;
+import org.sixpang.companyservice.application.dto.CompanySearchRequest;
 import org.sixpang.companyservice.application.dto.CreateCompanyRequest;
 import org.sixpang.companyservice.application.dto.UpdateCompanyRequest;
 import org.sixpang.companyservice.domain.model.Company;
@@ -66,8 +67,8 @@ public class CompanyService {
     }
 
     @Transactional(readOnly = true)
-    public Page<CompanyResponse> getCompanies(Pageable pageable) {
-        return companyRepository.findAllByDeletedAtIsNull(pageable)
+    public Page<CompanyResponse> getCompanies(CompanySearchRequest request, Pageable pageable) {
+        return companyRepository.searchCompanies(request,pageable)
                 .map(company -> CompanyResponse.from(company));
     }
 }
