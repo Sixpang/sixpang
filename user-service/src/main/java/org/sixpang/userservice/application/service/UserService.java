@@ -61,8 +61,9 @@ public class UserService {
         User user = userRepository.findByIdAndDeletedAtIsNull(userId)
                 .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
-        // 전화번호 중복 체크
-        if (userRepository.existsByPhoneAndIdNot(dto.getPhone(), userId)) {
+        // 전화번호 중복 체크 (값 있을 때만)
+        if (dto.getPhone() != null &&
+                userRepository.existsByPhoneAndIdNot(dto.getPhone(), userId)) {
             throw new UserException(UserErrorCode.EXISTS_PHONE);
         }
 
