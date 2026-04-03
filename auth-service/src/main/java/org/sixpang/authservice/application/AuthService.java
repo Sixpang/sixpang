@@ -20,9 +20,10 @@ public class AuthService {
     public LoginResponseDto login(LoginRequestDto request) {
 
         // 1. 유저 조회 (User 서비스 호출)
-        UserAuthDto user = userClient.getUserByEmail(request.getEmail());
+        UserAuthDto user = userClient.getUserByEmail(request.getEmail()).getData();
 
         // 2. 비밀번호 검증
+
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("이메일 또는 비밀번호가 올바르지 않습니다.");
         }

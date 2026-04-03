@@ -74,7 +74,6 @@ public class User extends BaseEntity {
         return user;
     }
 
-    /**비지니스 로직**/
 
     /**그 외 비지니스 로직**/
 
