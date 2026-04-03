@@ -5,8 +5,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sixpang.commonserver.entity.BaseEntity;
-import org.sixpang.commonserver.global.CustomException;
-import org.sixpang.commonserver.global.ErrorCode;
 import org.sixpang.orderservice.domain.model.enums.DeliveryStatus;
 import org.sixpang.orderservice.domain.model.enums.OrderStatus;
 
