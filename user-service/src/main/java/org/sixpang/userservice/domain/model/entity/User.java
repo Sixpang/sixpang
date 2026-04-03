@@ -93,9 +93,6 @@ public class User extends BaseEntity {
         if (this.status == UserStatus.REJECTED) {
             throw new UserException(UserErrorCode.ALREADY_REJECTED);
         }
-        if (this.status != UserStatus.PENDING) {
-            throw new UserException(UserErrorCode.CANNOT_REJECT);
-        }
         this.status = UserStatus.REJECTED;
     }
 
