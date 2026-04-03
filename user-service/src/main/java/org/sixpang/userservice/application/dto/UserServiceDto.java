@@ -7,6 +7,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.sixpang.userservice.domain.model.entity.User;
 import org.sixpang.userservice.domain.model.enums.UserRole;
 
 import java.util.UUID;
@@ -45,7 +46,23 @@ public class UserServiceDto {
         private final String slackId;
         private final UUID hubId;
         private final UUID companyId;
+
+        public User toEntity(String encodedPassword) {
+            return User.create(
+                    this.email,
+                    encodedPassword,
+                    this.name,
+                    this.phone,
+                    this.role,
+                    this.slackId,
+                    this.hubId,
+                    this.companyId
+            );
+        }
+
+
     }
+
 
     /**회원 정보 수정 DTO**/
     @Getter

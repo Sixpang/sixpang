@@ -3,6 +3,7 @@ package org.sixpang.userservice.application.service;
 import lombok.RequiredArgsConstructor;
 import org.sixpang.userservice.application.dto.UserServiceDto;
 import org.sixpang.userservice.domain.model.entity.User;
+import org.sixpang.userservice.domain.model.enums.UserStatus;
 import org.sixpang.userservice.domain.repository.UserRepository;
 import org.sixpang.userservice.exception.UserErrorCode;
 import org.sixpang.userservice.exception.UserException;
@@ -21,33 +22,19 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    /**회원가입**/
+
+    /**회원 가입**/
     public UUID signUp(UserServiceDto.SignUp dto) {
 
-        // 이메일 중복 체크
-        if (userRepository.existsByEmail(dto.getEmail())) {
-            throw new UserException(UserErrorCode.EXISTS_EMAIL);
-        }
+        //코드 리뷰:중복 검사 로직을 메서드 로 분리 하여 가독성 개선
+        validateDuplicateUser(dto);
 
-        // 전화번호 중복 체크
-        if (userRepository.existsByPhone(dto.getPhone())) {
-            throw new UserException(UserErrorCode.EXISTS_PHONE);
-        }
-
-        // 비밀번호 암호화
+        // 비밀 번호 암호화
         String encodedPassword = passwordEncoder.encode(dto.getPassword());
 
         // 유저 생성
-        User user = User.create(
-                dto.getEmail(),
-                encodedPassword,
-                dto.getName(),
-                dto.getPhone(),
-                dto.getRole(),
-                dto.getSlackId(),
-                dto.getHubId(),
-                dto.getCompanyId()
-        );
+        // 코드 리뷰:DTO가 Entity 생성 책임을 갖도록 위임
+        User user = dto.toEntity(encodedPassword);
 
         // 저장
         userRepository.save(user);
@@ -58,8 +45,7 @@ public class UserService {
     /**회원 정보 수정**/
     public void updateUser(UUID userId, UserServiceDto.Update dto) {
 
-        User user = userRepository.findByIdAndDeletedAtIsNull(userId)
-                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+        User user = findUser(userId);
 
         // 전화번호 중복 체크 (값 있을 때만)
         if (dto.getPhone() != null &&
@@ -74,10 +60,10 @@ public class UserService {
         );
     }
 
+    /**비밀번호 변경 **/
     public void changePassword(UUID userId, UserServiceDto.ChangePassword dto) {
 
-        User user = userRepository.findByIdAndDeletedAtIsNull(userId)
-                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+        User user = findUser(userId);
 
         // 현재 비밀번호 검증
         if (!passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword())) {
@@ -91,29 +77,55 @@ public class UserService {
     }
 
     /**회원 상태 변경(승인, 거절)**/
-    public void changeStatus(UUID userId, String status) {
+    // 코드 리뷰: 하드 코딩 문자열 제거 → UserStatus enum 사용
+    // 코드 리뷰: 나중에 enum 관련 조건문을 쓰지 않아도 되는 추상 메서드 구현 방식 추후 설명 해주실 예정
+    public void changeStatus(UUID userId, UserStatus status) {
 
-        User user = userRepository.findByIdAndDeletedAtIsNull(userId)
-                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+        User user = findUser(userId);
 
-        switch (status) {
-            case "APPROVED":
-                user.approve();
-                break;
-            case "REJECTED":
-                user.reject();
-                break;
-            default:
-                throw new UserException(UserErrorCode.INVALID_STATUS);
+        if (status.isApproved()) {
+            user.approve();
+        } else if (status.isRejected()) {
+            user.reject();
+        } else {
+            throw new UserException(UserErrorCode.INVALID_STATUS);
         }
     }
 
     /**회원삭제**/
     public void deleteUser(UUID userId, UUID currentUserId) {
 
-        User user = userRepository.findByIdAndDeletedAtIsNull(userId)
-                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+        User user = findUser(userId);
 
         user.delete(currentUserId);
+    }
+
+
+    // ==================== 공통 조회 메서드 ====================
+
+    //코드 리뷰: User 조회 공통 메서드로 관리
+    private User findUser(UUID userId) {
+        return userRepository.findByIdAndDeletedAtIsNull(userId)
+                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+    }
+    // 이메일 중복 체크
+    private boolean isAlreadyExists(String email) {
+        return userRepository.existsByEmail(email);
+    }
+    // 전화 번호 중복 체크
+    private boolean isAlreadyExistsPhone(String phone) {
+        return userRepository.existsByPhone(phone);
+    }
+
+    //코드 리뷰:중복 검사 로직을 한 곳으로 모아 가독성 과 재 사용성 확보
+    private void validateDuplicateUser(UserServiceDto.SignUp dto) {
+        // 이메일 중복 체크 (코드 리뷰: 예외 처리 조건이 명확 하게 드러나도록 분기문 유지)
+        if (isAlreadyExists(dto.getEmail())) {
+            throw new UserException(UserErrorCode.EXISTS_EMAIL);
+        }
+        // 전화 번호 중복 체크 (코드 리뷰:예외 처리 조건이 명확 하게 드러나도록 분기문 유지)
+        if (isAlreadyExistsPhone(dto.getPhone())) {
+            throw new UserException(UserErrorCode.EXISTS_PHONE);
+        }
     }
 }

@@ -8,6 +8,7 @@ import org.sixpang.userservice.application.dto.UserServiceDto;
 import org.sixpang.userservice.application.service.UserQueryService;
 import org.sixpang.userservice.application.service.UserService;
 import org.sixpang.userservice.domain.model.enums.UserRole;
+import org.sixpang.userservice.domain.model.enums.UserStatus;
 import org.sixpang.userservice.presentation.dto.PageResponseDto;
 import org.sixpang.userservice.presentation.dto.UserRequestDto;
 import org.sixpang.userservice.presentation.dto.UserResponseDto;
@@ -165,7 +166,7 @@ public class UserController {
     @PatchMapping("/{id}/status")
     public ResponseEntity<ApiResponse<UserResponseDto.UserSimpleResponse>> changeStatus(
             @PathVariable UUID id,
-            @RequestParam String status
+            @RequestParam UserStatus status
     ) {
         userService.changeStatus(id, status);
 
