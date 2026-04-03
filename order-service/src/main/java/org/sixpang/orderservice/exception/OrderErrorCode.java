@@ -1,21 +1,24 @@
-//package org.sixpang.orderservice.domain.exception;
+package org.sixpang.orderservice.exception;
 
-//import lombok.Getter;
-//import lombok.Getter;
-import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.sixpang.commonserver.global.ErrorCode;
 import org.springframework.http.HttpStatus;
 
-//@Getter
-//public enum OrderErrorCode {
+@RequiredArgsConstructor
+public enum OrderErrorCode implements ErrorCode{
 
-//    ALREADY_CANCELLED(HttpStatus.BAD_REQUEST);
-//
-//    private final String code;
-//    private final String message;
-//
-//    OrderErrorCode(String code, String message) {
-//        this.code = code;
-//        this.message = message;
-//    }
-//}
+    ALREADY_CANCELLED(HttpStatus.NOT_FOUND, "주문을 찾을 수 없습니다.");
+
+    private final HttpStatus status;
+    private final String message;
+
+    @Override
+    public String getMessage() {
+        return message;
+    }
+
+    @Override
+    public HttpStatus getStatus() {
+        return status;
+    }
+}
