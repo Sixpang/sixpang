@@ -3,8 +3,10 @@ package org.sixpang.userservice.presentation.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.sixpang.commonserver.response.ApiResponse;
-import org.sixpang.userservice.application.dto.UserQueryDto;
 import org.sixpang.userservice.application.dto.UserServiceDto;
+import org.sixpang.userservice.application.dto.query.UserDetail;
+import org.sixpang.userservice.application.dto.query.UserInfo;
+import org.sixpang.userservice.application.dto.query.AuthUser;
 import org.sixpang.userservice.application.service.UserQueryService;
 import org.sixpang.userservice.application.service.UserService;
 import org.sixpang.userservice.domain.model.enums.UserRole;
@@ -64,7 +66,7 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserResponseDto.UserDetailResponse>> getUser(
             @PathVariable UUID id
     ) {
-        UserQueryDto.UserDetail dto = userQueryService.getUser(id);
+        UserDetail dto = userQueryService.getUser(id);
 
         return ResponseEntity.ok(
                 ApiResponse.of("회원 상세 조회 성공",
@@ -87,7 +89,7 @@ public class UserController {
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponseDto<List<UserResponseDto.UserResponse>>>> getUsers(Pageable pageable) {
 
-        Page<UserQueryDto.UserInfo> users = userQueryService.getUsers(pageable);
+        Page<UserInfo> users = userQueryService.getUsers(pageable);
 
         List<UserResponseDto.UserResponse> content =
                 users.map(dto -> new UserResponseDto.UserResponse(
@@ -129,7 +131,7 @@ public class UserController {
                         .build()
         );
 
-        UserQueryDto.UserDetail dto = userQueryService.getUser(id);
+        UserDetail dto = userQueryService.getUser(id);
 
         return ResponseEntity.ok(
                 ApiResponse.of("회원 정보 수정이 완료되었습니다.",
@@ -170,7 +172,7 @@ public class UserController {
     ) {
         userService.changeStatus(id, status);
 
-        UserQueryDto.UserDetail dto = userQueryService.getUser(id);
+        UserDetail dto = userQueryService.getUser(id);
 
         return ResponseEntity.ok(
                 ApiResponse.of("회원 상태가 성공적으로 변경되었습니다.",
@@ -200,7 +202,7 @@ public class UserController {
 
     /** 이메일 조회 **/
     @GetMapping("/email")
-    public ResponseEntity<ApiResponse<UserQueryDto.AuthUser>> getUserByEmail(
+    public ResponseEntity<ApiResponse<AuthUser>> getUserByEmail(
             @RequestParam String email
     ) {
         return ResponseEntity.ok(
