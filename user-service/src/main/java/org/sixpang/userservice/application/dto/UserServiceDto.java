@@ -7,6 +7,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.sixpang.userservice.domain.model.entity.User;
 import org.sixpang.userservice.domain.model.enums.UserRole;
 
 import java.util.UUID;
@@ -14,7 +15,7 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserServiceDto {
 
-    /**회원가입 DTO**/
+    /**회원 가입 DTO**/
     @Getter
     @Builder
     public static class SignUp {
@@ -45,7 +46,22 @@ public class UserServiceDto {
         private final String slackId;
         private final UUID hubId;
         private final UUID companyId;
+
+        // 코드 리뷰:DTO가 Entity 생성 책임을 갖도록 변환 메서드 제공
+        public User toEntity(String encodedPassword) {
+            return User.create(
+                    this.email,
+                    encodedPassword,
+                    this.name,
+                    this.phone,
+                    this.role,
+                    this.slackId,
+                    this.hubId,
+                    this.companyId
+            );
+        }
     }
+
 
     /**회원 정보 수정 DTO**/
     @Getter
@@ -61,7 +77,7 @@ public class UserServiceDto {
         private final String slackId;
     }
 
-    /**비밀번호 변경 DTO**/
+    /**비밀 번호 변경 DTO**/
     @Getter
     @Builder
     public static class ChangePassword {

@@ -1,13 +1,14 @@
-package org.sixpang.deliveryservice.domain.repository;
+package org.sixpang.deliveryservice.infrastructure.repository;
 
 import org.sixpang.deliveryservice.domain.model.entity.HubDeliveryManager;
 import org.sixpang.deliveryservice.domain.model.enums.DeliveryManagerStatus;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface HubDeliveryManagerRepository {
+public interface HubDeliveryManagerJpaRepository extends JpaRepository<HubDeliveryManager, UUID> {
     boolean existsByUserId(UUID userId);
 
     //전국 WAIT 중 순번 가장 낮은 사람
@@ -18,7 +19,4 @@ public interface HubDeliveryManagerRepository {
 
     List<HubDeliveryManager> findAllByStatus(DeliveryManagerStatus status);
 
-    HubDeliveryManager save(HubDeliveryManager manager);
-
-    Optional<HubDeliveryManager> findById(UUID userId);
 }
