@@ -15,19 +15,20 @@ public interface OrderRepository extends JpaRepository<Order, UUID>{
     // 주문 단건 조회 (삭제 제외)
     Optional<Order> findByIdAndDeletedAtIsNull(UUID id);
 
-    // 공급 업체별 주문 조회
-    Page<Order> findBySupplierId(UUID supplierId, Pageable pageable);
+    // 공급 업체별 주문 조회 (삭제 제외)
+    Page<Order> findBySupplierIdAndDeletedAtIsNull(UUID supplierId, Pageable pageable);
 
-    // 수령 업체별 주문 조회
-    Page<Order> findByReceiverId(UUID receiverId, Pageable pageable);
+    // 수령 업체별 주문 조회 (삭제 제외)
+    Page<Order> findByReceiverIdAndDeletedAtIsNull(UUID receiverId, Pageable pageable);
 
-    // 주문 상태별 조회
-    Page<Order> findByOrderStatus(OrderStatus orderStatus, Pageable pageable);
+    // 주문 상태별 조회 (삭제 제외)
+    Page<Order> findByOrderStatusAndDeletedAtIsNull(OrderStatus orderStatus, Pageable pageable);
 
-    // 배송 상태별 조회
-    Page<Order> findByDeliveryStatus(DeliveryStatus deliveryStatus, Pageable pageable);
+    // 배송 상태별 조회 (삭제 제외)
+    Page<Order> findByDeliveryStatusAndDeletedAtIsNull(DeliveryStatus deliveryStatus, Pageable pageable);
 
     // 전체 주문 조회 (삭제 제외)
     Page<Order> findAllByDeletedAtIsNull(Pageable pageable);
+
 
 }
