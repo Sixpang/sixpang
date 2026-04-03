@@ -14,7 +14,6 @@ public class UserAuthDto {
     private UUID id;
     private String email;
     private String password;
-
     private String name;
     private String role;
 }
