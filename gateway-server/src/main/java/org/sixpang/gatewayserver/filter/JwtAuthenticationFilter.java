@@ -31,28 +31,24 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         String path = exchange.getRequest().getURI().getPath();
         HttpMethod method = exchange.getRequest().getMethod();
 
-        log.info("[Gateway] Request Path: {}, Method: {}", path, method);
+        log.info("[Gateway] {} {}", method, path);
 
         // 로그인 허용
         if (path.equals("/api/auth/login")) {
-            log.info("[Gateway] 로그인은 인증 X ");
             return chain.filter(exchange);
         }
 
         // 회원 가입 허용
         if (path.equals("/api/users") && HttpMethod.POST.equals(method)) {
-            log.info("[Gateway] Skip authentication - signup");
             return chain.filter(exchange);
         }
 
         // Authorization 헤더에서 토큰 추출
         String token = resolveToken(exchange);
 
-        log.info("[Gateway] Extracted Token: {}", token);
-
         // 토큰 없음 또는 유효하지 않음 → 401
         if (token == null || !jwtProvider.validateToken(token)) {
-            log.warn("[Gateway] Invalid or missing token");
+            log.warn("[Gateway] Unauthorized request");
             return unauthorized(exchange);
         }
 
@@ -60,18 +56,22 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         String userId = jwtProvider.getUserId(token);
         String role = jwtProvider.getRole(token);
 
-        log.info("[Gateway] Parsed userId: {}, role: {}", userId, role);
-
-        // 내부 서비스로 전달할 헤더 추가
-        exchange.getRequest().mutate()
-                .header("X-User-Id", userId)
-                .header("X-User-Role", role)
+        // 요청에 헤더를 추가
+        ServerWebExchange mutatedExchange = exchange.mutate()
+                .request(exchange.getRequest().mutate()
+                        .header("X-User-Id", userId)
+                        .header("X-User-Role", role)
+                        .build())
                 .build();
 
-        log.info("[Gateway] Header set -> X-User-Id: {}, X-User-Role: {}", userId, role);
+        // 디버깅 로그
+        log.info("[Gateway] userId={}, role={}", userId, role);
+        log.info("[Gateway] headers → X-User-Id={}, X-User-Role={}",
+                mutatedExchange.getRequest().getHeaders().getFirst("X-User-Id"),
+                mutatedExchange.getRequest().getHeaders().getFirst("X-User-Role")
+        );
 
-        // 다음 필터로 전달
-        return chain.filter(exchange);
+        return chain.filter(mutatedExchange);
     }
 
     /**Authorization 헤더에서 Bearer 토큰 추출*/

@@ -4,6 +4,7 @@ spring:
 
 server:
   port: 0
+
 eureka:
   client:
     service-url:
@@ -11,3 +12,6 @@ eureka:
   instance:
     instance-id:
       ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
+
+jwt:
+  secret: your-secret-key-your-secret-key-your-secret-key

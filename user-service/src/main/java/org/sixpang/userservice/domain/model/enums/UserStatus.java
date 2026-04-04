@@ -16,7 +16,7 @@ public enum UserStatus {
     public boolean isRejected() {
         return this == REJECTED;
     }
-    
+
 
     // 승인 가능 여부 검증 (상태 기반 책임 위임)
     public void validateApprove() {
