@@ -1,4 +1,4 @@
-package org.sixpang.authservice.infrastructure.client.dto;
+package org.sixpang.authservice.application.client.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

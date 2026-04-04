@@ -2,7 +2,7 @@ package org.sixpang.authservice.presentation.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.sixpang.authservice.infrastructure.client.dto.UserAuthDto;
+import org.sixpang.authservice.application.client.dto.UserAuthDto;
 
 @Getter
 @AllArgsConstructor
