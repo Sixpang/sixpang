@@ -1,5 +1,5 @@
 ### 변수 설정
-@port = 59186
+@port = 54212
 ### 할때마다 바꿔줘야함
 @baseUrl = http://localhost:{{port}}/api/deliveries/managers
 @managerId = b57cbb93-c1ae-47d7-8da6-bdda2f272d96

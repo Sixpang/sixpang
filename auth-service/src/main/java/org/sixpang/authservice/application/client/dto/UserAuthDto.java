@@ -1,4 +1,4 @@
-package org.sixpang.authservice.infrastructure.client.dto;
+package org.sixpang.authservice.application.client.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,7 +14,6 @@ public class UserAuthDto {
     private UUID id;
     private String email;
     private String password;
-
     private String name;
     private String role;
 }

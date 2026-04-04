@@ -16,47 +16,47 @@ spring:
         - id: user-service
           uri: lb://user-service
           predicates:
-            - Path=/users/**
+            - Path=/api/users/**
 
         - id: auth-service
           uri: lb://auth-service
           predicates:
-            - Path=/auth/**
+            - Path=/api/auth/**
 
         - id: order-service
           uri: lb://order-service
           predicates:
-            - Path=/order/**
+            - Path=/api/order/**
 
         - id: product-service
           uri: lb://product-service
           predicates:
-            - Path=/product/**
+            - Path=/api/product/**
 
         - id: company-service
           uri: lb://company-service
           predicates:
-            - Path=/company/**
+            - Path=/api/company/**
 
         - id: delivery-service
           uri: lb://delivery-service
           predicates:
-            - Path=/deliveries/**
+            - Path=/api/deliveries/**
 
         - id: hub-service
           uri: lb://hub-service
           predicates:
-            - Path=/hub/**
+            - Path=/api/hub/**
 
         - id: notification-service
           uri: lb://notification-service
           predicates:
-            - Path=/notification/**
+            - Path=/api/notification/**
 
         - id: prediction-service
           uri: lb://prediction-service
           predicates:
-            - Path=/prediction/**
+            - Path=/api/prediction/**
 
 eureka:
   client:
@@ -65,3 +65,8 @@ eureka:
 
   instance:
     instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
+
+
+jwt:
+  secret: my-secret-key-my-secret-key-my-secret-key
+  issuer: sixpang-auth

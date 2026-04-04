@@ -5,10 +5,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sixpang.commonserver.entity.BaseEntity;
-import org.sixpang.commonserver.global.CustomException;
-import org.sixpang.commonserver.global.ErrorCode;
 import org.sixpang.orderservice.domain.model.enums.DeliveryStatus;
 import org.sixpang.orderservice.domain.model.enums.OrderStatus;
+import org.sixpang.orderservice.presentation.dto.OrderRequestDto;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -81,5 +80,26 @@ public class Order extends BaseEntity {
     // 주문 삭제
     public  void delete(UUID id) {
         super.softDelete(id);
+    }
+
+    // 주문 생성 계산 로직
+    public static Order create(
+            OrderRequestDto.CreateOrderRequest request,
+            BigDecimal totalPrice
+    ) {
+        Order order = new Order();
+        order.supplierId = request.getSupplierId();
+        order.receiverId = request.getReceiverId();
+        order.deadlineAt = request.getDeadlineAt();
+        order.totalPrice = totalPrice;
+        order.orderstatus = OrderStatus.CONFIRMED; // 초기 주문 상태
+        order.deliveryStatus = DeliveryStatus.PENDING; // 초기 배송 상태
+        return order;
+    }
+
+    public void update(OrderRequestDto.UpdateOrderRequest request) {
+        if (request.getDeadlineAt() != null) {
+            this.deadlineAt = request.getDeadlineAt();
+        }
     }
 }
