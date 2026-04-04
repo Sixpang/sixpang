@@ -45,19 +45,7 @@ public class HubService {
     // 허브 정보 목록 조회
     @Transactional(readOnly = true)
     public Page<HubResponseDto> getAllHubInfo(Pageable pageable){
-        int requestedSize = pageable.getPageSize();
-
-        int size = (requestedSize == 10 || requestedSize == 30 || requestedSize == 50)
-                ? requestedSize
-                : 10;
-
-        Pageable adjustedPageable = PageRequest.of(
-                pageable.getPageNumber(),
-                size,
-                pageable.getSort()
-        );
-
-        Page<Hub> hubPage = hubRepository.findAllByDeletedAtIsNull(adjustedPageable);
+        Page<Hub> hubPage = hubRepository.findAllByDeletedAtIsNull(pageable);
 
         return hubPage.map(HubResponseDto::from);
     }
