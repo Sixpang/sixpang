@@ -1,8 +1,6 @@
 package org.sixpang.orderservice.application.service;
 
 import lombok.RequiredArgsConstructor;
-import org.sixpang.commonserver.global.CustomException;
-import org.sixpang.commonserver.global.ErrorCode;
 import org.sixpang.orderservice.domain.model.entity.Order;
 import org.sixpang.orderservice.domain.model.entity.OrderItem;
 import org.sixpang.orderservice.domain.repository.OrderItemRepository;
@@ -14,9 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.swing.undo.CannotUndoException;
 import java.math.BigDecimal;
-import java.security.PublicKey;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,10 +31,7 @@ public class OrderServiceImpl implements OrderService{
         // total_price 계산
         // request에서 아이템 목록 꺼내서 (가격 * 수량) 합산
         // 지금은 가격이 없으니 추후 상품 서비스 연동 시 채울 예정
-        BigDecimal totalPrice = request.getOrderItems().stream()
-                .map(item -> item.getProductPrice()
-                        .muiltiply(BigDecimal.valueOf(item.getCount()))
-                ).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalPrice = BigDecimal.ZERO;
 
         // Order 엔티티 생성 후 저장
         Order order = Order.create(request, totalPrice);
@@ -100,7 +93,7 @@ public class OrderServiceImpl implements OrderService{
     // 주문 수정
     @Override
     @Transactional
-    public OrderResponseDto.OrderDetailResponse updateOrders(
+    public OrderResponseDto.OrderDetailResponse updateOrder(
             UUID orderId, OrderRequestDto.UpdateOrderRequest request) {
 
         // 주문 조회
