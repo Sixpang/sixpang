@@ -3,6 +3,7 @@ package org.sixpang.userservice.application.service;
 import lombok.RequiredArgsConstructor;
 import org.sixpang.userservice.application.dto.UserServiceDto;
 import org.sixpang.userservice.domain.model.entity.User;
+import org.sixpang.commonserver.enums.UserRole;
 import org.sixpang.userservice.domain.model.enums.UserStatus;
 import org.sixpang.userservice.domain.repository.UserRepository;
 import org.sixpang.userservice.exception.UserErrorCode;
@@ -43,7 +44,9 @@ public class UserService {
     }
 
     /**회원 정보 수정**/
-    public void updateUser(UUID userId, UserServiceDto.Update dto) {
+    public void updateUser(UUID userId, UUID currentUserId, UserRole role, UserServiceDto.Update dto) {
+
+        validateAccess(userId, currentUserId, role);
 
         User user = findUser(userId);
 
@@ -61,7 +64,9 @@ public class UserService {
     }
 
     /**비밀번호 변경 **/
-    public void changePassword(UUID userId, UserServiceDto.ChangePassword dto) {
+    public void changePassword(UUID userId, UUID currentUserId, UserRole role, UserServiceDto.ChangePassword dto) {
+
+        validateAccess(userId, currentUserId, role);
 
         User user = findUser(userId);
 
@@ -93,7 +98,9 @@ public class UserService {
     }
 
     /**회원삭제**/
-    public void deleteUser(UUID userId, UUID currentUserId) {
+    public void deleteUser(UUID userId, UUID currentUserId, UserRole role) {
+
+        validateAccess(userId, currentUserId, role);
 
         User user = findUser(userId);
 
@@ -126,6 +133,13 @@ public class UserService {
         // 전화 번호 중복 체크 (코드 리뷰:예외 처리 조건이 명확 하게 드러나도록 분기문 유지)
         if (isAlreadyExistsPhone(dto.getPhone())) {
             throw new UserException(UserErrorCode.EXISTS_PHONE);
+        }
+    }
+
+    //권한 체크 메서드
+    private void validateAccess(UUID targetUserId, UUID currentUserId, UserRole role) {
+        if (!targetUserId.equals(currentUserId) && role != UserRole.MASTER) {
+            throw new UserException(UserErrorCode.FORBIDDEN);
         }
     }
 }

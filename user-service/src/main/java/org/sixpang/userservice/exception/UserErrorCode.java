@@ -15,7 +15,9 @@ public enum UserErrorCode implements ErrorCode {
     ALREADY_APPROVED(HttpStatus.BAD_REQUEST, "이미 승인된 상태입니다."),
     ALREADY_REJECTED(HttpStatus.BAD_REQUEST, "이미 거절된 상태입니다."),
     CANNOT_APPROVE(HttpStatus.BAD_REQUEST, "승인할 수 없는 상태입니다."),
-    CANNOT_REJECT(HttpStatus.BAD_REQUEST, "거절할 수 없는 상태입니다.");
+    CANNOT_REJECT(HttpStatus.BAD_REQUEST, "거절할 수 없는 상태입니다."),
+
+    FORBIDDEN(HttpStatus.FORBIDDEN, "접근 권한이 없습니다.");
 
     private final HttpStatus status;
     private final String message;

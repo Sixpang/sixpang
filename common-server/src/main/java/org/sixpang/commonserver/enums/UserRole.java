@@ -1,4 +1,4 @@
-package org.sixpang.userservice.domain.model.enums;
+package org.sixpang.commonserver.enums;
 
 public enum UserRole {
     MASTER,           // 마스터 관리자
