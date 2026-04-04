@@ -13,6 +13,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 /** Gateway에서 전달된 헤더 기반 인증 필터 */
 @Component
@@ -34,10 +35,9 @@ public class HeaderAuthenticationFilter extends OncePerRequestFilter {
 
         // 헤더 값이 있으면 인증 처리
         if (userId != null && role != null) {
-
-            // 사용자 정보 객체 생성
+            
             UserPrincipal principal =
-                    new UserPrincipal(Long.parseLong(userId), role);
+                    new UserPrincipal(UUID.fromString(userId), role);
 
             // Spring Security 인증 객체 생성
             Authentication authentication =
