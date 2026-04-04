@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sixpang.commonserver.entity.BaseEntity;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
