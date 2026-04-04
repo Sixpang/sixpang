@@ -56,7 +56,7 @@ spring:
         - id: prediction-service
           uri: lb://prediction-service
           predicates:
-            - Path=/api/prediction/**
+            - Path=/api/predictions/**
 
 eureka:
   client:
