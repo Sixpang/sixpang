@@ -24,17 +24,11 @@ public class HubService {
     // 허브 등록
     @Transactional
     public HubResponseDto register(UUID userId, HubRequestDto requestDto){
+        Hub hub = requestDto.toEntity();
+
         if (hubRepository.existsByNameAndDeletedAtIsNull(requestDto.getName())) {
             throw new CustomException(HubErrorCode.EXISTS_HUB);
         }
-
-        Hub hub = Hub.of(
-                requestDto.getName(),
-                requestDto.getAddress(),
-                requestDto.getLatitude(),
-                requestDto.getLongitude(),
-                requestDto.getStatus()
-        );
 
         hubRepository.save(hub);
 
