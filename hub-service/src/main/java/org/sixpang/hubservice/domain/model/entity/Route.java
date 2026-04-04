@@ -1,4 +1,4 @@
-package org.sixpang.routeservice.domain.model;
+package org.sixpang.hubservice.domain.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

@@ -1,4 +1,4 @@
-package org.sixpang.routeservice.infrastructure.repository;
+package org.sixpang.hubservice.infrastructure.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.sixpang.routeservice.domain.model.Route;
