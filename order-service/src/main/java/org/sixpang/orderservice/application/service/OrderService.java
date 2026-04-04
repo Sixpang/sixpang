@@ -4,9 +4,11 @@ import org.sixpang.orderservice.presentation.dto.OrderRequestDto;
 import org.sixpang.orderservice.presentation.dto.OrderResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
+@Service
 public interface OrderService {
 
     // 주문 생성
@@ -22,7 +24,7 @@ public interface OrderService {
     Page<OrderResponseDto.OrderResponse> getOrdersBySupplierId(UUID supplierId, Pageable pageable);
 
     // 수령 업체별 주문 목록 조회
-    Page<OrderResponseDto.OrderResponse> getOrdersByreceiverId(UUID receiverId, Pageable pageable);
+    Page<OrderResponseDto.OrderResponse> getOrdersByReceiverId(UUID receiverId, Pageable pageable);
 
     // 주문 수정
     OrderResponseDto.OrderDetailResponse updateOrder(UUID orderId, OrderRequestDto.UpdateOrderRequest request);
