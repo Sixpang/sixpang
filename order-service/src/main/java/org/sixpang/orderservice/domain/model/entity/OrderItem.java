@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sixpang.commonserver.entity.BaseEntity;
+import org.sixpang.orderservice.presentation.dto.OrderRequestDto;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -56,5 +57,15 @@ public class OrderItem extends BaseEntity {
         this.count = count;
     }
 
-    // 주문 아이템 취소, 삭제는 주문 ID에 따라 변경 될 텐데
+    public static OrderItem create(
+            UUID orderId,
+            OrderRequestDto.OrderItemRequest request
+    ) {
+        OrderItem item = new OrderItem();
+        item.orderId = orderId;
+        item.productId = request.getProductId();
+        item.count = request.getCount();
+        // productNAme, productPrice는 추후 상품 서비스 연동 시 채울 예정
+        return item;
+    }
 }
