@@ -4,6 +4,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import org.sixpang.authservice.application.security.TokenService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +14,7 @@ import java.util.UUID;
 
 /**JWT 토큰 생성 **/
 @Component
-public class JwtProvider {
+public class TokenProviderImpl implements TokenService {
 
     @Value("${jwt.secret}")
     private String secretKey;
@@ -38,6 +39,7 @@ public class JwtProvider {
 
         return Jwts.builder()
                 .setSubject(userId.toString())
+                .setIssuer("sixpang-auth")
                 .claim("role", role)
                 .setIssuedAt(now)
                 .setExpiration(expiry)

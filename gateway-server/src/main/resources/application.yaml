@@ -65,3 +65,8 @@ eureka:
 
   instance:
     instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
+
+
+jwt:
+  secret: my-secret-key-my-secret-key-my-secret-key
+  issuer: sixpang-auth
