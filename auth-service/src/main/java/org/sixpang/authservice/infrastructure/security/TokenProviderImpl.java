@@ -39,6 +39,7 @@ public class TokenProviderImpl implements TokenService {
 
         return Jwts.builder()
                 .setSubject(userId.toString())
+                .setIssuer("sixpang-auth")
                 .claim("role", role)
                 .setIssuedAt(now)
                 .setExpiration(expiry)

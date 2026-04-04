@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.nio.charset.StandardCharsets;
+
 /**JWT 인증 필터 */
 // 모든 요청에 대해 토큰 검증 수행 (토큰 추출 ,토큰 존재 확인, 토큰 유효성 검증)
 // 토큰 검증 성공 시 사용자 정보를 헤더에 담아 전달 (userId / role 추출, 내부 서비스로 전달)
@@ -46,10 +48,16 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         // Authorization 헤더에서 토큰 추출
         String token = resolveToken(exchange);
 
-        // 토큰 없음 또는 유효하지 않음 → 401
-        if (token == null || !jwtProvider.validateToken(token)) {
-            log.warn("[Gateway] Unauthorized request");
-            return unauthorized(exchange);
+        // 토큰 없음 → 401 (이유 포함)
+        if (token == null) {
+            log.warn("[Gateway] 토큰 없음");
+            return unauthorized(exchange, "토큰이 없습니다");
+        }
+
+        // 토큰 유효성 실패 → 401 (이유 포함)
+        if (!jwtProvider.validateToken(token)) {
+            log.warn("[Gateway] 유효하지 않은 토큰");
+            return unauthorized(exchange, "유효하지 않은 토큰입니다");
         }
 
         // 사용자 정보 추출
@@ -87,9 +95,17 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     }
 
     /**인증 실패 → 401 Unauthorized*/
-    private Mono<Void> unauthorized(ServerWebExchange exchange) {
+    //(코드리뷰 :실패 이유가 안들어온다 들어와야함 검증하는 쪽에서 상세하게 예외처리를 잡아라)
+    private Mono<Void> unauthorized(ServerWebExchange exchange, String message) {
         exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-        return exchange.getResponse().setComplete();
+
+        byte[] bytes = message.getBytes(StandardCharsets.UTF_8);
+
+        return exchange.getResponse().writeWith(
+                Mono.just(exchange.getResponse()
+                        .bufferFactory()
+                        .wrap(bytes))
+        );
     }
 
     /**필터 실행 순서 (가장 먼저 실행)*/
