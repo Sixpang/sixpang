@@ -1,4 +1,4 @@
-package org.sixpang.companyservice.infrastructure.config;
+package org.sixpang.productservice.infrastructure.config;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
@@ -13,7 +13,7 @@ public class QuerydslConfig {
     private EntityManager entityManager;
 
     @Bean
-    public JPAQueryFactory jpaQueryFactory(){
+    public JPAQueryFactory jpaQueryFactory() {
         return new JPAQueryFactory(entityManager);
     }
 }
