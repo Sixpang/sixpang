@@ -3,6 +3,7 @@ package org.sixpang.hubservice.application.dto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.sixpang.hubservice.domain.model.entity.Hub;
 import org.sixpang.hubservice.domain.model.enums.HubStatus;
 
@@ -12,6 +13,7 @@ import java.util.UUID;
 @Getter
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class HubResponseDto {
     private UUID id;
     private String name;
