@@ -46,7 +46,7 @@ spring:
         - id: hub-service
           uri: lb://hub-service
           predicates:
-            - Path=/api/hub/**
+            - Path=/api/hubs/**
 
         - id: notification-service
           uri: lb://notification-service
