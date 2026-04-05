@@ -15,6 +15,12 @@ spring:
         show_sql: true
         format_sql: true
 
+  naver:
+    api:
+      client-id: ${NAVER_CLIENT_ID}
+      client-secret: ${NAVER_CLIENT_SECRET}
+      directions-url: ${DIRECTIONS_URL}
+
 server:
   port: 0
 eureka:
