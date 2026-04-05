@@ -4,6 +4,7 @@ import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.sixpang.hubservice.domain.model.entity.Hub;
 import org.sixpang.hubservice.domain.model.enums.HubStatus;
 
 import java.math.BigDecimal;
@@ -33,4 +34,14 @@ public class HubRequestDto {
 
     @NotNull(message = "허브 운영 상태를 입력해주세요(ACTIVE, SUSPENDED, CLOSED)")
     private HubStatus status;
+
+    public Hub toEntity() {
+        return Hub.of(
+                name,
+                address,
+                latitude,
+                longitude,
+                status
+        );
+    }
 }

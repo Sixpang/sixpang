@@ -26,17 +26,11 @@ public class HubService {
     @Transactional
     @CacheEvict(cacheNames = "hub", key = "#id")
     public HubResponseDto register(UUID userId, HubRequestDto requestDto){
+        Hub hub = requestDto.toEntity();
+
         if (hubRepository.existsByNameAndDeletedAtIsNull(requestDto.getName())) {
             throw new CustomException(HubErrorCode.EXISTS_HUB);
         }
-
-        Hub hub = Hub.of(
-                requestDto.getName(),
-                requestDto.getAddress(),
-                requestDto.getLatitude(),
-                requestDto.getLongitude(),
-                requestDto.getStatus()
-        );
 
         hubRepository.save(hub);
 
@@ -55,19 +49,7 @@ public class HubService {
     @Transactional(readOnly = true)
     @Cacheable(cacheNames = "hubList", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
     public Page<HubResponseDto> getAllHubInfo(Pageable pageable){
-        int requestedSize = pageable.getPageSize();
-
-        int size = (requestedSize == 10 || requestedSize == 30 || requestedSize == 50)
-                ? requestedSize
-                : 10;
-
-        Pageable adjustedPageable = PageRequest.of(
-                pageable.getPageNumber(),
-                size,
-                pageable.getSort()
-        );
-
-        Page<Hub> hubPage = hubRepository.findAllByDeletedAtIsNull(adjustedPageable);
+        Page<Hub> hubPage = hubRepository.findAllByDeletedAtIsNull(pageable);
 
         return hubPage.map(HubResponseDto::from);
     }
