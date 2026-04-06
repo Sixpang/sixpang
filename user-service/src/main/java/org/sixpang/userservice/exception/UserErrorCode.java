@@ -20,7 +20,11 @@ public enum UserErrorCode implements ErrorCode {
     FORBIDDEN(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
 
     INVALID_AFFILIATION_REQUIRED(HttpStatus.BAD_REQUEST, "허브 또는 업체 중 하나는 반드시 선택해야 합니다."),
-    INVALID_AFFILIATION_DUPLICATE(HttpStatus.BAD_REQUEST, "허브와 업체를 동시에 선택할 수 없습니다.");
+    INVALID_AFFILIATION_DUPLICATE(HttpStatus.BAD_REQUEST, "허브와 업체를 동시에 선택할 수 없습니다."),
+
+    INVALID_COMPANY(HttpStatus.BAD_REQUEST, "존재하지 않는 업체입니다."),
+    INVALID_HUB(HttpStatus.BAD_REQUEST, "존재하지 않는 허브입니다.");
+
 
     private final HttpStatus status;
     private final String message;
