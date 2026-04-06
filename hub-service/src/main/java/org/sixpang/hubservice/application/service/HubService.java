@@ -95,4 +95,9 @@ public class HubService {
             throw new CustomException(HubErrorCode.EXISTS_HUB);
         }
     }
+
+    // 허브 존재 여부 확인
+    public boolean exists(UUID id) {
+        return hubRepository.findByIdAndDeletedAtIsNull(id).isPresent();
+    }
 }
