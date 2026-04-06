@@ -21,6 +21,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class HubService {
     private final HubRepository hubRepository;
+    private final RouteService routeService;
 
     // 허브 등록
     @Transactional
@@ -33,6 +34,8 @@ public class HubService {
         }
 
         hubRepository.save(hub);
+
+        routeService.generateRoutesForNewHub(hub.getId());
 
         return HubResponseDto.from(hub);
     }
@@ -75,6 +78,8 @@ public class HubService {
         Hub hub = findHub(id);
 
         hub.delete(userId);
+
+        routeService.disableRoutesForHub(hub.getId(), userId);
     }
 
     // ID로 허브 찾기
