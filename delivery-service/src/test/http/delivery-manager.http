@@ -1,17 +1,20 @@
 ### 변수 설정
-@port = 54212
+@port = 61306
 ### 할때마다 바꿔줘야함
 @baseUrl = http://localhost:{{port}}/api/deliveries/managers
 @managerId = b57cbb93-c1ae-47d7-8da6-bdda2f272d96
-### 1번째 사람 550e8400-e29b-41d4-a716-446655440000
+### 1번째 사람
+@user1 = 550e8400-e29b-41d4-a716-446655440000
 ### b57cbb93-c1ae-47d7-8da6-bdda2f272d96
-### 2번째 사람 bf5a60f7-f67a-419d-8778-2473b4af7e93
+### 2번째 사람
+@user2 = bf5a60f7-f67a-419d-8778-2473b4af7e93
 ### 0c85471d-7866-4538-a653-2dd5d066b14d
 
 ### 1. 허브 담당자 생성 (HUB 타입)
 # 성공 시 반환되는 managerId를 아래 @managerId_hub에 기록하세요.
 POST {{baseUrl}}
 Content-Type: application/json
+
 {
   "userId": "{{user1}}",
   "type": "HUB"
