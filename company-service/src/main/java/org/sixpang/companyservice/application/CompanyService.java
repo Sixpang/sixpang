@@ -21,11 +21,13 @@ import java.util.UUID;
 public class CompanyService {
 
     private final CompanyRepository companyRepository;
+    private final UserClient userClient;
 
     @Transactional
     public CompanyResponse createCompany(CreateCompanyRequest request, UserPrincipal user) {
+        UserPermissionInfo userInfo = getUserPermissionInfo(user);
 
-        validateCompanyManageRole(user);
+        validateCreatePermission(userInfo, request.hubId());
 
         boolean exists = companyRepository.existsByNameAndDeletedAtIsNull(request.name());
         if(exists){
@@ -47,7 +49,9 @@ public class CompanyService {
         Company company = companyRepository.findByIdAndDeletedAtIsNull(companyId)
                 .orElseThrow(() -> new CustomException(CompanyErrorCode.COMPANY_NOT_FOUND));
 
-        validateCompanyManageRole(user);
+        UserPermissionInfo userInfo = getUserPermissionInfo(user);
+
+        validateUpdatePermission(userInfo, company);
 
         company.update(
                 request.name(),
@@ -65,7 +69,9 @@ public class CompanyService {
         Company company = companyRepository.findByIdAndDeletedAtIsNull(companyId)
                 .orElseThrow(() -> new CustomException(CompanyErrorCode.COMPANY_NOT_FOUND));
 
-        validateCompanyManageRole(user);
+        UserPermissionInfo userInfo = getUserPermissionInfo(user);
+
+        validateDeletePermission(userInfo, company);
 
         company.delete();
     }
@@ -89,15 +95,85 @@ public class CompanyService {
         return companyRepository.findByIdAndDeletedAtIsNull(companyId).isPresent();
     }
 
-    private void validateCompanyManageRole(UserPrincipal user) {
-        if (user == null || user.getRole() == null) {
+    private UserPermissionInfo getUserPermissionInfo(UserPrincipal user) {
+        if (user == null || user.getUserId() == null) {
             throw new CustomException(CompanyErrorCode.COMPANY_ACCESS_DENIED);
         }
 
-        String role = user.getRole();
+        return userClient.getUserPermissionInfo(user.getUserId());
+    }
 
-        if ("MASTER".equals(role) || "HUB_MANAGER".equals(role)) {
+    /**
+     * 생성 권한
+     * - MASTER 가능
+     * - HUB_MANAGER 가능 (본인 hub만)
+     * - COMPANY_MANAGER 불가
+     * - DRIVER_MANAGER 불가
+     */
+    private void validateCreatePermission(UserPermissionInfo userInfo, UUID targetHubId) {
+        String role = userInfo.role();
+
+        if ("MASTER".equals(role)) {
             return;
+        }
+
+        if ("HUB_MANAGER".equals(role)) {
+            if (userInfo.hubId() != null && userInfo.hubId().equals(targetHubId)) {
+                return;
+            }
+        }
+
+        throw new CustomException(CompanyErrorCode.COMPANY_ACCESS_DENIED);
+    }
+
+    /**
+     * 수정 권한
+     * - MASTER 가능
+     * - HUB_MANAGER 가능 (본인 hub 업체만)
+     * - COMPANY_MANAGER 가능 (본인 업체만)
+     * - DRIVER_MANAGER 불가
+     */
+    private void validateUpdatePermission(UserPermissionInfo userInfo, Company company) {
+        String role = userInfo.role();
+
+        if ("MASTER".equals(role)) {
+            return;
+        }
+
+        if ("HUB_MANAGER".equals(role)) {
+            if (userInfo.hubId() != null && userInfo.hubId().equals(company.getHubId())) {
+                return;
+            }
+            throw new CustomException(CompanyErrorCode.COMPANY_ACCESS_DENIED);
+        }
+
+        if ("COMPANY_MANAGER".equals(role)) {
+            if (userInfo.companyId() != null && userInfo.companyId().equals(company.getId())) {
+                return;
+            }
+        }
+
+        throw new CustomException(CompanyErrorCode.COMPANY_ACCESS_DENIED);
+    }
+
+    /**
+     * 삭제 권한
+     * - MASTER 가능
+     * - HUB_MANAGER 가능 (본인 hub 업체만)
+     * - COMPANY_MANAGER 불가
+     * - DRIVER_MANAGER 불가
+     */
+    private void validateDeletePermission(UserPermissionInfo userInfo, Company company) {
+        String role = userInfo.role();
+
+        if ("MASTER".equals(role)) {
+            return;
+        }
+
+        if ("HUB_MANAGER".equals(role)) {
+            if (userInfo.hubId() != null && userInfo.hubId().equals(company.getHubId())) {
+                return;
+            }
         }
 
         throw new CustomException(CompanyErrorCode.COMPANY_ACCESS_DENIED);
