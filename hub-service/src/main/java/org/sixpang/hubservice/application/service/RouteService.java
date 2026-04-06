@@ -44,6 +44,10 @@ public class RouteService {
     public List<AvailableRouteResponseDto> getAvailableRoutes(UUID departureHubId) {
         List<Route> routes = routeRepository.findAllByDepartureHubIdAndDeletedAtIsNull(departureHubId);
 
+        if (routes.isEmpty()) {
+            throw new CustomException(RouteErrorCode.AVAILABLE_ROUTE_NOT_FOUND);
+        }
+
         return routes.stream()
                 .map(AvailableRouteResponseDto::from)
                 .collect(Collectors.toList());
@@ -54,7 +58,7 @@ public class RouteService {
     @Cacheable(value = "routes", key = "'direct:' + #startHubId + ':' + #goalHubId")
     public DirectRouteResponseDto getDirectRoutes(UUID startHubId, UUID goalHubId) {
         Route route = routeRepository.findByDepartureHubIdAndArrivalHubIdAndDeletedAtIsNull(startHubId, goalHubId)
-                .orElseThrow(() -> new CustomException(RouteErrorCode.ROUTE_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(RouteErrorCode.DIRECT_ROUTE_NOT_FOUND));
 
         return DirectRouteResponseDto.from(route);
     }
@@ -72,8 +76,14 @@ public class RouteService {
         Map<UUID, Route> edgeTo = new HashMap<>(); // 지나온 Route 정보 기록
         PriorityQueue<NodeDistance> pq = new PriorityQueue<>(Comparator.comparing(NodeDistance::getDistance));
 
-        for (UUID hubId : graph.keySet()) {
-            shortestDistances.put(hubId, new BigDecimal("999999.0"));
+        // 초기화 시 모든 관련 노드 추가
+        allRoutes.forEach(r -> {
+            shortestDistances.put(r.getDepartureHubId(), new BigDecimal("999999.0"));
+            shortestDistances.put(r.getArrivalHubId(), new BigDecimal("999999.0"));
+        });
+
+        if (!shortestDistances.containsKey(departureHubId)) {
+            throw new CustomException(RouteErrorCode.OPTIMAL_ROUTE_NOT_FOUND);
         }
 
         shortestDistances.put(departureHubId, BigDecimal.ZERO);
@@ -198,13 +208,14 @@ public class RouteService {
 
             var summary = response.route().traoptimal().get(0).summary();
 
-            BigDecimal distanceKm = BigDecimal.valueOf(summary.distance()).divide(new BigDecimal("1000"), 2, BigDecimal.ROUND_HALF_UP);
+            BigDecimal distanceKm = BigDecimal.valueOf(summary.distance())
+                    .divide(new BigDecimal("1000"), 2, BigDecimal.ROUND_HALF_UP);
 
             Route route = Route.of(
                     start.getId(), start.getName(),
                     goal.getId(), goal.getName(),
                     (long) summary.duration(),
-                    BigDecimal.valueOf(summary.distance())
+                    distanceKm
             );
 
             routeRepository.save(route);
