@@ -19,8 +19,8 @@ naver:
   api:
     directions-url: ${DIRECTIONS_URL}
   client:
-    client-id: ${NAVER_CLIENT_ID}
-    client-secret: ${NAVER_CLIENT_SECRET}
+    id: ${NAVER_CLIENT_ID}
+    secret: ${NAVER_CLIENT_SECRET}
 
 
 server:
