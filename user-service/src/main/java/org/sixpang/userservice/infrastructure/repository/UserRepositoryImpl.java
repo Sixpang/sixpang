@@ -2,6 +2,7 @@ package org.sixpang.userservice.infrastructure.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.sixpang.userservice.domain.model.entity.User;
+import org.sixpang.userservice.domain.model.enums.UserStatus;
 import org.sixpang.userservice.domain.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -49,5 +50,10 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public Page<User> findAllByDeletedAtIsNull(Pageable pageable) {
         return userJpaRepository.findAllByDeletedAtIsNull(pageable);
+    }
+
+    @Override
+    public Page<User> findAllByStatusAndDeletedAtIsNull(UserStatus status, Pageable pageable) {
+        return userJpaRepository.findAllByStatusAndDeletedAtIsNull(status, pageable);
     }
 }
