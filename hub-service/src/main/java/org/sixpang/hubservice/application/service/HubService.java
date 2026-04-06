@@ -25,7 +25,7 @@ public class HubService {
 
     // 허브 등록
     @Transactional
-    @CacheEvict(cacheNames = "hub", key = "#id")
+    @CacheEvict(cacheNames = "hub", allEntries = true)
     public HubResponseDto register(UUID userId, HubRequestDto requestDto){
         Hub hub = requestDto.toEntity();
 
@@ -59,7 +59,7 @@ public class HubService {
 
     // 허브 정보 수정
     @Transactional
-    @CacheEvict(cacheNames = "hub", key = "#id")
+    @CacheEvict(cacheNames = "hub", allEntries = true)
     public HubResponseDto updateHubInfo(UUID id, UUID userId, HubRequestDto requestDto) {
         Hub hub = findHub(id);
 
@@ -73,7 +73,7 @@ public class HubService {
 
     // 허브 삭제
     @Transactional
-    @CacheEvict(cacheNames = "hub", key = "#id")
+    @CacheEvict(cacheNames = "hub", allEntries = true)
     public void deleteHub(UUID id, UUID userId) {
         Hub hub = findHub(id);
 
