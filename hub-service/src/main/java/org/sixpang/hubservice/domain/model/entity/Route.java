@@ -22,8 +22,14 @@ public class Route extends BaseEntity {
     @Column(name = "departure_hub_id", nullable = false)
     private UUID departureHubId;
 
+    @Column(name = "departure_hub_name", nullable = false)
+    private String departureHubName;
+
     @Column(name = "arrival_hub_id", nullable = false)
     private UUID arrivalHubId;
+
+    @Column(name = "arrival_hub_name", nullable = false)
+    private String arrivalHubName;
 
     @Column(nullable = false)
     private Long duration;
@@ -34,20 +40,26 @@ public class Route extends BaseEntity {
     @Builder(access = AccessLevel.PRIVATE)
     private Route(
             UUID departureHubId,
+            String departureHubName,
             UUID arrivalHubId,
+            String arrivalHubName,
             Long duration,
             BigDecimal distance
     ){
         this.departureHubId = departureHubId;
+        this.departureHubName = departureHubName;
         this.arrivalHubId = arrivalHubId;
+        this.arrivalHubName = arrivalHubName;
         this.duration = duration;
         this.distance = distance;
     }
 
-    public static Route of(UUID departureHubId, UUID arrivalHubId, Long duration, BigDecimal distance){
+    public static Route of(UUID departureHubId, String departureHubName, UUID arrivalHubId, String arrivalHubName, Long duration, BigDecimal distance){
         return Route.builder()
                 .departureHubId(departureHubId)
+                .departureHubName(departureHubName)
                 .arrivalHubId(arrivalHubId)
+                .arrivalHubName(arrivalHubName)
                 .duration(duration)
                 .distance(distance)
                 .build();
