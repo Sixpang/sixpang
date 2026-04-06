@@ -1,7 +1,7 @@
 @host = http://localhost:54435
 @companyId = 27f6f4dc-9224-4389-a57e-c868374a43fc
 
-POST http://localhost:54435/api/companies
+POST http://localhost:57881/api/companies
 Content-Type: application/json
 X-User-Id: 55555555-5555-5555-5555-555555555555
 X-User-Role: HUB_MANAGER
@@ -9,6 +9,6 @@ X-User-Role: HUB_MANAGER
 {
   "name": "테스트업체3",
   "address": "서울시 마포구",
-  "type": "RECIVER",
+  "type": "RECEIVER",
   "hubId": "66666666-6666-6666-6666-666666666666"
 }
