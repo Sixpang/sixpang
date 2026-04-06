@@ -27,7 +27,7 @@ public class Order extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private OrderStatus orderstatus; // 주문 상태
+    private OrderStatus orderStatus; // 주문 상태
 
     @Column(nullable = false, name = "deadline_at")
     private Timestamp deadlineAt; // 납입 기한 일자+시간
@@ -53,7 +53,7 @@ public class Order extends BaseEntity {
         this.receiverId = receiverId;
         this.deadlineAt = deadlineAt;
         this.totalPrice = totalPrice;
-        this.orderstatus = OrderStatus.CONFIRMED; // 주문 상태 (승인)
+        this.orderStatus = OrderStatus.CONFIRMED; // 주문 상태 (승인)
     }
 
     // 주문 생성
