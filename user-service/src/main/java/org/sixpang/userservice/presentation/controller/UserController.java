@@ -15,6 +15,7 @@ import org.sixpang.userservice.domain.model.entity.UserStatusHistory;
 import org.sixpang.userservice.domain.model.enums.UserStatus;
 import org.sixpang.userservice.exception.UserErrorCode;
 import org.sixpang.userservice.exception.UserException;
+import org.sixpang.userservice.presentation.dto.UserPermissionInfo;
 import org.sixpang.userservice.presentation.dto.UserRequestDto;
 import org.sixpang.userservice.presentation.dto.UserResponseDto;
 import org.springframework.data.domain.Page;
@@ -325,13 +326,26 @@ public class UserController {
         );
     }
 
-    /** 이메일 조회 **/
+    /** 이메일 조회 (feign client) **/
     @GetMapping("/email")
     public ResponseEntity<ApiResponse<AuthUser>> getUserByEmail(
             @RequestParam String email
     ) {
         return ResponseEntity.ok(
                 ApiResponse.of("조회 성공", userQueryService.getUserByEmail(email))
+        );
+    }
+
+    /**HubId(),CompanyId() 정보 (feign client)**/
+    @GetMapping("/internal/{id}")
+    public UserPermissionInfo getUserPermissionInfo(@PathVariable UUID id) {
+        UserDetail dto = userQueryService.getUser(id);
+
+        return new UserPermissionInfo(
+                dto.getId(),
+                dto.getRole().name(),
+                dto.getHubId(),
+                dto.getCompanyId()
         );
     }
 }
