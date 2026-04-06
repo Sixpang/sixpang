@@ -78,4 +78,9 @@ public class CompanyService {
         return companyRepository.searchCompanies(request,pageable)
                 .map(company -> CompanyResponse.from(company));
     }
+
+    @Transactional(readOnly = true)
+    public boolean exists(UUID companyId) {
+        return companyRepository.findByIdAndDeletedAtIsNull(companyId).isPresent();
+    }
 }
