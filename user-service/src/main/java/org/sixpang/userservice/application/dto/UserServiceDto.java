@@ -8,7 +8,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sixpang.userservice.domain.model.entity.User;
-import org.sixpang.userservice.domain.model.enums.UserRole;
+import org.sixpang.commonserver.enums.UserRole;
 
 import java.util.UUID;
 

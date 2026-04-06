@@ -28,8 +28,8 @@ public class CompanyRepositoryImpl implements CompanyRepository {
     }
 
     @Override
-    public Page<Company> findAllByDeletedAtIsNull(Pageable pageable) {
-        return companyJpaRepository.findAllByDeletedAtIsNull(pageable);
+    public Boolean existsByNameAndDeletedAtIsNull(String name) {
+        return companyJpaRepository.existsByNameAndDeletedAtIsNull(name);
     }
 
     @Override

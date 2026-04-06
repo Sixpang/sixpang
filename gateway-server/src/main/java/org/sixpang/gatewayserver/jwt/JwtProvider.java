@@ -4,26 +4,48 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import jakarta.annotation.PostConstruct;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 
 @Component
 public class JwtProvider {
 
+    @Value("${jwt.secret}")
+    private String secretKey;
 
-    private final String secretKey = "my-secret-key-my-secret-key-my-secret-key";
+    @Value("${jwt.issuer}")
+    private String issuer;
 
-    private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+    private SecretKey key;
+
+    @PostConstruct
+    public void init() {
+        this.key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
     }
 
     /**토큰 유효성 검증*/
+    // (코드 리뷰: 토큰에대한 검증이 부족한 상태)
     public boolean validateToken(String token) {
         try {
-            parseClaims(token);
+            Claims claims = parseClaims(token);
+
+            // (코드 리뷰: 토큰 만료(exp) 검증)
+            if (claims.getExpiration().before(new Date())) {
+                return false;
+            }
+
+            // (코드 리뷰: 우리 시스템에서 발급한 토큰인지 검증 (issuer))
+            if (!issuer.equals(claims.getIssuer())) {
+                return false;
+            }
+
             return true;
+
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
@@ -42,7 +64,7 @@ public class JwtProvider {
     /**공통 파싱 로직*/
     private Claims parseClaims(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
+                .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
