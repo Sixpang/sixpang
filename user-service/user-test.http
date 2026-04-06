@@ -1,6 +1,6 @@
 @host = http://localhost:8080
-@userId = b8641d4c-1fe8-44d0-b194-a5ec9181ebaa
-@accessToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2OTJmZDcxMy01YzcyLTQ2M2YtYWI4Yi03ZGI1N2RiZjFjMDgiLCJpc3MiOiJzaXhwYW5nLWF1dGgiLCJyb2xlIjoiTUFTVEVSIiwiaWF0IjoxNzc1NDc0NDA3LCJleHAiOjE3NzU0NzgwMDd9.vB4yvMYk6GMMme8nom6e9i3kNWcxgya21nrOJl9t9hE
+@userId = 여기에 userid
+@accessToken = 여기에 JWT토큰
 
 # 1. 회원가입
 ### 회원가입
