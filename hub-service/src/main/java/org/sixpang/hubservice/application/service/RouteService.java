@@ -52,7 +52,7 @@ public class RouteService {
     // 특정 두 허브 간 직통 경로 조회 (거리, 시간)
     @Transactional(readOnly = true)
     @Cacheable(value = "routes", key = "'direct:' + #startHubId + ':' + #goalHubId")
-    public DirectRouteResponseDto getRouteBetween(UUID startHubId, UUID goalHubId) {
+    public DirectRouteResponseDto getDirectRoutes(UUID startHubId, UUID goalHubId) {
         Route route = routeRepository.findByDepartureHubIdAndArrivalHubIdAndDeletedAtIsNull(startHubId, goalHubId)
                 .orElseThrow(() -> new CustomException(RouteErrorCode.ROUTE_NOT_FOUND));
 
@@ -64,7 +64,7 @@ public class RouteService {
     @Cacheable(value = "routes", key = "'optimal:' + #startHubId + ':' + #goalHubId")
     public OptimalRouteResponseDto findOptimalRoute(UUID departureHubId, UUID arrivalHubId) {
 
-        // 1. 활성화된 모든 경로 조회 및 200km 미만 그래프 생성
+        // 활성화된 모든 경로 조회 및 200km 미만 그래프 생성
         List<Route> allRoutes = routeRepository.findAllByDeletedAtIsNull();
         Map<UUID, List<Route>> graph = buildGraphUnderLimit(allRoutes);
 
@@ -79,7 +79,7 @@ public class RouteService {
         shortestDistances.put(departureHubId, BigDecimal.ZERO);
         pq.add(new NodeDistance(departureHubId, BigDecimal.ZERO));
 
-        // 2. 다익스트라 탐색
+        // 다익스트라 탐색
         while (!pq.isEmpty()) {
             NodeDistance current = pq.poll();
             UUID currentHubId = current.getHubId();
@@ -105,7 +105,7 @@ public class RouteService {
             throw new CustomException(GlobalErrorCode.INVALID_REQUEST);
         }
 
-        // 3. 경로 재구성 (역추적 후 뒤집기)
+        // 경로 재구성
         List<Route> pathEdges = new ArrayList<>();
         UUID step = arrivalHubId;
         while (edgeTo.containsKey(step)) {
@@ -115,7 +115,7 @@ public class RouteService {
         }
         Collections.reverse(pathEdges);
 
-        // 4. 결과 DTO 조립
+        // 결과 DTO 조립
         BigDecimal totalDistance = BigDecimal.ZERO;
         Long totalDuration = 0L;
         List<PathResponse> pathList = new ArrayList<>();
