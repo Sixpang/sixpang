@@ -4,8 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.sixpang.userservice.application.dto.UserServiceDto;
 import org.sixpang.userservice.domain.model.entity.User;
 import org.sixpang.commonserver.enums.UserRole;
+import org.sixpang.userservice.domain.model.entity.UserStatusHistory;
 import org.sixpang.userservice.domain.model.enums.UserStatus;
 import org.sixpang.userservice.domain.repository.UserRepository;
+import org.sixpang.userservice.domain.repository.UserStatusHistoryRepository;
 import org.sixpang.userservice.exception.UserErrorCode;
 import org.sixpang.userservice.exception.UserException;
 import org.sixpang.userservice.infrastructure.client.HubServiceClient;
@@ -23,6 +25,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserStatusHistoryRepository userStatusHistoryRepository;
     private final HubServiceClient hubServiceClient;
     private final HubServiceClient companyServiceClient;
 
@@ -128,6 +131,11 @@ public class UserService {
         } else {
             throw new UserException(UserErrorCode.INVALID_STATUS);
         }
+
+        // 상태 변경 이력 저장 추가
+        userStatusHistoryRepository.save(
+                new UserStatusHistory(userId, status, null)
+        );
     }
 
     /**회원삭제**/
