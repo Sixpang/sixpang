@@ -36,40 +36,40 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         log.info("[Gateway] {} {}", method, path);
 
         // 로그인 허용
-        if (path.equals("/api/auth/login")) {
-            return chain.filter(exchange);
-        }
+        boolean isLogin = path.equals("/api/auth/login");
 
         // 회원 가입 허용
-        if (path.equals("/api/users") && HttpMethod.POST.equals(method)) {
-            return chain.filter(exchange);
-        }
+        boolean isSignUp = path.equals("/api/users") && HttpMethod.POST.equals(method);
+
+        boolean isPublic = isLogin || isSignUp;
 
         // Authorization 헤더에서 토큰 추출
         String token = resolveToken(exchange);
 
         // 토큰 없음 → 401 (이유 포함)
-        if (token == null) {
+        if (!isPublic && token == null) {
             log.warn("[Gateway] 토큰 없음");
             return unauthorized(exchange, "토큰이 없습니다");
         }
 
         // 토큰 유효성 실패 → 401 (이유 포함)
-        if (!jwtProvider.validateToken(token)) {
+        if (!isPublic && !jwtProvider.validateToken(token)) {
             log.warn("[Gateway] 유효하지 않은 토큰");
             return unauthorized(exchange, "유효하지 않은 토큰입니다");
         }
 
         // 사용자 정보 추출
-        String userId = jwtProvider.getUserId(token);
-        String role = jwtProvider.getRole(token);
+        final String userId = (token != null) ? jwtProvider.getUserId(token) : null;
+        final String role = (token != null) ? jwtProvider.getRole(token) : null;
 
         // 요청에 헤더를 추가
         ServerWebExchange mutatedExchange = exchange.mutate()
-                .request(exchange.getRequest().mutate()
-                        .header("X-User-Id", userId)
-                        .header("X-User-Role", role)
-                        .build())
+                .request(builder -> builder.headers(httpHeaders -> {
+                    if (userId != null) {
+                        httpHeaders.add("X-User-Id", userId);
+                        httpHeaders.add("X-User-Role", role);
+                    }
+                }))
                 .build();
 
         // 디버깅 로그
