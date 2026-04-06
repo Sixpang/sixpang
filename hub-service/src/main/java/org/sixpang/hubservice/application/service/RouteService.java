@@ -198,6 +198,8 @@ public class RouteService {
 
             var summary = response.route().traoptimal().get(0).summary();
 
+            BigDecimal distanceKm = BigDecimal.valueOf(summary.distance()).divide(new BigDecimal("1000"), 2, BigDecimal.ROUND_HALF_UP);
+
             Route route = Route.of(
                     start.getId(), start.getName(),
                     goal.getId(), goal.getName(),
