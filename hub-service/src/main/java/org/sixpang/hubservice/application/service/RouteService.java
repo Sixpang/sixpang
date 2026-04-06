@@ -77,77 +77,6 @@ public class RouteService {
 
         Map<UUID, List<Route>> graph = buildGraphUnderLimit(allRoutes);
 
-        /*
-        Map<UUID, BigDecimal> shortestDistances = new HashMap<>();
-        Map<UUID, Route> edgeTo = new HashMap<>(); // 지나온 Route 정보 기록
-        PriorityQueue<NodeDistance> pq = new PriorityQueue<>(Comparator.comparing(NodeDistance::getDistance));
-
-        // 초기화 시 모든 관련 노드 추가
-        allRoutes.forEach(r -> {
-            shortestDistances.put(r.getDepartureHubId(), new BigDecimal("999999.0"));
-            shortestDistances.put(r.getArrivalHubId(), new BigDecimal("999999.0"));
-        });
-
-        if (!shortestDistances.containsKey(departureHubId)) {
-            throw new CustomException(RouteErrorCode.OPTIMAL_ROUTE_NOT_FOUND);
-        }
-
-        shortestDistances.put(departureHubId, BigDecimal.ZERO);
-        pq.add(new NodeDistance(departureHubId, BigDecimal.ZERO));
-
-        // 다익스트라 탐색
-        while (!pq.isEmpty()) {
-            NodeDistance current = pq.poll();
-            UUID currentHubId = current.getHubId();
-            BigDecimal currentDist = current.getDistance();
-
-            if (currentHubId.equals(arrivalHubId)) break;
-            if (currentDist.compareTo(shortestDistances.get(currentHubId)) > 0) continue;
-
-            List<Route> edges = graph.getOrDefault(currentHubId, new ArrayList<>());
-            for (Route edge : edges) {
-                UUID neighborHubId = edge.getArrivalHubId();
-                BigDecimal newDist = currentDist.add(edge.getDistance());
-
-                if (newDist.compareTo(shortestDistances.getOrDefault(neighborHubId, new BigDecimal("999999.0"))) < 0) {
-                    shortestDistances.put(neighborHubId, newDist);
-                    edgeTo.put(neighborHubId, edge);
-                    pq.add(new NodeDistance(neighborHubId, newDist));
-                }
-            }
-        }
-
-        if (!edgeTo.containsKey(arrivalHubId)) {
-            throw new CustomException(GlobalErrorCode.INVALID_REQUEST);
-        }
-
-        // 경로 재구성
-        List<Route> pathEdges = new ArrayList<>();
-        UUID step = arrivalHubId;
-        while (edgeTo.containsKey(step)) {
-            Route edge = edgeTo.get(step);
-            pathEdges.add(edge);
-            step = edge.getDepartureHubId();
-        }
-        Collections.reverse(pathEdges);
-
-        // 결과 DTO 조립
-        BigDecimal totalDistance = BigDecimal.ZERO;
-        Long totalDuration = 0L;
-        List<PathResponse> pathList = new ArrayList<>();
-
-        int sequence = 1;
-        for (Route edge : pathEdges) {
-            totalDistance = totalDistance.add(edge.getDistance());
-            totalDuration += edge.getDuration();
-
-            // from 메서드에 sequence와 Route 엔티티만 넘김
-            pathList.add(PathResponse.from(sequence++, edge));
-        }
-
-        return OptimalRouteResponseDto.from(totalDistance, totalDuration, pathList);
-        */
-
         Map<UUID, BigDecimal> shortestDistance = new HashMap<>();
         Map<UUID, Route> previousEdge = new HashMap<>(); // 지나온 Route 정보 기록
 
@@ -240,8 +169,6 @@ public class RouteService {
         for (Hub targetHub : existingHubs) {
             createRouteOrThrow(newHub, targetHub); // 정방향
             createRouteOrThrow(targetHub, newHub); // 역방향
-            // fetchAndSaveRoute(newHub, targetHub); // 정방향
-            // fetchAndSaveRoute(targetHub, newHub); // 역방향
         }
     }
 
@@ -327,35 +254,4 @@ public class RouteService {
             throw new CustomException(RouteErrorCode.NAVER_API_RESPONSE_INVALID);
         }
     }
-
-    /*
-    // 네이버 맵 API 호출 및 Route 엔티티 저장
-    private void fetchAndSaveRoute(Hub start, Hub goal) {
-        try {
-            var response = naverMapFeignClient.getRoute(
-                    naverClientId,
-                    naverClientSecret,
-                    start.getLongitude() + "," + start.getLatitude(),
-                    goal.getLongitude() + "," + goal.getLatitude()
-            );
-
-            var summary = response.route().traoptimal().get(0).summary();
-
-            BigDecimal distanceKm = BigDecimal.valueOf(summary.distance())
-                    .divide(new BigDecimal("1000"), 2, BigDecimal.ROUND_HALF_UP);
-
-            Route route = Route.of(
-                    start.getId(), start.getName(),
-                    goal.getId(), goal.getName(),
-                    (long) summary.duration(),
-                    distanceKm
-            );
-
-            routeRepository.save(route);
-
-        } catch (Exception e) {
-            log.error("경로 생성 실패 (네이버맵 API 오류): {} -> {}", start.getName(), goal.getName(), e);
-        }
-    }
-    */
 }
