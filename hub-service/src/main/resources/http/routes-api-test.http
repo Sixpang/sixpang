@@ -1,0 +1,8 @@
+### GET 특정 허브에서 이동 가능한 경로 목록 조회 API
+GET {{root-path}}/api/hub-routes/available?departureHubId=
+
+### GET 특정 허브 간 이동 경로 조회 API
+GET {{root-path}}/api/hub-routes/direct?departureHubId=&arrivalHubId=
+
+### GET 특정 허브 간 최적의 이동 경로 조회 API
+GET {{root-path}}/api/hub-routes/optimal?departureHubId=&arrivalHubId=
