@@ -1,12 +1,14 @@
 package org.sixpang.productservice.application;
 
 import lombok.RequiredArgsConstructor;
+import org.sixpang.commonserver.global.CustomException;
 import org.sixpang.commonserver.response.PageResponse;
 import org.sixpang.productservice.application.dto.*;
 import org.sixpang.productservice.domain.model.Inventory;
 import org.sixpang.productservice.domain.model.Product;
 import org.sixpang.productservice.domain.repository.InventoryRepository;
 import org.sixpang.productservice.domain.repository.ProductRepository;
+import org.sixpang.productservice.infrastructure.exception.ProductErrorCode;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,7 +24,12 @@ public class ProductService {
     private final InventoryRepository inventoryRepository;
 
     @Transactional
-    public ProductResponse createProduct(CreateProductRequest request){
+    public ProductResponse createProduct(CreateProductRequest request) {
+
+        if (productRepository.existsByNameAndDeletedAtIsNull(request.name())) {
+            throw new CustomException(ProductErrorCode.PRODUCT_ALREADY_EXISTS);
+        }
+
         Product product = new Product(
                 request.name(),
                 request.price(),
@@ -39,9 +46,14 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductResponse updateProduct(UUID productId,UpdateProductRequest request){
+    public ProductResponse updateProduct(UUID productId, UpdateProductRequest request) {
         Product product = productRepository.findByIdAndDeletedAtIsNull(productId)
-                .orElseThrow(() -> new RuntimeException("상품을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ProductErrorCode.PRODUCT_NOT_FOUND));
+
+        if (!product.getName().equals(request.name())
+                && productRepository.existsByNameAndDeletedAtIsNull(request.name())) {
+            throw new CustomException(ProductErrorCode.PRODUCT_ALREADY_EXISTS);
+        }
 
         product.update(
                 request.name(),
@@ -54,23 +66,23 @@ public class ProductService {
     }
 
     @Transactional
-    public void deleteProduct(UUID productId){
+    public void deleteProduct(UUID productId) {
         Product product = productRepository.findByIdAndDeletedAtIsNull(productId)
-                .orElseThrow(() -> new RuntimeException("상품을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
         product.delete();
     }
 
     @Transactional(readOnly = true)
-    public ProductResponse getProduct(UUID productId){
+    public ProductResponse getProduct(UUID productId) {
         Product product = productRepository.findByIdAndDeletedAtIsNull(productId)
-                .orElseThrow(() -> new RuntimeException("상품을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
         return ProductResponse.from(product);
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<ProductResponse> getProducts(ProductSearchRequest request, Pageable pageable){
+    public PageResponse<ProductResponse> getProducts(ProductSearchRequest request, Pageable pageable) {
         Page<Product> page = productRepository.searchProducts(request, pageable);
 
         return PageResponse.from(
@@ -79,18 +91,18 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public InventoryResponse getInventory(UUID productId){
+    public InventoryResponse getInventory(UUID productId) {
         Inventory inventory = inventoryRepository.findByProductId(productId)
-                .orElseThrow(() -> new RuntimeException("재고 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ProductErrorCode.INVENTORY_NOT_FOUND));
 
         return InventoryResponse.from(inventory);
     }
 
     @Transactional
-    public InventoryResponse increaseInventory(UUID productId, Long amount){
+    public InventoryResponse increaseInventory(UUID productId, Long amount) {
 
         Inventory inventory = inventoryRepository.findByProductId(productId)
-                .orElseThrow(() -> new RuntimeException("재고 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ProductErrorCode.INVENTORY_NOT_FOUND));
 
         inventory.increase(amount);
 
@@ -98,10 +110,10 @@ public class ProductService {
     }
 
     @Transactional
-    public InventoryResponse decreaseInventory(UUID productId, Long amount){
+    public InventoryResponse decreaseInventory(UUID productId, Long amount) {
 
         Inventory inventory = inventoryRepository.findByProductId(productId)
-                .orElseThrow(() -> new RuntimeException("재고 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ProductErrorCode.INVENTORY_NOT_FOUND));
 
         inventory.decrease(amount);
 

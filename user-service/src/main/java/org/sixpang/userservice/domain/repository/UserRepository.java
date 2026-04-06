@@ -1,6 +1,7 @@
 package org.sixpang.userservice.domain.repository;
 
 import org.sixpang.userservice.domain.model.entity.User;
+import org.sixpang.userservice.domain.model.enums.UserStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -24,4 +25,6 @@ public interface UserRepository {
     boolean existsByPhoneAndIdNot(String phone, UUID id);
 
     Page<User> findAllByDeletedAtIsNull(Pageable pageable);
+
+    Page<User> findAllByStatusAndDeletedAtIsNull(UserStatus status, Pageable pageable);
 }

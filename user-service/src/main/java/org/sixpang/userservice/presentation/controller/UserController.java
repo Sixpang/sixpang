@@ -15,7 +15,7 @@ import org.sixpang.userservice.domain.model.entity.UserStatusHistory;
 import org.sixpang.userservice.domain.model.enums.UserStatus;
 import org.sixpang.userservice.exception.UserErrorCode;
 import org.sixpang.userservice.exception.UserException;
-import org.sixpang.userservice.presentation.dto.PageResponseDto;
+import org.sixpang.userservice.presentation.dto.UserPermissionInfo;
 import org.sixpang.userservice.presentation.dto.UserRequestDto;
 import org.sixpang.userservice.presentation.dto.UserResponseDto;
 import org.springframework.data.domain.Page;
@@ -23,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.sixpang.commonserver.response.PageResponse;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -128,13 +129,29 @@ public class UserController {
     }
 
     /**목록 조회**/
-    @PreAuthorize("hasRole('MASTER')")
+    @PreAuthorize("hasAnyRole('MASTER', 'HUB_MANAGER')")
     @GetMapping
-    public ResponseEntity<ApiResponse<PageResponseDto<List<UserResponseDto.UserResponse>>>> getUsers(Pageable pageable) {
+    public ResponseEntity<ApiResponse<PageResponse<UserResponseDto.UserResponse>>> getUsers(
+            @RequestParam(required = false) UserStatus status,
+            Pageable pageable,
+            @AuthenticationPrincipal UserPrincipal user
+    ) {
 
-        Page<UserInfo> users = userQueryService.getUsers(pageable);
+        UserRole role = UserRole.valueOf(user.getRole());
 
-        List<UserResponseDto.UserResponse> content =
+        if (status == null && role != UserRole.MASTER) {
+            throw new UserException(UserErrorCode.FORBIDDEN);
+        }
+
+        Page<UserInfo> users;
+
+        if (status != null) {
+            users = userQueryService.getUsersByStatus(status, pageable);
+        } else {
+            users = userQueryService.getUsers(pageable);
+        }
+
+        Page<UserResponseDto.UserResponse> response =
                 users.map(dto -> new UserResponseDto.UserResponse(
                         dto.getId(),
                         dto.getEmail(),
@@ -142,20 +159,10 @@ public class UserController {
                         dto.getPhone(),
                         dto.getRole().name(),
                         dto.getStatus().name()
-                )).getContent();
-
-        PageResponseDto<List<UserResponseDto.UserResponse>> response =
-                new PageResponseDto<>(
-                        content,
-                        new PageResponseDto.Meta(
-                                users.getTotalElements(),
-                                users.getTotalPages(),
-                                users.getNumber()
-                        )
-                );
+                ));
 
         return ResponseEntity.ok(
-                ApiResponse.of("회원 목록 조회 성공", response)
+                ApiResponse.of("회원 목록 조회 성공", PageResponse.from(response))
         );
     }
 
@@ -319,13 +326,26 @@ public class UserController {
         );
     }
 
-    /** 이메일 조회 **/
+    /** 이메일 조회 (feign client) **/
     @GetMapping("/email")
     public ResponseEntity<ApiResponse<AuthUser>> getUserByEmail(
             @RequestParam String email
     ) {
         return ResponseEntity.ok(
                 ApiResponse.of("조회 성공", userQueryService.getUserByEmail(email))
+        );
+    }
+
+    /**HubId(),CompanyId() 정보 (feign client)**/
+    @GetMapping("/internal/{id}")
+    public UserPermissionInfo getUserPermissionInfo(@PathVariable("id") UUID id) {
+        UserDetail dto = userQueryService.getUser(id);
+
+        return new UserPermissionInfo(
+                dto.getId(),
+                dto.getRole().name(),
+                dto.getHubId(),
+                dto.getCompanyId()
         );
     }
 }

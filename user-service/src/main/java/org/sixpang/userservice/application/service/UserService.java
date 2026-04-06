@@ -10,6 +10,7 @@ import org.sixpang.userservice.domain.repository.UserRepository;
 import org.sixpang.userservice.domain.repository.UserStatusHistoryRepository;
 import org.sixpang.userservice.exception.UserErrorCode;
 import org.sixpang.userservice.exception.UserException;
+import org.sixpang.userservice.infrastructure.client.CompanyServiceClient;
 import org.sixpang.userservice.infrastructure.client.HubServiceClient;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserStatusHistoryRepository userStatusHistoryRepository;
     private final HubServiceClient hubServiceClient;
-    private final HubServiceClient companyServiceClient;
+    private final CompanyServiceClient companyServiceClient;
 
 
     /**회원 가입**/
@@ -39,9 +40,8 @@ public class UserService {
         //허브id 나 업체id 둘중에 하나는 입력해야함
         validateRoleTarget(dto);
 
-        // TODO: 허브 서비스 연동 후 활성화
-        // - hub-service exists API 호출
-        // - 존재하지 않으면 INVALID_HUB 예외
+        // TODO: 업체, 허브 서비스 연동 후 활성화
+        // 허브 존재 여부 검증(허브가 존재하지 않으면 예외처리)
         /*
         if (dto.getHubId() != null) {
             boolean exists = hubServiceClient.exists(dto.getHubId());
@@ -53,18 +53,15 @@ public class UserService {
         }
         */
 
-        // TODO: 업체 서비스 연동 후 활성화
-        // - company-service exists API 호출
-        // - 존재하지 않으면 INVALID_COMPANY 예외
-        /*
-        if (dto.getCompanyId() != null) {
+
+        // 업체 존재 여부 검증 (업체가 존재하지 않으면 예외처리)
+         /* if (dto.getCompanyId() != null) {
             boolean exists = companyServiceClient.exists(dto.getCompanyId());
 
             if (!exists) {
                 throw new UserException(UserErrorCode.INVALID_COMPANY);
             }
-        }
-        */
+        }*/
 
         // 비밀 번호 암호화
         String encodedPassword = passwordEncoder.encode(dto.getPassword());
