@@ -1,14 +1,10 @@
 package org.sixpang.orderservice.application.event;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import java.util.UUID;
 
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor
-public class OrderCreatedEvent {
-    private String orderId;
-    private String userId;
-    private int quantity;
+public record OrderCreatedEvent(
+        UUID orderId,
+        UUID supplierId,
+        UUID receiverId
+) {
 }
