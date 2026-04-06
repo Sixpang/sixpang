@@ -16,7 +16,7 @@ public class DirectRouteResponseDto {
     private Long duration;
     private BigDecimal distance;
 
-    private static DirectRouteResponseDto from(Route route){
+    public static DirectRouteResponseDto from(Route route){
         return DirectRouteResponseDto.builder()
                 .duration(route.getDuration())
                 .distance(route.getDistance())

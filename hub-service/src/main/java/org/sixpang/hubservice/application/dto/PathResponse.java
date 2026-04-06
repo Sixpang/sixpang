@@ -20,7 +20,7 @@ public class PathResponse {
     private BigDecimal distance;
     private Long duration;
 
-    private static PathResponse from(int sequence, Route route){
+    public static PathResponse from(int sequence, Route route){
         return PathResponse.builder()
                 .sequence(sequence)
                 .departureHubId(route.getDepartureHubId())

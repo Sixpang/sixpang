@@ -17,7 +17,7 @@ public class OptimalRouteResponseDto {
     private Long totalDuration;
     private List<PathResponse> pathList;
 
-    private static OptimalRouteResponseDto from(BigDecimal totalDistance, Long totalDuration, List<PathResponse> pathList){
+    public static OptimalRouteResponseDto from(BigDecimal totalDistance, Long totalDuration, List<PathResponse> pathList){
         return OptimalRouteResponseDto.builder()
                 .totalDistance(totalDistance)
                 .totalDuration(totalDuration)
