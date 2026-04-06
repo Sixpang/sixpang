@@ -55,18 +55,27 @@ public class RouteService {
 
     // 특정 두 허브 간 직통 경로 조회 (거리, 시간)
     @Transactional(readOnly = true)
-    @Cacheable(value = "routes", key = "'direct:' + #startHubId + ':' + #goalHubId")
-    public DirectRouteResponseDto getDirectRoutes(UUID startHubId, UUID goalHubId) {
-        Route route = routeRepository.findByDepartureHubIdAndArrivalHubIdAndDeletedAtIsNull(startHubId, goalHubId)
+    @Cacheable(value = "routes", key = "'direct:' + #departureHubId + ':' + #arrivalHubId")
+    public DirectRouteResponseDto getDirectRoutes(UUID departureHubId, UUID arrivalHubId) {
+        Route route = routeRepository.findByDepartureHubIdAndArrivalHubIdAndDeletedAtIsNull(departureHubId, arrivalHubId)
                 .orElseThrow(() -> new CustomException(RouteErrorCode.DIRECT_ROUTE_NOT_FOUND));
+
+        HubPair hubs = hubValidator.validateAndGetActiveHubs(departureHubId, arrivalHubId);
 
         return DirectRouteResponseDto.from(route);
     }
 
-    // 최적 이동 경로 조회 (다익스트라 : 200km 제약 조건)
+    /**
+     * 최적 경로 조회
+     * - 다익스트라 알고리즘 기반
+     * - 200km 제약 조건
+     */
     @Transactional(readOnly = true)
-    @Cacheable(value = "routes", key = "'optimal:' + #startHubId + ':' + #goalHubId")
+    @Cacheable(value = "routes", key = "'optimal:' + #departureHubId + ':' + #arrivalHubId")
     public OptimalRouteResponseDto findOptimalRoute(UUID departureHubId, UUID arrivalHubId) {
+        if (departureHubId.equals(arrivalHubId)) {
+            throw new CustomException(RouteErrorCode.SAME_HUB);
+        }
 
         // 활성화된 모든 경로 조회 및 200km 미만 그래프 생성
         List<Route> allRoutes = routeRepository.findAllByDeletedAtIsNull();
@@ -75,6 +84,17 @@ public class RouteService {
             throw new CustomException(RouteErrorCode.OPTIMAL_ROUTE_NOT_FOUND);
         }
 
+        Hub departureHub = hubRepository.findByIdAndDeletedAtIsNull(departureHubId)
+                .orElseThrow(() -> new CustomException(HubErrorCode.HUB_NOT_FOUND));
+
+        Hub arrivalHub = hubRepository.findByIdAndDeletedAtIsNull(arrivalHubId)
+                .orElseThrow(() -> new CustomException(HubErrorCode.HUB_NOT_FOUND));
+
+        if (!departureHub.isActive() || !arrivalHub.isActive()) {
+            throw new CustomException(HubErrorCode.HUB_NOT_ACTIVE);
+        }
+
+        // 그래프 생성
         Map<UUID, List<Route>> graph = buildGraphUnderLimit(allRoutes);
 
         Map<UUID, BigDecimal> shortestDistance = new HashMap<>();
@@ -172,7 +192,7 @@ public class RouteService {
         }
     }
 
-    // 특정 허브 비활성화/삭제 시 관련 경로 삭제
+    // 특정 허브 삭제 시 관련 경로 삭제
     @Transactional
     @CacheEvict(value = "routes", allEntries = true)
     public void disableRoutesForHub(UUID hubId, UUID userId) {
@@ -192,6 +212,7 @@ public class RouteService {
         return graph;
     }
 
+    // 다익스트라용 노드 클래스
     private static class NodeDistance {
         private final UUID hubId;
         private final BigDecimal distance;

@@ -63,6 +63,11 @@ public class Hub extends BaseEntity {
                 .build();
     }
 
+    // 운영 상태 검증
+    public boolean isActive() {
+        return this.status == HubStatus.ACTIVE;
+    }
+
     // 정보 수정
     public void updateInfo(String name, String address, BigDecimal latitude, BigDecimal longitude, HubStatus status) {
         this.name = name;
