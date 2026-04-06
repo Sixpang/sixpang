@@ -1,4 +1,4 @@
-package org.sixpang.orderservice.infrastructure.kafka.clients;
+package org.sixpang.orderservice.infrastructure.kafka.clients.producer;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;

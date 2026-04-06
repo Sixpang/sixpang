@@ -1,4 +1,4 @@
-package org.sixpang.orderservice.infrastructure.kafka.clients;
+package org.sixpang.orderservice.infrastructure.kafka.clients.producer;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
