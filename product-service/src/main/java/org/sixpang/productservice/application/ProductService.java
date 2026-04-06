@@ -1,11 +1,11 @@
 package org.sixpang.productservice.application;
 
 import lombok.RequiredArgsConstructor;
-import org.sixpang.productservice.application.dto.CreateProductRequest;
-import org.sixpang.productservice.application.dto.ProductResponse;
-import org.sixpang.productservice.application.dto.ProductSearchRequest;
-import org.sixpang.productservice.application.dto.UpdateProductRequest;
+import org.sixpang.commonserver.response.PageResponse;
+import org.sixpang.productservice.application.dto.*;
+import org.sixpang.productservice.domain.model.Inventory;
 import org.sixpang.productservice.domain.model.Product;
+import org.sixpang.productservice.domain.repository.InventoryRepository;
 import org.sixpang.productservice.domain.repository.ProductRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +19,7 @@ import java.util.UUID;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final InventoryRepository inventoryRepository;
 
     @Transactional
     public ProductResponse createProduct(CreateProductRequest request){
@@ -30,6 +31,9 @@ public class ProductService {
         );
 
         Product savedProduct = productRepository.save(product);
+
+        Inventory inventory = new Inventory(savedProduct.getId());
+        inventoryRepository.save(inventory);
 
         return ProductResponse.from(savedProduct);
     }
@@ -66,8 +70,43 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ProductResponse> getProducts(ProductSearchRequest request, Pageable pageable){
-        return productRepository.searchProducts(request, pageable)
-                .map(ProductResponse::from);
+    public PageResponse<ProductResponse> getProducts(ProductSearchRequest request, Pageable pageable){
+        Page<Product> page = productRepository.searchProducts(request, pageable);
+
+        return PageResponse.from(
+                page.map(ProductResponse::from)
+        );
     }
+
+    @Transactional(readOnly = true)
+    public InventoryResponse getInventory(UUID productId){
+        Inventory inventory = inventoryRepository.findByProductId(productId)
+                .orElseThrow(() -> new RuntimeException("재고 정보를 찾을 수 없습니다."));
+
+        return InventoryResponse.from(inventory);
+    }
+
+    @Transactional
+    public InventoryResponse increaseInventory(UUID productId, Long amount){
+
+        Inventory inventory = inventoryRepository.findByProductId(productId)
+                .orElseThrow(() -> new RuntimeException("재고 정보를 찾을 수 없습니다."));
+
+        inventory.increase(amount);
+
+        return InventoryResponse.from(inventory);
+    }
+
+    @Transactional
+    public InventoryResponse decreaseInventory(UUID productId, Long amount){
+
+        Inventory inventory = inventoryRepository.findByProductId(productId)
+                .orElseThrow(() -> new RuntimeException("재고 정보를 찾을 수 없습니다."));
+
+        inventory.decrease(amount);
+
+        return InventoryResponse.from(inventory);
+    }
+
+
 }
