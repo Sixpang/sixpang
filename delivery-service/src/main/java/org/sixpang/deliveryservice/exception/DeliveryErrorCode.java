@@ -25,6 +25,7 @@ public enum DeliveryErrorCode implements ErrorCode {
     MANAGER_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "배송 담당자 정원이 초과되었습니다."),
     HUB_ID_REQUIRED(HttpStatus.BAD_REQUEST, "업체 배송 담당자는 허브 ID가 필수입니다."),
     MANAGER_NOT_AVAILABLE(HttpStatus.BAD_REQUEST, "현재 배송 가능한 담당자가 아닙니다."),
+    UNSUPPORTED_TYPE(HttpStatus.BAD_REQUEST, "담당자 타입이 지정되지 않았습니다."),
 
     // [409 CONFLICT] 중복 및 데이터 충돌
     ALREADY_EXISTS_MANAGER(HttpStatus.CONFLICT, "이미 배송 담당자로 등록된 사용자입니다."),

@@ -16,7 +16,6 @@ import org.sixpang.deliveryservice.domain.repository.HubDeliveryManagerRepositor
 import org.sixpang.deliveryservice.exception.DeliveryErrorCode;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,98 +26,73 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Transactional
 public class DeliveryManagerService {
-    private final RedisTemplate<String, String> redisTemplate;
-    private static final String REDIS_HUB_KEY_PREFIX = "delivery:managers:hub:";
 
     private final HubDeliveryManagerRepository hubDeliveryManagerRepository;
     private final CompanyDeliveryManagerRepository companyDeliveryManagerRepository;
     private final DeliveryUserClient deliveryUserClient;
     private final DeliveryHubClient deliveryHubClient;
 
+    private final List<DeliveryManagerStrategy> strategies;
+    private final DeliveryManagerAssigner assigner; // DIP 적용된 배정 인터페이스
+
     private static final int HUB_MANAGER_TOTAL_MAX = 10;
     private static final int COMPANY_MANAGER_PER_HUB_MAX = 10;
 
-    //배송 담당자 생성
-    //수정예약:role부분 인증/인가 처리되면 수정하기
     public DeliveryManagerResponse create(DeliveryManagerCreateRequest request, String role, UUID requestUserId) {
         validateCreatePermission(role, request.type());
-
         validateUserExists(request.userId());
 
         if (hubDeliveryManagerRepository.existsByUserId(request.userId()) ||
                 companyDeliveryManagerRepository.existsByUserId(request.userId())) {
             throw new CustomException(DeliveryErrorCode.ALREADY_EXISTS_MANAGER);
         }
-        return request.type() == DeliveryManagerType.HUB
-                ? createHubManager(request)
-                : createCompanyManager(request);
+
+        if (request.type() == DeliveryManagerType.HUB) {
+            return createHubManager(request);
+        }
+        return createCompanyManager(request);
     }
 
-    //허브 배송 담당자 생성
     private DeliveryManagerResponse createHubManager(DeliveryManagerCreateRequest request) {
-        if (hubDeliveryManagerRepository.countByDeletedAtIsNull() >= HUB_MANAGER_TOTAL_MAX)
+        if (isHubManagerLimitExceeded())
             throw new CustomException(DeliveryErrorCode.MANAGER_LIMIT_EXCEEDED);
 
         HubDeliveryManager manager = HubDeliveryManager.create(request.userId());
         return DeliveryManagerResponse.fromHub(hubDeliveryManagerRepository.save(manager));
     }
 
-    //업체 배송 담당자 생성
     private DeliveryManagerResponse createCompanyManager(DeliveryManagerCreateRequest request) {
         if (request.hubId() == null)
             throw new CustomException(DeliveryErrorCode.HUB_ID_REQUIRED);
 
         validateHubExists(request.hubId());
-
-        if (companyDeliveryManagerRepository.countByHubIdAndDeletedAtIsNull(request.hubId()) >= COMPANY_MANAGER_PER_HUB_MAX) {
+        if (isCompanyManagerLimitExceeded(request.hubId()))
             throw new CustomException(DeliveryErrorCode.MANAGER_LIMIT_EXCEEDED);
-        }
 
         CompanyDeliveryManager manager = CompanyDeliveryManager.create(request.userId(), request.hubId());
         return DeliveryManagerResponse.fromCompany(companyDeliveryManagerRepository.save(manager));
     }
 
-    //조회
     @Transactional(readOnly = true)
     public DeliveryManagerResponse getById(UUID managerId, DeliveryManagerType type, String role, UUID requestUserId) {
+        DeliveryManagerStrategy strategy = findStrategy(type);
+        DeliveryManagerResponse response = strategy.get(managerId);
 
-        if (type == DeliveryManagerType.HUB) {
-            HubDeliveryManager manager = findHubManagerOrThrow(managerId);
-            validateReadPermission(role, requestUserId, manager.getUserId());
-            return DeliveryManagerResponse.fromHub(manager);
-        } else {
-            CompanyDeliveryManager manager = findCompanyManagerOrThrow(managerId);
-            validateReadPermission(role, requestUserId, manager.getUserId());
-            return DeliveryManagerResponse.fromCompany(manager);
-        }
+        validateReadPermission(role, requestUserId, response.userId());
+        return response;
     }
 
-    //목록 조회
-    @Transactional(readOnly = true)
-    public Page<DeliveryManagerResponse> search(DeliveryManagerSearchCondition condition, Pageable pageable, String role, UUID requestUserId) {
-        throw new UnsupportedOperationException("예외");
-    }
-
-    //배송 담당자 수정
     public DeliveryManagerResponse update(UUID managerId, DeliveryManagerType type,
                                           DeliveryManagerUpdateRequest request,
                                           String role, UUID requestUserId, UUID requestHubId) {
-        //==================================================================================================
-        if (type == DeliveryManagerType.HUB) {
-            HubDeliveryManager manager = findHubManagerOrThrow(managerId);
-            validateModifyPermission(role, requestUserId, requestHubId, null);
-            if (request.status() != null) manager.updateStatus(request.status());
-            return DeliveryManagerResponse.fromHub(hubDeliveryManagerRepository.save(manager));
-
-        } else {
-            CompanyDeliveryManager manager = findCompanyManagerOrThrow(managerId);
-            validateModifyPermission(role, requestUserId, requestHubId, manager.getHubId());
-            if (request.status() != null) manager.updateStatus(request.status());
-            return DeliveryManagerResponse.fromCompany(companyDeliveryManagerRepository.save(manager));
-        }
+        return findStrategy(type).update(managerId, request, role, requestUserId, requestHubId);
     }
 
-    //삭제
+    @Transactional(readOnly = true)
+    public Page<DeliveryManagerResponse> search(DeliveryManagerSearchCondition condition, Pageable pageable, String role, UUID requestUserId) {
+        return findStrategy(condition.type()).search(condition, pageable, role, requestUserId);
+    }
+
     public void delete(UUID managerId, DeliveryManagerType type,
                        String role, UUID requestUserId, UUID requestHubId) {
         if (type == DeliveryManagerType.HUB) {
@@ -134,77 +108,59 @@ public class DeliveryManagerService {
         }
     }
 
+    private DeliveryManagerStrategy findStrategy(DeliveryManagerType type) {
+        return this.strategies.stream()
+                .filter(s -> s.supports(type))
+                .findFirst()
+                .orElseThrow(() -> new CustomException(DeliveryErrorCode.UNSUPPORTED_TYPE));
+    }
+
+    // --- 배송 담당자 배정 로직 (전략 패턴 & DIP 적용) ---
+
     public HubDeliveryManager assignHubManager() {
-        // 실제로는 '전체 허브 담당자' 키를 사용하거나 로직에 맞게 키를 정하세요.
-        String redisKey = REDIS_HUB_KEY_PREFIX + "all";
+        String key = "delivery:hub:all";
 
-        // 1. Redis에서 순서대로 ID 하나 가져오기 (오른쪽에서 꺼내서 왼쪽으로 다시 넣음 -> 순환)
-        String managerIdStr = redisTemplate.opsForList()
-                .rightPopAndLeftPush(redisKey, redisKey);
+        String id = assigner.getNextIdWithRotation(key)
+                .orElseGet(() -> {
+                    refreshHubCache(key);
+                    return assigner.getNextIdWithRotation(key)
+                            .orElseThrow(() -> new CustomException(DeliveryErrorCode.MANAGER_NOT_FOUND));
+                });
 
-        if (managerIdStr == null) {
-            // Redis에 데이터가 없으면 DB에서 WAIT 상태인 애들을 긁어와서 채워주는 로직이 필요함
-            refreshRedisCache(redisKey);
-            managerIdStr = redisTemplate.opsForList().rightPopAndLeftPush(redisKey, redisKey);
-
-            if (managerIdStr == null) throw new CustomException(DeliveryErrorCode.MANAGER_NOT_FOUND);
-        }
-
-        // 2. DB에서 엔티티 조회 및 상태 변경
-        HubDeliveryManager manager = hubDeliveryManagerRepository.findById(UUID.fromString(managerIdStr))
+        HubDeliveryManager manager = hubDeliveryManagerRepository.findById(UUID.fromString(id))
                 .orElseThrow(() -> new CustomException(DeliveryErrorCode.MANAGER_NOT_FOUND));
 
         manager.updateStatus(DeliveryManagerStatus.ON_TASK);
-        return hubDeliveryManagerRepository.save(manager);
-    }
-
-    // Redis 캐시가 비었을 때 DB 데이터로 채워주는 헬퍼 메서드
-    private void refreshRedisCache(String key) {
-        List<HubDeliveryManager> waiters = hubDeliveryManagerRepository.findAllByStatus(DeliveryManagerStatus.WAIT);
-        for (HubDeliveryManager m : waiters) {
-            redisTemplate.opsForList().leftPush(key, m.getId().toString());
-        }
+        return manager;
     }
 
     public CompanyDeliveryManager assignCompanyManager(UUID hubId) {
-        String redisKey = "delivery:managers:company:" + hubId.toString();
+        String key = "delivery:company:" + hubId;
 
-        //Redis에서 담당자 ID 하나를 완전히 꺼내기 (RPOPLPUSH 대신 rightPop 사용)
-        //배정된 사람은 다시 큐에 넣지 않아야 다른 사람이 배정
-        String managerIdStr = redisTemplate.opsForList().rightPop(redisKey);
+        String id = assigner.getNextId(key)
+                .orElseGet(() -> {
+                    refreshCompanyCache(hubId, key);
+                    return assigner.getNextId(key)
+                            .orElseThrow(() -> new CustomException(DeliveryErrorCode.MANAGER_LIMIT_EXCEEDED));
+                });
 
-        //Redis가 비어있다면 DB에서 해당 허브의 'WAIT' 상태인 담당자들을 로딩
-        if (managerIdStr == null) {
-            List<CompanyDeliveryManager> managers = companyDeliveryManagerRepository
-                    .findAllByHubIdAndStatus(hubId, DeliveryManagerStatus.WAIT);
-
-            if (managers.isEmpty()) {
-                throw new CustomException(DeliveryErrorCode.MANAGER_LIMIT_EXCEEDED);
-            }
-
-            //DB에서 가져온 대기자들 Redis에서 넣기
-            for (CompanyDeliveryManager m : managers) {
-                redisTemplate.opsForList().leftPush(redisKey, m.getId().toString());
-            }
-
-            //적재 후 다시 하나 꺼내기
-            managerIdStr = redisTemplate.opsForList().rightPop(redisKey);
-        }
-
-        //DB 상태 업데이트 및 반환
-        CompanyDeliveryManager manager = findCompanyManagerOrThrow(UUID.fromString(managerIdStr));
-
-        //이미 업무 중인지 한 번 더 검증
-        if (manager.getStatus() != DeliveryManagerStatus.WAIT) {
-            //만약 누군가 가로챘다면 재귀 호출로 다음 사람 찾기
-            return assignCompanyManager(hubId);
-        }
+        CompanyDeliveryManager manager = companyDeliveryManagerRepository.findById(UUID.fromString(id))
+                .orElseThrow(() -> new CustomException(DeliveryErrorCode.MANAGER_NOT_FOUND));
 
         manager.updateStatus(DeliveryManagerStatus.ON_TASK);
-        return companyDeliveryManagerRepository.save(manager);
+        return manager;
     }
 
-    //외부 서비스 검증
+    // --- 내부 검증 및 헬퍼 메서드 ---
+
+    private boolean isHubManagerLimitExceeded() {
+        return hubDeliveryManagerRepository.countByDeletedAtIsNull() >= HUB_MANAGER_TOTAL_MAX;
+    }
+
+    private boolean isCompanyManagerLimitExceeded(UUID hudId) {
+        return companyDeliveryManagerRepository.countByHubIdAndDeletedAtIsNull(hudId) >= COMPANY_MANAGER_PER_HUB_MAX;
+    }
+
     private void validateUserExists(UUID userId) {
         try {
             deliveryUserClient.checkExists(userId);
@@ -221,7 +177,32 @@ public class DeliveryManagerService {
         }
     }
 
-    //권한 검증
+    private void refreshHubCache(String key) {
+        List<HubDeliveryManager> waiters = hubDeliveryManagerRepository.findAllByStatus(DeliveryManagerStatus.WAIT);
+        List<String> ids = waiters.stream()
+                .map(m -> m.getId().toString())
+                .toList();
+
+        if (ids.isEmpty()) {
+            throw new CustomException(DeliveryErrorCode.MANAGER_NOT_FOUND);
+        }
+
+        assigner.refreshCache(key, ids);
+    }
+
+    private void refreshCompanyCache(UUID hubId, String key) {
+        List<CompanyDeliveryManager> waiters = companyDeliveryManagerRepository.findAllByHubIdAndStatus(hubId, DeliveryManagerStatus.WAIT);
+        List<String> ids = waiters.stream()
+                .map(m -> m.getId().toString())
+                .toList();
+
+        if (ids.isEmpty()) {
+            throw new CustomException(DeliveryErrorCode.MANAGER_LIMIT_EXCEEDED);
+        }
+
+        assigner.refreshCache(key, ids);
+    }
+
     private void validateCreatePermission(String role, DeliveryManagerType type) {
         if ("MASTER".equals(role)) return;
         if ("HUB_MANAGER".equals(role) && type == DeliveryManagerType.COMPANY) return;
@@ -243,7 +224,6 @@ public class DeliveryManagerService {
         throw new CustomException(DeliveryErrorCode.ACCESS_DENIED);
     }
 
-    //공통 조회
     private HubDeliveryManager findHubManagerOrThrow(UUID id) {
         return hubDeliveryManagerRepository.findById(id)
                 .orElseThrow(() -> new CustomException(DeliveryErrorCode.MANAGER_NOT_FOUND));
