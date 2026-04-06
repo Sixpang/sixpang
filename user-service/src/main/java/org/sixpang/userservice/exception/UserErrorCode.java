@@ -17,7 +17,10 @@ public enum UserErrorCode implements ErrorCode {
     CANNOT_APPROVE(HttpStatus.BAD_REQUEST, "승인할 수 없는 상태입니다."),
     CANNOT_REJECT(HttpStatus.BAD_REQUEST, "거절할 수 없는 상태입니다."),
 
-    FORBIDDEN(HttpStatus.FORBIDDEN, "접근 권한이 없습니다.");
+    FORBIDDEN(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
+
+    INVALID_AFFILIATION_REQUIRED(HttpStatus.BAD_REQUEST, "허브 또는 업체 중 하나는 반드시 선택해야 합니다."),
+    INVALID_AFFILIATION_DUPLICATE(HttpStatus.BAD_REQUEST, "허브와 업체를 동시에 선택할 수 없습니다.");
 
     private final HttpStatus status;
     private final String message;

@@ -25,3 +25,4 @@ public interface OrderService {
 
     void deleteOrder(UUID orderId, UUID deletedBy);
 }
+

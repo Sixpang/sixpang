@@ -20,6 +20,8 @@ dependencies {
 
     // FeignClient
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+
+    implementation 'org.springframework.boot:spring-boot-starter-security'
 }
 
 ext {
@@ -29,9 +31,6 @@ ext {
 dependencyManagement {
     imports {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-
-        // FeignClient
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:2023.0.1"
     }
 }
 
