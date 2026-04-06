@@ -2,16 +2,13 @@ package org.sixpang.orderservice.presentation.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.sixpang.commonserver.global.CustomException;
+import org.sixpang.commonserver.response.ApiResponse;
+import org.sixpang.commonserver.response.PageResponse;
 import org.sixpang.orderservice.application.service.OrderService;
-import org.sixpang.orderservice.exception.OrderErrorCode;
 import org.sixpang.orderservice.presentation.dto.CreateOrderRequest;
 import org.sixpang.orderservice.presentation.dto.OrderDetailResponse;
-import org.sixpang.orderservice.presentation.dto.OrderPageResponse;
+import org.sixpang.orderservice.presentation.dto.OrderResponse;
 import org.sixpang.orderservice.presentation.dto.UpdateOrderRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,82 +21,94 @@ public class OrderController {
 
     private final OrderService orderService;
 
-    // 주문 생성
+    // 주문 생성 - 모든 로그인 사용자
     @PostMapping
-    public ResponseEntity<OrderDetailResponse> createOrder(
-            @RequestHeader("X-User-Id") UUID userId,
+    public ResponseEntity<ApiResponse<OrderDetailResponse>> createOrder(
+            @AuthenticationPrincipal UserPrincipal user,
             @Valid @RequestBody CreateOrderRequest request
     ) {
-        return ResponseEntity.ok(orderService.createOrder(request));
+        return ResponseEntity.ok(
+                ApiResponse.of("주문 생성 성공", orderService.createOrder(request))
+        );
     }
 
-    // 주문 단건
+    // 주문 단건 조회 - 모든 로그인 사용자
     @GetMapping("/{orderId}")
-    public ResponseEntity<OrderDetailResponse> getOrder(
-            @RequestHeader("X-User-Id") UUID userId,
+    public ResponseEntity<ApiResponse<OrderDetailResponse>> getOrder(
+            @AuthenticationPrincipal UserPrincipal user,
             @PathVariable UUID orderId
     ) {
-        return ResponseEntity.ok(orderService.getOrder(orderId));
+        return ResponseEntity.ok(
+                ApiResponse.of("주문 단건 조회 성공", orderService.getOrder(orderId))
+        );
     }
 
-    // 주문 전체 목록 조회 -> 마스터만
+    // 전체 목록 조회 - MASTER만
     @GetMapping
-    public ResponseEntity<OrderPageResponse> getOrders(
-            @RequestHeader("X-User-Id") String role,
-            @PageableDefault(size = 10,
-                    sort = "createdAt",
-                    direction = Sort.Direction.DESC) Pageable pageable
+    @PreAuthorize("hasRole('MASTER')")
+    public ResponseEntity<ApiResponse<PageResponse<OrderResponse>>> getOrders(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir
     ) {
-        if (!"MASTER".equals(role)) {
-            throw new CustomException(OrderErrorCode.ORDER_FORBIDDEN);
-        }
-        return ResponseEntity.ok(orderService.getOrders(pageable));
+        return ResponseEntity.ok(
+                ApiResponse.of("주문 전체 목록 조회 성공",
+                        orderService.getOrders(page, size, sortBy, sortDir))
+        );
     }
 
     // 공급 업체별 주문 목록 조회
-    @GetMapping("/supllier/{supplierId}")
-    public ResponseEntity<OrderPageResponse> getOrdersBySupplierId(
-            @RequestHeader("X-User-Id") UUID userId,
+    @GetMapping("/supplier/{supplierId}")
+    public ResponseEntity<ApiResponse<PageResponse<OrderResponse>>> getOrdersBySupplierId(
+            @AuthenticationPrincipal UserPrincipal user,
             @PathVariable UUID supplierId,
-            @PageableDefault(size = 10,
-                    sort = "createdAt",
-                    direction = Sort.Direction.DESC) Pageable pageable
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir
     ) {
-        return ResponseEntity.ok(orderService.getOrdersBySupplierId(supplierId, pageable));
+        return ResponseEntity.ok(
+                ApiResponse.of("공급업체별 주문 조회 성공",
+                        orderService.getOrdersBySupplierId(supplierId, page, size, sortBy, sortDir))
+        );
     }
 
     // 수령 업체별 주문 목록 조회
     @GetMapping("/receiver/{receiverId}")
-    public ResponseEntity<OrderPageResponse> getOrdersByReceiverId(
-            @RequestHeader("X-User-Id") UUID userId,
+    public ResponseEntity<ApiResponse<PageResponse<OrderResponse>>> getOrdersByReceiverId(
+            @AuthenticationPrincipal UserPrincipal user,
             @PathVariable UUID receiverId,
-            @PageableDefault(size = 10,
-                    sort = "createdAt",
-                    direction = Sort.Direction.DESC) Pageable pageable
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir
     ) {
-        return ResponseEntity.ok(orderService.getOrdersByReceiverId(receiverId, pageable));
+        return ResponseEntity.ok(
+                ApiResponse.of("수령업체별 주문 조회 성공",
+                        orderService.getOrdersByReceiverId(receiverId, page, size, sortBy, sortDir))
+        );
     }
 
     // 주문 수정
     @PatchMapping("/{orderId}")
-    public ResponseEntity<OrderDetailResponse> updateOrders(
-            @RequestHeader("X-User-Id") UUID userId,
+    public ResponseEntity<ApiResponse<OrderDetailResponse>> updateOrder(
+            @AuthenticationPrincipal UserPrincipal user,
             @PathVariable UUID orderId,
             @Valid @RequestBody UpdateOrderRequest request
     ) {
-        return ResponseEntity.ok(orderService.updateOrder(orderId, request));
+        return ResponseEntity.ok(
+                ApiResponse.of("주문 수정 성공", orderService.updateOrder(orderId, request))
+        );
     }
 
     // 주문 삭제
     @DeleteMapping("/{orderId}")
-    public ResponseEntity<Void> deleteOrder(
-            @PathVariable UUID orderId,
-            @RequestHeader("X-User-Id") UUID deletedBy
-            // 게이트웨이에서 헤더로 넘겨주는 유저 ID
+    public ResponseEntity<ApiResponse<Void>> deleteOrder(
+            @AuthenticationPrincipal UserPrincipal user,
+            @PathVariable UUID orderId
     ) {
-        orderService.deleteOrder(orderId, deletedBy);
-        return ResponseEntity.noContent().build(); // 204 No Content
+        orderService.deleteOrder(orderId, user.getUserId());
+        return ResponseEntity.ok(ApiResponse.of("주문 삭제 성공", null));
     }
-
-
 }

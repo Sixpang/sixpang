@@ -9,7 +9,8 @@ import org.sixpang.orderservice.domain.repository.OrderRepository;
 import org.sixpang.orderservice.exception.OrderErrorCode;
 import org.sixpang.orderservice.exception.OrderException;
 import org.sixpang.orderservice.infrastructure.client.ProductClient;
-import org.sixpang.orderservice.infrastructure.client.ProductStockResponse;
+import org.sixpang.orderservice.infrastructure.client.dto.InventoryResponse;
+import org.sixpang.orderservice.infrastructure.client.dto.UpdateInventoryRequest;
 import org.sixpang.orderservice.presentation.dto.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -33,47 +34,21 @@ public class OrderServiceImpl implements OrderService {
     @Transactional // 쓰기 작업
     public OrderDetailResponse createOrder(CreateOrderRequest request) {
 
-        // total_price 계산
         BigDecimal totalPrice = BigDecimal.ZERO;
-        List<OrderItem> orderItems = new ArrayList<>();
 
-        // 재고 확인 + totalPrice 계산
-        for (OrderItemRequest itemRequest : request.getOrderItems()) {
-
-            // 수량 검증
-            if (itemRequest.getCount() < 1) {
-                throw new CustomException(OrderErrorCode.ORDER_INVALID_QUANTITY);
-            }
-
-            // 상품 서비스에서 재고 확인 (FeignClient)
-            ProductStockResponse product;
+        // 재고 확인
+        for (OrderItemRequest item : request.getOrderItems()) {
+            InventoryResponse inventory;
             try {
-                product = productClient.getProductStock(itemRequest.getProductId());
+                inventory = productClient.getInventory(item.getProductId());
             } catch (Exception e) {
                 throw new CustomException(OrderErrorCode.PRODUCT_SERVICE_ERROR);
             }
 
-            // 상품 없으면 예외
-            if (product == null) {
-                throw new CustomException(OrderErrorCode.PRODUCT_NOT_FOUND);
-            }
-
-            // 재고 부족하면 예외
-            if (product.getStock() < itemRequest.getCount()) {
+            // record는 .quantity() 로 접근
+            if (inventory.quantity() < item.getCount()) {
                 throw new CustomException(OrderErrorCode.PRODUCT_OUT_OF_STOCK);
             }
-
-            // totalPrice 합산
-            BigDecimal itemTotal = product.getProductPrice()
-                    .multiply(BigDecimal.valueOf(itemRequest.getCount()));
-            totalPrice = totalPrice.add(itemTotal);
-
-            // OrderItem 생성
-            orderItems.add(OrderItem.create(
-                    null, // orderId는 Order 저장 후 채움
-                    itemRequest.getProductId(),
-                    itemRequest.getCount()
-            ));
         }
 
         // Order 생성 및 저장
@@ -85,21 +60,27 @@ public class OrderServiceImpl implements OrderService {
         );
         orderRepository.save(order);
 
+        // 3. OrderItem 생성 + 재고 감소
+        List<OrderItem> orderItems = new ArrayList<>();
+        for (OrderItemRequest item : request.getOrderItems()) {
+            try {
+                productClient.decreaseInventory(
+                        item.getProductId(),
+                        new UpdateInventoryRequest(item.getCount())
+                );
+            } catch (Exception e) {
+                throw new CustomException(OrderErrorCode.PRODUCT_SERVICE_ERROR);
+            }
 
-        List<OrderItem> savedItems = request.getOrderItems().stream()
-                .map(item -> {
-                    // 재고 확인 때 이미 검증했으므로 바로 생성
-                    ProductStockResponse product = productClient.getProductStock(item.getProductId());
-                    return OrderItem.create(
-                            order.getId(),
-                            item.getProductId(),
-                            item.getCount()
-                    );
-                })
-                .toList();
-        savedItems.forEach(orderItemRepository::save);
+            orderItems.add(OrderItem.create(
+                    order.getId(),
+                    item.getProductId(),
+                    item.getCount()
+            ));
+        }
+        orderItems.forEach(orderItemRepository::save);
 
-        return OrderDetailResponse.fromEntity(order, savedItems);
+        return OrderDetailResponse.fromEntity(order, orderItems);
     }
 
     // 주문 전체 목록 조회 (MASTER)
