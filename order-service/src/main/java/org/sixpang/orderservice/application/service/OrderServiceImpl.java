@@ -2,6 +2,8 @@ package org.sixpang.orderservice.application.service;
 
 import lombok.RequiredArgsConstructor;
 import org.sixpang.commonserver.response.PageResponse;
+import org.sixpang.orderservice.application.event.OrderCreatedEvent;
+import org.sixpang.orderservice.application.event.OrderEventPublisher;
 import org.sixpang.orderservice.domain.model.entity.Order;
 import org.sixpang.orderservice.domain.model.entity.OrderItem;
 import org.sixpang.orderservice.domain.repository.OrderItemRepository;
@@ -29,6 +31,8 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
+
+    private final OrderEventPublisher eventPublisher;
 
     // 페이징 처리 - 허용 사이즈 10/30/50 외에는 기본 10
     private Pageable buildPageable(int page, int size, String sortBy, String sortDir) {
@@ -68,6 +72,15 @@ public class OrderServiceImpl implements OrderService {
                 ))
                 .toList();
         orderItems.forEach(orderItemRepository::save);
+
+        // 이벤트 발행
+        OrderCreatedEvent event = new OrderCreatedEvent(
+                order.getId(),
+                order.getSupplierId(),
+                order.getReceiverId()
+        );
+
+        eventPublisher.publish(event);
 
         return OrderDetailResponse.fromEntity(order, orderItems);
     }
