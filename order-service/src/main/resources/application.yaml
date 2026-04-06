@@ -1,6 +1,15 @@
 spring:
   application:
     name: order-service
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      acks: all
+      retries: 3
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
   datasource:
     driver-class-name: org.postgresql.Driver
     url: ${DB_URL}
@@ -26,3 +35,5 @@ eureka:
   instance:
     instance-id:
       ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
+
+
