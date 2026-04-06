@@ -9,6 +9,7 @@ import org.sixpang.hubservice.domain.model.entity.Route;
 import java.math.BigDecimal;
 import java.util.UUID;
 
+import static org.sixpang.hubservice.infrastructure.RouteFormatter.*;
 @Getter
 @Builder
 @AllArgsConstructor
@@ -16,15 +17,19 @@ import java.util.UUID;
 public class AvailableRouteResponseDto {
     private UUID arrivalHubId;
     private String arrivalHubName;
-    private Long duration;
     private BigDecimal distance;
+    private Long duration;
+    private String distanceKm;
+    private String durationMin;
 
     public static AvailableRouteResponseDto from(Route route){
         return AvailableRouteResponseDto.builder()
                 .arrivalHubId(route.getArrivalHubId())
                 .arrivalHubName(route.getArrivalHubName())
-                .duration(route.getDuration())
                 .distance(route.getDistance())
+                .duration(route.getDuration())
+                .distanceKm(formatDistance(route.getDistance()))
+                .durationMin(formatDuration(route.getDuration()))
                 .build();
     }
 }

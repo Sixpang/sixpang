@@ -9,6 +9,8 @@ import org.sixpang.hubservice.domain.model.entity.Route;
 import java.math.BigDecimal;
 import java.util.UUID;
 
+import static org.sixpang.hubservice.infrastructure.RouteFormatter.*;
+
 @Getter
 @Builder
 @AllArgsConstructor
@@ -19,6 +21,8 @@ public class PathResponse {
     private String departureHubName;
     private BigDecimal distance;
     private Long duration;
+    private String distanceKm;
+    private String durationMin;
 
     public static PathResponse from(int sequence, Route route){
         return PathResponse.builder()
@@ -27,6 +31,8 @@ public class PathResponse {
                 .departureHubName(route.getDepartureHubName())
                 .distance(route.getDistance())
                 .duration(route.getDuration())
+                .distanceKm(formatDistance(route.getDistance()))
+                .durationMin(formatDuration(route.getDuration()))
                 .build();
     }
 }
