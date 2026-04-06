@@ -2,6 +2,7 @@ package org.sixpang.hubservice.application.service;
 
 import lombok.RequiredArgsConstructor;
 import org.sixpang.commonserver.global.CustomException;
+import org.sixpang.commonserver.response.PageResponse;
 import org.sixpang.hubservice.application.dto.HubRequestDto;
 import org.sixpang.hubservice.application.dto.HubResponseDto;
 import org.sixpang.hubservice.domain.model.entity.Hub;
@@ -51,10 +52,10 @@ public class HubService {
     // 허브 정보 목록 조회
     @Transactional(readOnly = true)
     @Cacheable(cacheNames = "hubList", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
-    public Page<HubResponseDto> getAllHubInfo(Pageable pageable){
-        Page<Hub> hubPage = hubRepository.findAllByDeletedAtIsNull(pageable);
+    public PageResponse<HubResponseDto> getAllHubInfo(Pageable pageable){
+        Page<Hub> page = hubRepository.findAllByDeletedAtIsNull(pageable);
 
-        return hubPage.map(HubResponseDto::from);
+        return PageResponse.from(page.map(HubResponseDto::from));
     }
 
     // 허브 정보 수정
