@@ -73,9 +73,4 @@ public class HubController {
         hubService.deleteHub(id, userPrincipal.getUserId());
         return ResponseEntity.ok(ApiResponse.of("허브가 삭제되었습니다.", null));
     }
-
-    @GetMapping("/hubs/{id}/exists")
-    public boolean exists(@PathVariable UUID id) {
-        return hubService.exists(id);
-    }
 }
