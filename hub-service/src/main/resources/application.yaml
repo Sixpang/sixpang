@@ -15,11 +15,13 @@ spring:
         show_sql: true
         format_sql: true
 
-  naver:
-    api:
-      client-id: ${NAVER_CLIENT_ID}
-      client-secret: ${NAVER_CLIENT_SECRET}
-      directions-url: ${DIRECTIONS_URL}
+naver:
+  api:
+    directions-url: ${DIRECTIONS_URL}
+  client:
+    client-id: ${NAVER_CLIENT_ID}
+    client-secret: ${NAVER_CLIENT_SECRET}
+
 
 server:
   port: 0
