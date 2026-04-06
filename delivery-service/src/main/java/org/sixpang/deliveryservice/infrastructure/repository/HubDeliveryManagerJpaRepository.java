@@ -2,6 +2,8 @@ package org.sixpang.deliveryservice.infrastructure.repository;
 
 import org.sixpang.deliveryservice.domain.model.entity.HubDeliveryManager;
 import org.sixpang.deliveryservice.domain.model.enums.DeliveryManagerStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -19,4 +21,5 @@ public interface HubDeliveryManagerJpaRepository extends JpaRepository<HubDelive
 
     List<HubDeliveryManager> findAllByStatus(DeliveryManagerStatus status);
 
+    Page<HubDeliveryManager> findAllByDeletedAtIsNull(Pageable pageable);
 }

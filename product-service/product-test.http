@@ -1,18 +1,60 @@
-@host = http://localhost:58434
-@contentType = application/json
-@companyId = 3bfc578e-51bd-4a22-8926-7c368d23498a
 
-### 상품 생성
-POST {{host}}/api/products
-Content-Type: {{contentType}}
+POST http://localhost:61046/api/products
+Content-Type: application/json
+X-User-Id: 08826884-0166-433c-a90c-1739ef0749de
+X-User-Role: COMPANY_MANAGER
 
 {
-  "name": "테스트 상품",
-  "price": 10000,
-  "companyId": "11111111-1111-1111-1111-111111111111",
+  "name": "product_test_02",
+  "price": 1000,
+  "companyId": "6fe4dfd8-eb19-49ba-8916-9ad33486a18b",
   "hubId": "22222222-2222-2222-2222-222222222222"
 }
 
 ### 상품 단건 조회
-GET {{host}}/api/products/{{productId}}
-Content-Type: {{contentType}}
+GET http://localhost:61046/api/products/f60e3ade-7d4f-4f1d-a58e-adfa75c796f4
+X-User-Id: 08826884-0166-433c-a90c-1739ef0749de
+X-User-Role: COMPANY_MANAGER
+
+### 상품 수정
+PATCH http://localhost:61046/api/products/f60e3ade-7d4f-4f1d-a58e-adfa75c796f4
+Content-Type: application/json
+X-User-Id: 08826884-0166-433c-a90c-1739ef0749de
+X-User-Role: COMPANY_MANAGER
+
+{
+  "name": "product_test_02_update",
+  "price": 1500,
+  "companyId": "6fe4dfd8-eb19-49ba-8916-9ad33486a18b",
+  "hubId": "22222222-2222-2222-2222-222222222222"
+}
+
+### 재고 조회
+GET http://localhost:61046/api/products/f60e3ade-7d4f-4f1d-a58e-adfa75c796f4/inventory
+X-User-Id: 08826884-0166-433c-a90c-1739ef0749de
+X-User-Role: COMPANY_MANAGER
+
+### 재고 증가
+PATCH http://localhost:61046/api/products/f60e3ade-7d4f-4f1d-a58e-adfa75c796f4/inventory/increase
+Content-Type: application/json
+X-User-Id: 08826884-0166-433c-a90c-1739ef0749de
+X-User-Role: COMPANY_MANAGER
+
+{
+  "amount": 10
+}
+
+### 재고 감소
+PATCH http://localhost:61046/api/products/f60e3ade-7d4f-4f1d-a58e-adfa75c796f4/inventory/decrease
+Content-Type: application/json
+X-User-Id: 08826884-0166-433c-a90c-1739ef0749de
+X-User-Role: COMPANY_MANAGER
+
+{
+  "amount": 3
+}
+
+### 상품 삭제 실패 기대
+DELETE http://localhost:61046/api/products/f60e3ade-7d4f-4f1d-a58e-adfa75c796f4
+X-User-Id: 08826884-0166-433c-a90c-1739ef0749de
+X-User-Role: COMPANY_MANAGER

@@ -1,51 +1,61 @@
 ### 변수 설정
-@port = 54212
+@port = 61306
 ### 할때마다 바꿔줘야함
 @baseUrl = http://localhost:{{port}}/api/deliveries/managers
 @managerId = b57cbb93-c1ae-47d7-8da6-bdda2f272d96
-### 1번째 사람 550e8400-e29b-41d4-a716-446655440000
+### 1번째 사람
+@user1 = 550e8400-e29b-41d4-a716-446655440000
 ### b57cbb93-c1ae-47d7-8da6-bdda2f272d96
-### 2번째 사람 bf5a60f7-f67a-419d-8778-2473b4af7e93
+### 2번째 사람
+@user2 = bf5a60f7-f67a-419d-8778-2473b4af7e93
 ### 0c85471d-7866-4538-a653-2dd5d066b14d
 
-### 1. 배송 담당자 생성 (HUB 타입)
+### 1. 허브 담당자 생성 (HUB 타입)
+# 성공 시 반환되는 managerId를 아래 @managerId_hub에 기록하세요.
 POST {{baseUrl}}
 Content-Type: application/json
 
 {
-  "userId": "110e8400-e29b-41d4-a716-446655440000",
+  "userId": "{{user1}}",
   "type": "HUB"
 }
 
-### 2. 배송 담당자 생성 (COMPANY 타입)
+### 2. 업체 담당자 생성 (COMPANY 타입)
+# 성공 시 반환되는 managerId를 아래 @managerId_company에 기록하세요.
 POST {{baseUrl}}
 Content-Type: application/json
 
 {
-  "userId": "bf5a60f7-f67a-419d-8778-2473b4af7e93",
+  "userId": "{{user2}}",
   "type": "COMPANY",
-  "hubId": "330e8400-e29b-41d4-a716-446655441111"
+  "hubId": "{{hubId}}"
 }
 
-### 3. 배송 담당자 단건 조회
-GET {{baseUrl}}/{{managerId}}?type=COMPANY
+### -----------------------------------------------------------
+@managerId_hub = b57cbb93-c1ae-47d7-8da6-bdda2f272d96
+@managerId_company = bf5a60f7-f67a-419d-8778-2473b4af7e93
 
-### 4. 배송 담당자 상태 수정 (PATCH)
-PATCH {{baseUrl}}/{{managerId}}?type=COMPANY
+### 3. 담당자 단건 조회 (전략 패턴 확인)
+GET {{baseUrl}}/{{managerId_hub}}?type=HUB
+
+### 4. 상태 수정 (상태를 WAIT로 변경하여 배정 테스트 준비)
+PATCH {{baseUrl}}/{{managerId_hub}}?type=HUB
 Content-Type: application/json
 
 {
-  "status": "ON_TASK"
+  "status": "WAIT"
 }
 
-### 5. 배송 담당자 삭제 (Soft Delete)
-DELETE {{baseUrl}}/{{managerId}}?type=HUB
+### 5. 삭제 테스트 (Soft Delete)
+DELETE {{baseUrl}}/{{managerId_hub}}?type=HUB
 
 ### -----------------------------------------------------------
-### 🚀 Redis 순번 배정 테스트 (Assign)
+### 🚀 Redis 배정 테스트 (DIP 및 전략 패턴 검증)
 
-### 6. 허브 배송 담당자 배정
+### 6. 허브 배송 담당자 배정 (순환 배정)
+# 반복 호출 시 Redis의 RPOPLPUSH 로직에 의해 순번이 돌아야 합니다.
 POST {{baseUrl}}/assign/hub
 
-### 7. 업체 배송 담당자 배정
-POST {{baseUrl}}/assign/company?hubId=330e8400-e29b-41d4-a716-446655441111
+### 7. 업체 배송 담당자 배정 (단방향 배정)
+# 호출 시 Redis에서 해당 허브의 담당자 ID가 Pop 되어야 합니다.
+POST {{baseUrl}}/assign/company?hubId={{hubId}}

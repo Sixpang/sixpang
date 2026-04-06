@@ -1,7 +1,7 @@
 package org.sixpang.deliveryservice.infrastructure.client;
 
 import lombok.RequiredArgsConstructor;
-import org.sixpang.deliveryservice.application.service.DeliveryHubClient;
+import org.sixpang.deliveryservice.application.service.client.DeliveryHubClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -17,9 +17,9 @@ public class DeliveryHubClientImpl implements DeliveryHubClient {
     private final HubMockClient hubMockClient;
 
     public void checkExists(UUID hubId) {
-        if(featureFlag){
+        if (featureFlag) {
             hubMockClient.checkExists(hubId);
-        }else{
+        } else {
             hubClient.checkExists(hubId);
         }
     }

@@ -1,24 +1,27 @@
 package org.sixpang.orderservice.application.service;
 
 import lombok.RequiredArgsConstructor;
+import org.sixpang.commonserver.global.CustomException;
 import org.sixpang.commonserver.response.PageResponse;
+import org.sixpang.commonserver.security.UserPrincipal;
+import org.sixpang.orderservice.application.event.OrderCreatedEvent;
+import org.sixpang.orderservice.application.event.OrderEventPublisher;
 import org.sixpang.orderservice.domain.model.entity.Order;
 import org.sixpang.orderservice.domain.model.entity.OrderItem;
+import org.sixpang.orderservice.domain.model.enums.OrderStatus;
 import org.sixpang.orderservice.domain.repository.OrderItemRepository;
 import org.sixpang.orderservice.domain.repository.OrderRepository;
 import org.sixpang.orderservice.exception.OrderErrorCode;
-import org.sixpang.orderservice.exception.OrderException;
-import org.sixpang.orderservice.presentation.dto.CreateOrderRequest;
-import org.sixpang.orderservice.presentation.dto.OrderDetailResponse;
-import org.sixpang.orderservice.presentation.dto.OrderResponse;
-import org.sixpang.orderservice.presentation.dto.UpdateOrderRequest;
-import org.springframework.data.domain.PageRequest;
+import org.sixpang.orderservice.infrastructure.client.ProductClient;
+import org.sixpang.orderservice.infrastructure.client.dto.InventoryResponse;
+import org.sixpang.orderservice.infrastructure.client.dto.UpdateInventoryRequest;
+import org.sixpang.orderservice.presentation.dto.*;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,28 +32,30 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
+    private final ProductClient productClient;
 
-    // 페이징 처리 - 허용 사이즈 10/30/50 외에는 기본 10
-    private Pageable buildPageable(int page, int size, String sortBy, String sortDir) {
-        if (size != 10 && size != 30 && size != 50) {
-            size = 10;
-        }
-        Sort sort = sortDir.equalsIgnoreCase("asc")
-                ? Sort.by(sortBy).ascending()
-                : Sort.by(sortBy).descending();
-        return PageRequest.of(page, size, sort);
-    }
+    private final OrderEventPublisher eventPublisher;
 
     @Override
-    @Transactional // 쓰기 작업
+    @Transactional
     public OrderDetailResponse createOrder(CreateOrderRequest request) {
 
-
-        // total_price 계산
-        // request에서 아이템 목록 꺼내서 (가격 * 수량) 합산
-        // 지금은 가격이 없으니 추후 상품 서비스 연동 시 채울 예정
         BigDecimal totalPrice = BigDecimal.ZERO;
 
+        // 1. 재고 확인
+        for (OrderItemRequest item : request.getOrderItems()) {
+            InventoryResponse inventory;
+            try {
+                inventory = productClient.getInventory(item.getProductId());
+            } catch (Exception e) {
+                throw new CustomException(OrderErrorCode.PRODUCT_SERVICE_ERROR);
+            }
+            if (inventory.quantity() < item.getCount()) {
+                throw new CustomException(OrderErrorCode.PRODUCT_OUT_OF_STOCK);
+            }
+        }
+
+        // 2. Order 생성 및 저장
         Order order = Order.create(
                 request.getSupplierId(),
                 request.getReceiverId(),
@@ -59,91 +64,118 @@ public class OrderServiceImpl implements OrderService {
         );
         orderRepository.save(order);
 
-
-        List<OrderItem> orderItems = request.getOrderItems().stream()
-                .map(item -> OrderItem.create(
-                        order.getId(),
+        // 3. OrderItem 생성 + 재고 감소
+        List<OrderItem> orderItems = new ArrayList<>();
+        for (OrderItemRequest item : request.getOrderItems()) {
+            try {
+                productClient.decreaseInventory(
                         item.getProductId(),
-                        item.getCount()
-                ))
-                .toList();
+                        new UpdateInventoryRequest(item.getCount())
+                );
+            } catch (Exception e) {
+                throw new CustomException(OrderErrorCode.PRODUCT_SERVICE_ERROR);
+            }
+            orderItems.add(OrderItem.create(
+                    order.getId(),
+                    item.getProductId(),
+                    item.getCount()
+            ));
+        }
         orderItems.forEach(orderItemRepository::save);
+
+        // 이벤트 발행 (이 부분이 있어야 Kafka로 메시지가 발송됩니다)
+        OrderCreatedEvent event = new OrderCreatedEvent(
+                order.getId(),
+                order.getSupplierId(),
+                order.getReceiverId()
+        );
+
+        eventPublisher.publish(event);
 
         return OrderDetailResponse.fromEntity(order, orderItems);
     }
 
     @Override
-    public OrderDetailResponse getOrder(UUID orderId) {
-
-        // 주문 조회 (삭제 제외)
+    public OrderDetailResponse getOrder(UUID orderId, UserPrincipal user) {
         Order order = orderRepository.findByIdAndDeletedAtIsNull(orderId)
-                .orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(OrderErrorCode.ORDER_NOT_FOUND));
 
-        // 해당 주문의 아이템 목록 조회
+        // MASTER가 아니면 본인 주문만 조회 가능
+        if (!"MASTER".equals(user.getRole()) &&
+                !order.getCreatedBy().equals(user.getUserId())) {
+            throw new CustomException(OrderErrorCode.ORDER_ACCESS_DENIED);
+        }
+
         List<OrderItem> orderItems = orderItemRepository
                 .findByOrderIdAndDeletedAtIsNull(orderId);
 
-        // from()으로 변환 후 반환
         return OrderDetailResponse.fromEntity(order, orderItems);
     }
 
     @Override
-    public PageResponse<OrderResponse> getOrders(int page, int size, String sortBy, String sortDir) {
+    public PageResponse<OrderResponse> getOrders(Pageable pageable) {
         return PageResponse.from(
-                orderRepository.findAllByDeletedAtIsNull(buildPageable(page, size, sortBy, sortDir))
+                orderRepository.findAllByDeletedAtIsNull(pageable)
                         .map(OrderResponse::fromEntity)
         );
     }
 
     @Override
-    public PageResponse<OrderResponse> getOrdersBySupplierId(UUID supplierId, int page, int size, String sortBy, String sortDir) {
+    public PageResponse<OrderResponse> getOrdersBySupplierId(UUID supplierId, Pageable pageable) {
         return PageResponse.from(
-                orderRepository.findBySupplierIdAndDeletedAtIsNull(supplierId, buildPageable(page, size, sortBy, sortDir))
+                orderRepository.findBySupplierIdAndDeletedAtIsNull(supplierId, pageable)
                         .map(OrderResponse::fromEntity)
         );
     }
 
     @Override
-    public PageResponse<OrderResponse> getOrdersByReceiverId(UUID receiverId, int page, int size, String sortBy, String sortDir) {
+    public PageResponse<OrderResponse> getOrdersByReceiverId(UUID receiverId, Pageable pageable) {
         return PageResponse.from(
-                orderRepository.findByReceiverIdAndDeletedAtIsNull(receiverId, buildPageable(page, size, sortBy, sortDir))
+                orderRepository.findByReceiverIdAndDeletedAtIsNull(receiverId, pageable)
                         .map(OrderResponse::fromEntity)
         );
     }
 
-
-    // 주문 수정
     @Override
     @Transactional
-    public OrderDetailResponse updateOrder(
-            UUID orderId, UpdateOrderRequest request
-    ) {
-        // 주문 조회
+    public OrderDetailResponse updateOrder(UUID orderId, UpdateOrderRequest request, UserPrincipal user) {
         Order order = orderRepository.findByIdAndDeletedAtIsNull(orderId)
-                .orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(OrderErrorCode.ORDER_NOT_FOUND));
+
+        // MASTER가 아니면 본인 주문만 수정 가능
+        if (!"MASTER".equals(user.getRole()) &&
+                !order.getCreatedBy().equals(user.getUserId())) {
+            throw new CustomException(OrderErrorCode.ORDER_ACCESS_DENIED);
+        }
+
+        if (order.getOrderStatus() != OrderStatus.CONFIRMED) {
+            throw new CustomException(OrderErrorCode.ORDER_CANNOT_UPDATE);
+        }
 
         order.update(request.getDeadlineAt());
 
-        // 아이템 조회 후 반환
         List<OrderItem> orderItems = orderItemRepository
                 .findByOrderIdAndDeletedAtIsNull(orderId);
 
         return OrderDetailResponse.fromEntity(order, orderItems);
     }
 
-    // 주문 삭제
     @Override
     @Transactional
-    public void deleteOrder(UUID orderId, UUID deletedBy) {
-
-        // 주문 조회
+    public void deleteOrder(UUID orderId, UserPrincipal user) {
         Order order = orderRepository.findByIdAndDeletedAtIsNull(orderId)
-                .orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(OrderErrorCode.ORDER_NOT_FOUND));
 
-        order.delete(deletedBy);
+        // MASTER가 아니면 본인 주문만 삭제 가능
+        if (!"MASTER".equals(user.getRole()) &&
+                !order.getCreatedBy().equals(user.getUserId())) {
+            throw new CustomException(OrderErrorCode.ORDER_ACCESS_DENIED);
+        }
+
+        order.delete(user.getUserId());
 
         List<OrderItem> orderItems = orderItemRepository
                 .findByOrderIdAndDeletedAtIsNull(orderId);
-        orderItems.forEach(item -> item.delete(deletedBy));
+        orderItems.forEach(item -> item.delete(user.getUserId()));
     }
 }

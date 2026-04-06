@@ -3,6 +3,7 @@ package org.sixpang.companyservice.presentation;
 import lombok.RequiredArgsConstructor;
 import org.sixpang.commonserver.response.ApiResponse;
 import org.sixpang.commonserver.response.PageResponse;
+import org.sixpang.commonserver.security.UserPrincipal;
 import org.sixpang.companyservice.application.CompanyService;
 import org.sixpang.companyservice.application.dto.CompanyResponse;
 import org.sixpang.companyservice.application.dto.CompanySearchRequest;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -25,14 +27,21 @@ public class CompanyController {
     private final CompanyService companyService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<CompanyResponse>> createCompany(@RequestBody CreateCompanyRequest request) {
-        CompanyResponse response = companyService.createCompany(request);
+    public ResponseEntity<ApiResponse<CompanyResponse>> createCompany(
+            @RequestBody CreateCompanyRequest request,
+            @AuthenticationPrincipal UserPrincipal user
+            ) {
+        CompanyResponse response = companyService.createCompany(request, user);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.of("업체 생성 성공", response));
     }
 
     @PatchMapping("/{companyId}")
-    public ResponseEntity<ApiResponse<CompanyResponse>> updateCompany(@PathVariable UUID companyId, @RequestBody UpdateCompanyRequest request) {
-        CompanyResponse response = companyService.updateCompany(companyId, request);
+    public ResponseEntity<ApiResponse<CompanyResponse>> updateCompany(
+            @PathVariable UUID companyId,
+            @RequestBody UpdateCompanyRequest request,
+            @AuthenticationPrincipal UserPrincipal user
+            ) {
+        CompanyResponse response = companyService.updateCompany(companyId, request,user);
         return ResponseEntity.ok(ApiResponse.of("업체 수정 성공", response));
     }
 
@@ -56,8 +65,11 @@ public class CompanyController {
     }
 
     @DeleteMapping("/{companyId}")
-    public ResponseEntity<ApiResponse<Void>> deleteCompany(@PathVariable UUID companyId) {
-        companyService.deleteCompany(companyId);
+    public ResponseEntity<ApiResponse<Void>> deleteCompany(
+            @PathVariable UUID companyId,
+            @AuthenticationPrincipal UserPrincipal user
+            ) {
+        companyService.deleteCompany(companyId,user);
         return ResponseEntity.ok(ApiResponse.of("업체 삭제 성공", null));
     }
 
