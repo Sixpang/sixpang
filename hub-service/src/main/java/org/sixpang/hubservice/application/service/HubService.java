@@ -28,11 +28,11 @@ public class HubService {
     @Transactional
     @CacheEvict(cacheNames = {"hub", "hubList"}, allEntries = true)
     public HubResponseDto register(UUID userId, HubRequestDto requestDto){
-        Hub hub = requestDto.toEntity();
-
         if (hubRepository.existsByNameAndDeletedAtIsNull(requestDto.getName())) {
             throw new CustomException(HubErrorCode.EXISTS_HUB);
         }
+
+        Hub hub = requestDto.toEntity();
 
         hubRepository.save(hub);
 

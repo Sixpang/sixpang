@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface NaverMapFeignClient {
     @GetMapping("/driving")
     DirectionsResponseDto getRoute(
-            @RequestHeader("x-ncp-apigw-api-key-id") String clientId,
-            @RequestHeader("x-ncp-apigw-api-key") String clientSecret,
+            @RequestHeader("X-NCP-APIGW-API-KEY-ID") String clientId,
+            @RequestHeader("X-NCP-APIGW-API-KEY-ID") String clientSecret,
             @RequestParam("start") String start,
             @RequestParam("goal") String goal
     );

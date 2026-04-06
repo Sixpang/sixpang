@@ -1,9 +1,6 @@
 package org.sixpang.hubservice.domain.repository;
 
 import org.sixpang.hubservice.domain.model.entity.Route;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +12,8 @@ public interface RouteRepository {
     Optional<Route> findByDepartureHubIdAndArrivalHubIdAndDeletedAtIsNull(UUID departureHubId, UUID arrivalHubId);
 
     List<Route> findAllByDeletedAtIsNull();
+
+    boolean existsByDepartureHubIdAndArrivalHubId(UUID departureHubId, UUID arrivalHubId);
 
     void softDeleteRoutesByHubId(UUID hubId, UUID userId);
 

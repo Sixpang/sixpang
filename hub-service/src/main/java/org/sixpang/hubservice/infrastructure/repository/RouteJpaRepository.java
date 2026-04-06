@@ -17,6 +17,8 @@ public interface RouteJpaRepository extends JpaRepository<Route, UUID> {
 
     List<Route> findAllByDeletedAtIsNull();
 
+    boolean existsByDepartureHubIdAndArrivalHubId(UUID departureHubId, UUID arrivalHubId);
+
     @Modifying
     @Query("UPDATE Route r SET r.deletedAt = CURRENT_TIMESTAMP, r.deletedBy = :userId " +
             "WHERE (r.departureHubId = :hubId OR r.arrivalHubId = :hubId) AND r.deletedAt IS NULL")

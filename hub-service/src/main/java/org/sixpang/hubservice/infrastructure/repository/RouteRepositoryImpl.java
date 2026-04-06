@@ -30,6 +30,11 @@ public class RouteRepositoryImpl implements RouteRepository {
     };
 
     @Override
+    public boolean existsByDepartureHubIdAndArrivalHubId(UUID departureHubId, UUID arrivalHubId){
+        return routeJpaRepository.existsByDepartureHubIdAndArrivalHubId(departureHubId, arrivalHubId);
+    };
+
+    @Override
     public void softDeleteRoutesByHubId(UUID hubId, UUID userId){
         routeJpaRepository.softDeleteRoutesByHubId(hubId, userId);
     };
