@@ -8,6 +8,7 @@ import org.sixpang.userservice.domain.model.enums.UserStatus;
 import org.sixpang.userservice.domain.repository.UserRepository;
 import org.sixpang.userservice.exception.UserErrorCode;
 import org.sixpang.userservice.exception.UserException;
+import org.sixpang.userservice.infrastructure.client.HubServiceClient;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,8 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final HubServiceClient hubServiceClient;
+    private final HubServiceClient companyServiceClient;
 
 
     /**회원 가입**/
@@ -32,6 +35,33 @@ public class UserService {
 
         //허브id 나 업체id 둘중에 하나는 입력해야함
         validateRoleTarget(dto);
+
+        // TODO: 허브 서비스 연동 후 활성화
+        // - hub-service exists API 호출
+        // - 존재하지 않으면 INVALID_HUB 예외
+        /*
+        if (dto.getHubId() != null) {
+            boolean exists = hubServiceClient.exists(dto.getHubId());
+            System.out.println("허브 존재 여부: " + exists);
+
+            if (!exists) {
+                throw new UserException(UserErrorCode.INVALID_HUB);
+            }
+        }
+        */
+
+        // TODO: 업체 서비스 연동 후 활성화
+        // - company-service exists API 호출
+        // - 존재하지 않으면 INVALID_COMPANY 예외
+        /*
+        if (dto.getCompanyId() != null) {
+            boolean exists = companyServiceClient.exists(dto.getCompanyId());
+
+            if (!exists) {
+                throw new UserException(UserErrorCode.INVALID_COMPANY);
+            }
+        }
+        */
 
         // 비밀 번호 암호화
         String encodedPassword = passwordEncoder.encode(dto.getPassword());
@@ -147,6 +177,9 @@ public class UserService {
     }
 
     private void validateRoleTarget(UserServiceDto.SignUp dto) {
+
+        // TODO: 현재는 입력값 검증만 수행
+        // - 추후 Feign 연동 후 실제 허브/업체 존재 여부 검증 추가 예정
 
         boolean hasHub = dto.getHubId() != null;
         boolean hasCompany = dto.getCompanyId() != null;
