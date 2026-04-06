@@ -1,8 +1,8 @@
 package org.sixpang.hubservice.infrastructure.repository;
 
 import lombok.RequiredArgsConstructor;
-import org.sixpang.routeservice.domain.model.Route;
-import org.sixpang.routeservice.domain.repository.RouteRepository;
+import org.sixpang.hubservice.domain.model.entity.Route;
+import org.sixpang.hubservice.domain.repository.RouteRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
