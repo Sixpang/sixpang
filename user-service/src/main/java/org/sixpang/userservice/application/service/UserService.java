@@ -30,6 +30,9 @@ public class UserService {
         //코드 리뷰:중복 검사 로직을 메서드 로 분리 하여 가독성 개선
         validateDuplicateUser(dto);
 
+        //허브id 나 업체id 둘중에 하나는 입력해야함
+        validateRoleTarget(dto);
+
         // 비밀 번호 암호화
         String encodedPassword = passwordEncoder.encode(dto.getPassword());
 
@@ -140,6 +143,22 @@ public class UserService {
     private void validateAccess(UUID targetUserId, UUID currentUserId, UserRole role) {
         if (!targetUserId.equals(currentUserId) && role != UserRole.MASTER) {
             throw new UserException(UserErrorCode.FORBIDDEN);
+        }
+    }
+
+    private void validateRoleTarget(UserServiceDto.SignUp dto) {
+
+        boolean hasHub = dto.getHubId() != null;
+        boolean hasCompany = dto.getCompanyId() != null;
+
+        // 둘 다 없으면 에러
+        if (!hasHub && !hasCompany) {
+            throw new UserException(UserErrorCode.INVALID_AFFILIATION_REQUIRED);
+        }
+
+        // 둘 다 있으면 에러
+        if (hasHub && hasCompany) {
+            throw new UserException(UserErrorCode.INVALID_AFFILIATION_DUPLICATE);
         }
     }
 }
