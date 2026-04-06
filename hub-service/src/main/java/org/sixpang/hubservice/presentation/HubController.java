@@ -32,7 +32,7 @@ public class HubController {
             @RequestBody @Valid HubRequestDto requestDto
     ){
         HubResponseDto responseDto = hubService.register(userPrincipal.getUserId(), requestDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.of("허브가 성공적으로 생성되었습니다.", responseDto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.of(HttpStatus.CREATED, "허브가 성공적으로 생성되었습니다.", responseDto));
     }
 
     @PreAuthorize("hasRole('MASTER')")

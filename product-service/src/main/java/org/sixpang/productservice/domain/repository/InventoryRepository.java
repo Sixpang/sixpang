@@ -8,5 +8,5 @@ import java.util.UUID;
 public interface InventoryRepository {
 
     Inventory save(Inventory inventory);
-    Optional<Inventory> findById(UUID productId);
+    Optional<Inventory> findByProductId(UUID productId);
 }

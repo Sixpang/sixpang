@@ -28,6 +28,10 @@ public class Inventory extends BaseEntity {
         }
     }
 
+    public Inventory(UUID productId){
+        this.productId = productId;
+        this.quantity = 0L;
+    }
 
     public Inventory(UUID productId, Long quantity) {
         if (quantity == null || quantity < 0) {

@@ -61,4 +61,8 @@ public class CompanyController {
         return ResponseEntity.ok(ApiResponse.of("업체 삭제 성공", null));
     }
 
+    @GetMapping("/{companyId}/exists")
+    public boolean exists(@PathVariable UUID companyId) {
+        return companyService.exists(companyId);
+    }
 }
