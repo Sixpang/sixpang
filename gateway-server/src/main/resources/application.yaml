@@ -46,7 +46,7 @@ spring:
         - id: hub-service
           uri: lb://hub-service
           predicates:
-            - Path=/api/hub/**
+            - Path=/api/hubs/**
 
         - id: notification-service
           uri: lb://notification-service
@@ -56,7 +56,7 @@ spring:
         - id: prediction-service
           uri: lb://prediction-service
           predicates:
-            - Path=/api/prediction/**
+            - Path=/api/predictions/**
 
 eureka:
   client:
@@ -65,3 +65,8 @@ eureka:
 
   instance:
     instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
+
+
+jwt:
+  secret: my-secret-key-my-secret-key-my-secret-key
+  issuer: sixpang-auth

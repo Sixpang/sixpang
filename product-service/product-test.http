@@ -1,0 +1,18 @@
+@host = http://localhost:58434
+@contentType = application/json
+@companyId = 3bfc578e-51bd-4a22-8926-7c368d23498a
+
+### 상품 생성
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+
+{
+  "name": "테스트 상품",
+  "price": 10000,
+  "companyId": "11111111-1111-1111-1111-111111111111",
+  "hubId": "22222222-2222-2222-2222-222222222222"
+}
+
+### 상품 단건 조회
+GET {{host}}/api/products/{{productId}}
+Content-Type: {{contentType}}
