@@ -17,6 +17,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
     implementation project(':common-server')
+
+    implementation 'org.springframework.boot:spring-boot-starter-security'
 }
 
 ext {

@@ -1,6 +1,7 @@
 package org.sixpang.orderservice.application.service;
 
 import lombok.RequiredArgsConstructor;
+import org.sixpang.commonserver.response.PageResponse;
 import org.sixpang.orderservice.domain.model.entity.Order;
 import org.sixpang.orderservice.domain.model.entity.OrderItem;
 import org.sixpang.orderservice.domain.repository.OrderItemRepository;
@@ -9,9 +10,11 @@ import org.sixpang.orderservice.exception.OrderErrorCode;
 import org.sixpang.orderservice.exception.OrderException;
 import org.sixpang.orderservice.presentation.dto.CreateOrderRequest;
 import org.sixpang.orderservice.presentation.dto.OrderDetailResponse;
-import org.sixpang.orderservice.presentation.dto.OrderPageResponse;
+import org.sixpang.orderservice.presentation.dto.OrderResponse;
 import org.sixpang.orderservice.presentation.dto.UpdateOrderRequest;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,9 +30,22 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
 
+    // 페이징 처리 - 허용 사이즈 10/30/50 외에는 기본 10
+    private Pageable buildPageable(int page, int size, String sortBy, String sortDir) {
+        if (size != 10 && size != 30 && size != 50) {
+            size = 10;
+        }
+        Sort sort = sortDir.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+        return PageRequest.of(page, size, sort);
+    }
+
     @Override
     @Transactional // 쓰기 작업
     public OrderDetailResponse createOrder(CreateOrderRequest request) {
+
+
         // total_price 계산
         // request에서 아이템 목록 꺼내서 (가격 * 수량) 합산
         // 지금은 가격이 없으니 추후 상품 서비스 연동 시 채울 예정
@@ -56,14 +72,6 @@ public class OrderServiceImpl implements OrderService {
         return OrderDetailResponse.fromEntity(order, orderItems);
     }
 
-    // 주문 전체 목록 조회 (MASTER)
-    public OrderPageResponse getOrders(Pageable pageable) {
-
-        return new OrderPageResponse(
-                orderRepository.findAllByDeletedAtIsNull(pageable)
-        );
-    }
-
     @Override
     public OrderDetailResponse getOrder(UUID orderId) {
 
@@ -79,23 +87,27 @@ public class OrderServiceImpl implements OrderService {
         return OrderDetailResponse.fromEntity(order, orderItems);
     }
 
-
     @Override
-    public OrderPageResponse getOrdersBySupplierId(
-            UUID supplierId, Pageable pageable
-    ) {
-        return new OrderPageResponse(
-                orderRepository.findBySupplierIdAndDeletedAtIsNull(supplierId, pageable)
+    public PageResponse<OrderResponse> getOrders(int page, int size, String sortBy, String sortDir) {
+        return PageResponse.from(
+                orderRepository.findAllByDeletedAtIsNull(buildPageable(page, size, sortBy, sortDir))
+                        .map(OrderResponse::fromEntity)
         );
     }
 
+    @Override
+    public PageResponse<OrderResponse> getOrdersBySupplierId(UUID supplierId, int page, int size, String sortBy, String sortDir) {
+        return PageResponse.from(
+                orderRepository.findBySupplierIdAndDeletedAtIsNull(supplierId, buildPageable(page, size, sortBy, sortDir))
+                        .map(OrderResponse::fromEntity)
+        );
+    }
 
     @Override
-    public OrderPageResponse getOrdersByReceiverId(
-            UUID receiverId, Pageable pageable
-    ) {
-        return new OrderPageResponse(
-                orderRepository.findByReceiverIdAndDeletedAtIsNull(receiverId, pageable)
+    public PageResponse<OrderResponse> getOrdersByReceiverId(UUID receiverId, int page, int size, String sortBy, String sortDir) {
+        return PageResponse.from(
+                orderRepository.findByReceiverIdAndDeletedAtIsNull(receiverId, buildPageable(page, size, sortBy, sortDir))
+                        .map(OrderResponse::fromEntity)
         );
     }
 

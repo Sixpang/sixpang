@@ -27,7 +27,7 @@ public class OrderResponse {
                 order.getId(),
                 order.getSupplierId(),
                 order.getReceiverId(),
-                order.getOrderstatus(),
+                order.getOrderStatus(),
                 order.getTotalPrice(),
                 order.getDeadlineAt()
         );
