@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.sixpang.deliveryservice.domain.model.entity.HubDeliveryManager;
 import org.sixpang.deliveryservice.domain.model.enums.DeliveryManagerStatus;
 import org.sixpang.deliveryservice.domain.repository.HubDeliveryManagerRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -29,22 +31,26 @@ public class HubDeliveryManagerRepositoryImpl implements HubDeliveryManagerRepos
 
     @Override
     public int countByDeletedAtIsNull() {
-        return  hubDeliveryManagerJpaRepository.countByDeletedAtIsNull();
+        return hubDeliveryManagerJpaRepository.countByDeletedAtIsNull();
     } // 전국 10명 제한
 
     @Override
     public List<HubDeliveryManager> findAllByStatus(DeliveryManagerStatus status) {
-        return  hubDeliveryManagerJpaRepository.findAllByStatus(status);
+        return hubDeliveryManagerJpaRepository.findAllByStatus(status);
     }
 
     @Override
-    public HubDeliveryManager save(HubDeliveryManager manager){
+    public HubDeliveryManager save(HubDeliveryManager manager) {
         return hubDeliveryManagerJpaRepository.save(manager);
     }
 
     @Override
-    public Optional<HubDeliveryManager> findById(UUID userId){
+    public Optional<HubDeliveryManager> findById(UUID userId) {
         return hubDeliveryManagerJpaRepository.findById(userId);
     }
 
+    @Override
+    public Page<HubDeliveryManager> findAllByDeletedAtIsNull(Pageable pageable) {
+        return hubDeliveryManagerJpaRepository.findAllByDeletedAtIsNull(pageable);
+    }
 }
