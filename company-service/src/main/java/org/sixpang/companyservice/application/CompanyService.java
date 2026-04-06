@@ -2,10 +2,8 @@ package org.sixpang.companyservice.application;
 
 import lombok.RequiredArgsConstructor;
 import org.sixpang.commonserver.global.CustomException;
-import org.sixpang.companyservice.application.dto.CompanyResponse;
-import org.sixpang.companyservice.application.dto.CompanySearchRequest;
-import org.sixpang.companyservice.application.dto.CreateCompanyRequest;
-import org.sixpang.companyservice.application.dto.UpdateCompanyRequest;
+import org.sixpang.commonserver.security.UserPrincipal;
+import org.sixpang.companyservice.application.dto.*;
 import org.sixpang.companyservice.domain.model.Company;
 import org.sixpang.companyservice.domain.repository.CompanyRepository;
 import org.sixpang.companyservice.infrastructure.exception.CompanyErrorCode;
@@ -25,7 +23,9 @@ public class CompanyService {
     private final CompanyRepository companyRepository;
 
     @Transactional
-    public CompanyResponse createCompany(CreateCompanyRequest request) {
+    public CompanyResponse createCompany(CreateCompanyRequest request, UserPrincipal user) {
+
+        validateCompanyManageRole(user);
 
         boolean exists = companyRepository.existsByNameAndDeletedAtIsNull(request.name());
         if(exists){
@@ -43,9 +43,11 @@ public class CompanyService {
     }
 
     @Transactional
-    public CompanyResponse updateCompany(UUID companyId, UpdateCompanyRequest request) {
+    public CompanyResponse updateCompany(UUID companyId, UpdateCompanyRequest request, UserPrincipal user) {
         Company company = companyRepository.findByIdAndDeletedAtIsNull(companyId)
                 .orElseThrow(() -> new CustomException(CompanyErrorCode.COMPANY_NOT_FOUND));
+
+        validateCompanyManageRole(user);
 
         company.update(
                 request.name(),
@@ -58,9 +60,12 @@ public class CompanyService {
     }
 
     @Transactional
-    public void deleteCompany(UUID companyId) {
+    public void deleteCompany(UUID companyId ,UserPrincipal user) {
+
         Company company = companyRepository.findByIdAndDeletedAtIsNull(companyId)
                 .orElseThrow(() -> new CustomException(CompanyErrorCode.COMPANY_NOT_FOUND));
+
+        validateCompanyManageRole(user);
 
         company.delete();
     }
@@ -83,4 +88,19 @@ public class CompanyService {
     public boolean exists(UUID companyId) {
         return companyRepository.findByIdAndDeletedAtIsNull(companyId).isPresent();
     }
+
+    private void validateCompanyManageRole(UserPrincipal user) {
+        if (user == null || user.getRole() == null) {
+            throw new CustomException(CompanyErrorCode.COMPANY_ACCESS_DENIED);
+        }
+
+        String role = user.getRole();
+
+        if ("MASTER".equals(role) || "HUB_MANAGER".equals(role)) {
+            return;
+        }
+
+        throw new CustomException(CompanyErrorCode.COMPANY_ACCESS_DENIED);
+    }
 }
+
