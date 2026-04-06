@@ -1,4 +1,4 @@
-package org.sixpang.deliveryservice.application.service;
+package org.sixpang.deliveryservice.application.service.client;
 
 import java.util.UUID;
 
