@@ -13,6 +13,7 @@ spring:
       ddl-auto: update
     properties:
       hibernate:
+        default_schema: product_service
         show_sql: true
         format_sql: true
 

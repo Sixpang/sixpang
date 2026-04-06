@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-@EnableFeignClients
+
 @Service
 @RequiredArgsConstructor
 public class ProductService {
