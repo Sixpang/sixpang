@@ -1,4 +1,4 @@
-package org.sixpang.deliveryservice.application.service;
+package org.sixpang.deliveryservice.application.service.strategy;
 
 import org.sixpang.commonserver.global.CustomException;
 import org.sixpang.deliveryservice.application.dto.DeliveryManagerResponse;

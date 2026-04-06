@@ -1,7 +1,7 @@
 package org.sixpang.deliveryservice.infrastructure.client;
 
 import lombok.RequiredArgsConstructor;
-import org.sixpang.deliveryservice.application.service.DeliveryUserClient;
+import org.sixpang.deliveryservice.application.service.client.DeliveryUserClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +17,7 @@ public class DeliveryUserClientImpl implements DeliveryUserClient {
     private final UserMockClient userMockClient;
 
     public void checkExists(UUID userId) {
-        if(featureFlag) {
+        if (featureFlag) {
             userMockClient.checkExists(userId);
         } else {
             userClient.checkExists(userId);

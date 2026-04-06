@@ -5,7 +5,7 @@ import org.sixpang.commonserver.global.CustomException;
 import org.sixpang.deliveryservice.application.dto.DeliveryManagerResponse;
 import org.sixpang.deliveryservice.application.dto.DeliveryManagerSearchCondition;
 import org.sixpang.deliveryservice.application.dto.DeliveryManagerUpdateRequest;
-import org.sixpang.deliveryservice.application.service.DeliveryManagerStrategy;
+import org.sixpang.deliveryservice.application.service.strategy.DeliveryManagerStrategy;
 import org.sixpang.deliveryservice.domain.model.entity.HubDeliveryManager;
 import org.sixpang.deliveryservice.domain.model.enums.DeliveryManagerType;
 import org.sixpang.deliveryservice.domain.repository.HubDeliveryManagerRepository;

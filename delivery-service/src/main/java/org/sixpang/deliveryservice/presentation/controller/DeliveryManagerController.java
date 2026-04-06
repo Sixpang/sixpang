@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.sixpang.deliveryservice.application.dto.DeliveryManagerCreateRequest;
 import org.sixpang.deliveryservice.application.dto.DeliveryManagerResponse;
 import org.sixpang.deliveryservice.application.dto.DeliveryManagerUpdateRequest;
-import org.sixpang.deliveryservice.application.service.DeliveryManagerService;
+import org.sixpang.deliveryservice.application.service.service.DeliveryManagerService;
 import org.sixpang.deliveryservice.domain.model.enums.DeliveryManagerType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
