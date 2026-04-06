@@ -3,7 +3,7 @@ package org.sixpang.userservice.application.dto.query;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.sixpang.userservice.domain.model.entity.User;
-import org.sixpang.userservice.domain.model.enums.UserRole;
+import org.sixpang.commonserver.enums.UserRole;
 import org.sixpang.userservice.domain.model.enums.UserStatus;
 
 import java.util.UUID;

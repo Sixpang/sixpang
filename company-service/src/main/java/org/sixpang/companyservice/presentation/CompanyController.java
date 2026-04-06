@@ -2,6 +2,7 @@ package org.sixpang.companyservice.presentation;
 
 import lombok.RequiredArgsConstructor;
 import org.sixpang.commonserver.response.ApiResponse;
+import org.sixpang.commonserver.response.PageResponse;
 import org.sixpang.companyservice.application.CompanyService;
 import org.sixpang.companyservice.application.dto.CompanyResponse;
 import org.sixpang.companyservice.application.dto.CompanySearchRequest;
@@ -42,14 +43,15 @@ public class CompanyController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<CompanyResponse>>> getCompanies(
+    public ResponseEntity<ApiResponse<PageResponse<CompanyResponse>>> getCompanies(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) CompanyType type,
             @RequestParam(required = false) UUID hubId,
             @RequestParam(required = false) String address,
             Pageable pageable) {
         CompanySearchRequest request = new CompanySearchRequest(name, address,type,hubId);
-        Page<CompanyResponse> response = companyService.getCompanies(request,pageable);
+        Page<CompanyResponse> companies = companyService.getCompanies(request,pageable);
+        PageResponse<CompanyResponse> response = PageResponse.from(companies);
         return ResponseEntity.ok(ApiResponse.of("업체 목록 조회 성공", response));
     }
 
@@ -59,4 +61,8 @@ public class CompanyController {
         return ResponseEntity.ok(ApiResponse.of("업체 삭제 성공", null));
     }
 
+    @GetMapping("/{companyId}/exists")
+    public boolean exists(@PathVariable UUID companyId) {
+        return companyService.exists(companyId);
+    }
 }

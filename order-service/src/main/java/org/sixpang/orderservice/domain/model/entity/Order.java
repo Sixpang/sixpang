@@ -5,12 +5,11 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sixpang.commonserver.entity.BaseEntity;
-import org.sixpang.orderservice.domain.model.enums.DeliveryStatus;
 import org.sixpang.orderservice.domain.model.enums.OrderStatus;
-import org.sixpang.orderservice.presentation.dto.OrderRequestDto;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -36,70 +35,41 @@ public class Order extends BaseEntity {
     @Column(nullable = false, name = "total_price")
     private BigDecimal totalPrice; // 주문 총 액
 
-    @Column(nullable = false, name = "delivery_status")
-    private DeliveryStatus deliveryStatus; // 배송 상태
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+    @Column(name = "deleted_by")
+    private UUID deletedBy;
 
     // 주문 생성
-    public static Order create(
+    // 생성 시점에 필요한 값 모두 받기
+    private Order(
             UUID supplierId,
             UUID receiverId,
             Timestamp deadlineAt,
             BigDecimal totalPrice
     ) {
-        Order order = new Order();
-        order.supplierId = supplierId;
-        order.receiverId = receiverId;
-        order.deadlineAt = deadlineAt;
-        order.totalPrice = totalPrice;
-        order.orderstatus = OrderStatus.CONFIRMED; // 기본 값 : 승인
-        order.deliveryStatus = DeliveryStatus.PENDING; // 기본 값 : 배송 예정
-        return  order;
-    }
-
-    // 주문 수정
-    public void update(
-            Timestamp deadlineAt,
-            BigDecimal totalPrice
-    ) {
+        this.supplierId = supplierId;
+        this.receiverId = receiverId;
         this.deadlineAt = deadlineAt;
         this.totalPrice = totalPrice;
+        this.orderstatus = OrderStatus.CONFIRMED; // 주문 상태 (승인)
     }
 
-    // 주문 취소
-    public void cancel( ) {
-        if (this.orderstatus == OrderStatus.CANCELLED){
-            throw new IllegalArgumentException("이미 취소 된 주문입니다.");
+    // 주문 생성
+    public static Order create(UUID supplierId, UUID receiverId, Timestamp deadlineAt, BigDecimal totalPrice) {
+        return new Order(supplierId, receiverId, deadlineAt, totalPrice);
+    }
+
+    // 기한 수정
+    public void update(Timestamp deadlineAt) {
+        if (deadlineAt != null) {
+            this.deadlineAt = deadlineAt;
         }
-        if (this.deliveryStatus == DeliveryStatus.DELIVERING) {
-            throw  new IllegalArgumentException("배송 중인 주문은 취소할 수 없습니다.");
-        }
-        this.orderstatus = OrderStatus.CANCELLED;
-        this.deliveryStatus = DeliveryStatus.PENDING;
     }
 
-    // 주문 삭제
-    public  void delete(UUID id) {
-        super.softDelete(id);
-    }
-
-    // 주문 생성 계산 로직
-    public static Order create(
-            OrderRequestDto.CreateOrderRequest request,
-            BigDecimal totalPrice
-    ) {
-        Order order = new Order();
-        order.supplierId = request.getSupplierId();
-        order.receiverId = request.getReceiverId();
-        order.deadlineAt = request.getDeadlineAt();
-        order.totalPrice = totalPrice;
-        order.orderstatus = OrderStatus.CONFIRMED; // 초기 주문 상태
-        order.deliveryStatus = DeliveryStatus.PENDING; // 초기 배송 상태
-        return order;
-    }
-
-    public void update(OrderRequestDto.UpdateOrderRequest request) {
-        if (request.getDeadlineAt() != null) {
-            this.deadlineAt = request.getDeadlineAt();
-        }
+    // softDelete
+    public void delete(UUID deletedBy) {
+        this.softDelete(deletedBy);
     }
 }

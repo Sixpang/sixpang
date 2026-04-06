@@ -28,9 +28,14 @@ public class Inventory extends BaseEntity {
         }
     }
 
+    public Inventory(UUID productId){
+        this.productId = productId;
+        this.quantity = 0L;
+    }
+
     public Inventory(UUID productId, Long quantity) {
         if (quantity == null || quantity < 0) {
-            throw new RuntimeException("재고 수량은 0 이상이어야 합니다,");
+            throw new RuntimeException("재고 수량은 0 이상이어야 합니다.");
         }
         this.productId = productId;
         this.quantity = quantity;
@@ -45,7 +50,7 @@ public class Inventory extends BaseEntity {
         validateAmount(amount);
 
         if (this.quantity < amount) {
-            throw new RuntimeException("재고 부족");
+            throw new RuntimeException("재고가 부족합니다.");
         }
         this.quantity -= amount;
     }

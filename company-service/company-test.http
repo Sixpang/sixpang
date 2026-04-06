@@ -1,4 +1,4 @@
-@host = http://localhost:51729
+@host = http://localhost:53438
 @companyId = 3bfc578e-51bd-4a22-8926-7c368d23498a
 
 ### 업체 생성
@@ -34,3 +34,7 @@ Content-Type: application/json
 ### 업체 삭제
 DELETE {{host}}/api/companies/{{companyId}}
 Content-Type: application/json
+
+### 상품 목록 조회 (Page 그대로 응답)
+GET {{host}}/api/companies?page=0&size=999}
+Accept: application/json

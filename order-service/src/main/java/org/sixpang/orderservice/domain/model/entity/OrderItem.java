@@ -5,7 +5,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sixpang.commonserver.entity.BaseEntity;
-import org.sixpang.orderservice.presentation.dto.OrderRequestDto;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -30,21 +29,29 @@ public class OrderItem extends BaseEntity {
     private Integer count; // 수량
 
     // 주문 아이템 생성
+    // 순수한 값만 받기
+    private OrderItem(
+            UUID orderId,
+            UUID productId,
+            Integer count
+    ) {
+        this.orderId = orderId;
+        this.productId = productId;
+        this.count = count;
+    }
+
     public static OrderItem create(
             UUID orderId,
             UUID productId,
-            String productName,
-            BigDecimal productPrice,
             Integer count
     ) {
-        OrderItem orderItem = new OrderItem();
-        orderItem.orderId = orderId;
-        orderItem.productId = productId;
-        orderItem.productName = productName;
-        orderItem.productPrice = productPrice;
-        orderItem.count = count;
-        return  orderItem;
+        return new OrderItem(orderId, productId, count);
     }
+
+    public void delete(UUID deletedBy) {
+        this.softDelete(deletedBy);
+    }
+
 
     // 주문 아이템 수정
     public void update(
@@ -55,17 +62,5 @@ public class OrderItem extends BaseEntity {
         this.productName = productName;
         this.productPrice = productPrice;
         this.count = count;
-    }
-
-    public static OrderItem create(
-            UUID orderId,
-            OrderRequestDto.OrderItemRequest request
-    ) {
-        OrderItem item = new OrderItem();
-        item.orderId = orderId;
-        item.productId = request.getProductId();
-        item.count = request.getCount();
-        // productNAme, productPrice는 추후 상품 서비스 연동 시 채울 예정
-        return item;
     }
 }
