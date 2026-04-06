@@ -3,18 +3,19 @@ package org.sixpang.deliveryservice.application.messaging;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sixpang.deliveryservice.application.dto.OrderCreatedEvent;
-import org.sixpang.deliveryservice.application.service.service.DeliveryService;
+import org.sixpang.deliveryservice.application.service.service.DeliveryCreationService;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class DeliveryEventConsumer {
-    private final DeliveryService deliveryService;
+    private final DeliveryCreationService deliveryService;
 
     @KafkaListener(
             topics = "order-created-topic",
-            groupId = "delivery-service-group", // 배송 서비스 전용 그룹 ID
+            groupId = "delivery-service-group",
             containerFactory = "kafkaListenerContainerFactory"
     )
     public void consumeOrderCreated(OrderCreatedEvent event) {

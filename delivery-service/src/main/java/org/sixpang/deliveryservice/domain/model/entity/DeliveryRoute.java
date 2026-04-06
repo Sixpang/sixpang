@@ -2,6 +2,7 @@ package org.sixpang.deliveryservice.domain.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sixpang.commonserver.entity.BaseEntity;
@@ -72,6 +73,35 @@ public class DeliveryRoute extends BaseEntity {
 
         return route;
     }
+
+    @Builder
+    public DeliveryRoute(Delivery delivery, Integer hubSequence, UUID departureHub,
+                         UUID arrivalHub, UUID hubRouteId, BigDecimal estimatedDistance,
+                         Long estimatedTime, UUID hubDeliveryManagerId) {
+        this.delivery = delivery;
+        this.hubSequence = hubSequence;
+        this.departureHub = departureHub;
+        this.arrivalHub = arrivalHub;
+        this.hubRouteId = hubRouteId;
+        this.estimatedDistance = estimatedDistance;
+        this.estimatedTime = estimatedTime;
+        this.hubDeliveryManagerId = hubDeliveryManagerId;
+        this.status = DeliveryRouteStatus.HUB_WAITING;
+    }
+
+    public void setDelivery(Delivery delivery) {
+        this.delivery = delivery;
+    }
+
+    public void updateStatus(DeliveryRouteStatus status) {
+        this.status = status;
+    }
+
+    public void completeDelivery() {
+        this.actualAt = LocalDateTime.now();
+        this.status = DeliveryRouteStatus.DONE;
+    }
+
 
     private static void validateRouteData(DeliveryRouteCreateCommand command) {
         checkPositive(command.hubSequence(), DeliveryRouteErrorCode.INVALID_ROUTE_SEQUENCE);

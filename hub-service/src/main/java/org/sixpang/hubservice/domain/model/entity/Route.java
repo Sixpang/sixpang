@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @Entity
 @Getter
-@Table(name = "p_route")
+@Table(name = "p_route", schema = "hub_service")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Route extends BaseEntity {
     @Id
@@ -45,7 +45,7 @@ public class Route extends BaseEntity {
             String arrivalHubName,
             Long duration,
             BigDecimal distance
-    ){
+    ) {
         this.departureHubId = departureHubId;
         this.departureHubName = departureHubName;
         this.arrivalHubId = arrivalHubId;
@@ -54,7 +54,7 @@ public class Route extends BaseEntity {
         this.distance = distance;
     }
 
-    public static Route of(UUID departureHubId, String departureHubName, UUID arrivalHubId, String arrivalHubName, Long duration, BigDecimal distance){
+    public static Route of(UUID departureHubId, String departureHubName, UUID arrivalHubId, String arrivalHubName, Long duration, BigDecimal distance) {
         return Route.builder()
                 .departureHubId(departureHubId)
                 .departureHubName(departureHubName)
