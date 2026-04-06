@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @Entity
 @Getter
-@Table(name = "p_route")
+@Table(name = "p_route", schema = "route")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Route extends BaseEntity {
     @Id
