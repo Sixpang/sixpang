@@ -10,6 +10,6 @@ import java.util.UUID;
 @FeignClient(name = "user-service")
 public interface UserClient {
 
-    @GetMapping("/internal/users/{userId}/permission-info")
-    UserPermissionInfo getUserPermissionInfo(@PathVariable UUID userId);
+    @GetMapping("/api/users/internal/{id}")
+    UserPermissionInfo getUserPermissionInfo(@PathVariable("id") UUID id);
 }
