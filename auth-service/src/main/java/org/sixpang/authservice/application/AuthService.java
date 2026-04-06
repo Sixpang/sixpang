@@ -3,6 +3,7 @@ package org.sixpang.authservice.application;
 import lombok.RequiredArgsConstructor;
 import org.sixpang.authservice.application.client.UserClient;
 import org.sixpang.authservice.application.client.dto.UserAuthDto;
+import org.sixpang.authservice.application.client.dto.UserStatus;
 import org.sixpang.authservice.application.security.TokenService;
 import org.sixpang.authservice.presentation.dto.LoginRequestDto;
 import org.sixpang.authservice.presentation.dto.LoginResponseDto;
@@ -24,12 +25,14 @@ public class AuthService {
     /** 로그인 기능 **/
     // 1. 이메일을 기반으로 사용자 인증 정보 조회
     // 2. 입력한 비밀번호와 저장된 비밀번호 일치 여부 검증
-    // 3. 사용자 식별 정보로 JWT 토큰 생성
-    // 4. DTO의 정적 팩토리 메서드를 사용하여 응답 생성
+    // 3. 승인 상태 인지 검증
+    // 4. 사용자 식별 정보로 JWT 토큰 생성
+    // 5. DTO 응답 생성
     public LoginResponseDto login(LoginRequestDto request) {
 
         UserAuthDto user = findUser(request.getEmail());
         validatePassword(request.getPassword(), user.getPassword());
+        validateApproved(user);
         String accessToken = createAccessToken(user);
         return LoginResponseDto.of(user, accessToken);
     }
@@ -63,5 +66,17 @@ public class AuthService {
     //  사용자 ID와 권한을 기반으로 accessToken 생성
     private String createAccessToken(UserAuthDto user) {
         return tokenService.createToken(user.getId(), user.getRole());
+    }
+
+    //승인된 사용자만 로그인 가능
+    private void validateApproved(UserAuthDto user) {
+
+        if (user.getStatus().isRejected()) {
+            throw new AuthException(AuthErrorCode.REJECTED_USER);
+        }
+
+        if (!user.getStatus().isApproved()) {
+            throw new AuthException(AuthErrorCode.NOT_APPROVED);
+        }
     }
 }

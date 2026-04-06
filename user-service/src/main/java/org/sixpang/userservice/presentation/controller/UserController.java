@@ -11,6 +11,7 @@ import org.sixpang.userservice.application.dto.query.AuthUser;
 import org.sixpang.userservice.application.service.UserQueryService;
 import org.sixpang.userservice.application.service.UserService;
 import org.sixpang.commonserver.enums.UserRole;
+import org.sixpang.userservice.domain.model.entity.UserStatusHistory;
 import org.sixpang.userservice.domain.model.enums.UserStatus;
 import org.sixpang.userservice.exception.UserErrorCode;
 import org.sixpang.userservice.exception.UserException;
@@ -272,6 +273,20 @@ public class UserController {
                                 dto.getStatus().name()
                         )
                 )
+        );
+    }
+
+    /**회원 상태 변경 이력 조회**/
+    @PreAuthorize("hasAnyRole('MASTER', 'HUB_MANAGER')")
+    @GetMapping("/{userId}/status-history")
+    public ResponseEntity<ApiResponse<List<UserStatusHistory>>> getStatusHistory(
+            @PathVariable UUID userId
+    ) {
+        List<UserStatusHistory> history =
+                userQueryService.getStatusHistory(userId);
+
+        return ResponseEntity.ok(
+                ApiResponse.of("회원 상태 이력 조회 성공", history)
         );
     }
 
