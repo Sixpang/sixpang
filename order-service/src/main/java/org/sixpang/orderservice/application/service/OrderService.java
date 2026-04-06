@@ -1,33 +1,28 @@
 package org.sixpang.orderservice.application.service;
 
-import org.sixpang.orderservice.presentation.dto.OrderRequestDto;
-import org.sixpang.orderservice.presentation.dto.OrderResponseDto;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.sixpang.commonserver.response.PageResponse;
+import org.sixpang.orderservice.presentation.dto.CreateOrderRequest;
+import org.sixpang.orderservice.presentation.dto.OrderDetailResponse;
+import org.sixpang.orderservice.presentation.dto.OrderResponse;
+import org.sixpang.orderservice.presentation.dto.UpdateOrderRequest;
 
 import java.util.UUID;
 
+
 public interface OrderService {
 
-    // 주문 생성
-    OrderResponseDto.OrderDetailResponse createOrder(OrderRequestDto.CreateOrderRequest request);
+    OrderDetailResponse createOrder(CreateOrderRequest request);
 
-    // 주문 단건 조회
-    OrderResponseDto.OrderDetailResponse getOrder(UUID orderID);
+    OrderDetailResponse getOrder(UUID orderId);
 
-    // 주문 전체 목록 조회 (MASTER)
-    Page<OrderResponseDto.OrderResponse> getOrders(Pageable pageable);
+    PageResponse<OrderResponse> getOrders(int page, int size, String sortBy, String sortDir);
 
-    // 공급 업체별 주문 목록 조회
-    Page<OrderResponseDto.OrderResponse> getOrdersBySupplierId(UUID supplierId, Pageable pageable);
+    PageResponse<OrderResponse> getOrdersBySupplierId(UUID supplierId, int page, int size, String sortBy, String sortDir);
 
-    // 수령 업체별 주문 목록 조회
-    Page<OrderResponseDto.OrderResponse> getOrdersByreceiverId(UUID receiverId, Pageable pageable);
+    PageResponse<OrderResponse> getOrdersByReceiverId(UUID receiverId, int page, int size, String sortBy, String sortDir);
 
-    // 주문 수정
-    OrderResponseDto.OrderDetailResponse updateOrder(UUID orderId, OrderRequestDto.UpdateOrderRequest request);
+    OrderDetailResponse updateOrder(UUID orderId, UpdateOrderRequest request);
 
-    // 주문 삭제 (softDelete)
-    void deleteOrder(UUID orderID, UUID deletedBy);
-
+    void deleteOrder(UUID orderId, UUID deletedBy);
 }
+

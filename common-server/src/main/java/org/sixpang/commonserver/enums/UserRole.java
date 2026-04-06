@@ -1,6 +1,5 @@
-package org.sixpang.gatewayserver.common;
+package org.sixpang.commonserver.enums;
 
-/** 사용자 권한 enum */
 public enum UserRole {
     MASTER,           // 마스터 관리자
     HUB_MANAGER,      // 허브 관리자

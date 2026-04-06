@@ -3,10 +3,14 @@ package org.sixpang.userservice.application.service;
 import lombok.RequiredArgsConstructor;
 import org.sixpang.userservice.application.dto.UserServiceDto;
 import org.sixpang.userservice.domain.model.entity.User;
+import org.sixpang.commonserver.enums.UserRole;
+import org.sixpang.userservice.domain.model.entity.UserStatusHistory;
 import org.sixpang.userservice.domain.model.enums.UserStatus;
 import org.sixpang.userservice.domain.repository.UserRepository;
+import org.sixpang.userservice.domain.repository.UserStatusHistoryRepository;
 import org.sixpang.userservice.exception.UserErrorCode;
 import org.sixpang.userservice.exception.UserException;
+import org.sixpang.userservice.infrastructure.client.HubServiceClient;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +25,9 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserStatusHistoryRepository userStatusHistoryRepository;
+    private final HubServiceClient hubServiceClient;
+    private final HubServiceClient companyServiceClient;
 
 
     /**회원 가입**/
@@ -28,6 +35,36 @@ public class UserService {
 
         //코드 리뷰:중복 검사 로직을 메서드 로 분리 하여 가독성 개선
         validateDuplicateUser(dto);
+
+        //허브id 나 업체id 둘중에 하나는 입력해야함
+        validateRoleTarget(dto);
+
+        // TODO: 허브 서비스 연동 후 활성화
+        // - hub-service exists API 호출
+        // - 존재하지 않으면 INVALID_HUB 예외
+        /*
+        if (dto.getHubId() != null) {
+            boolean exists = hubServiceClient.exists(dto.getHubId());
+            System.out.println("허브 존재 여부: " + exists);
+
+            if (!exists) {
+                throw new UserException(UserErrorCode.INVALID_HUB);
+            }
+        }
+        */
+
+        // TODO: 업체 서비스 연동 후 활성화
+        // - company-service exists API 호출
+        // - 존재하지 않으면 INVALID_COMPANY 예외
+        /*
+        if (dto.getCompanyId() != null) {
+            boolean exists = companyServiceClient.exists(dto.getCompanyId());
+
+            if (!exists) {
+                throw new UserException(UserErrorCode.INVALID_COMPANY);
+            }
+        }
+        */
 
         // 비밀 번호 암호화
         String encodedPassword = passwordEncoder.encode(dto.getPassword());
@@ -43,7 +80,9 @@ public class UserService {
     }
 
     /**회원 정보 수정**/
-    public void updateUser(UUID userId, UserServiceDto.Update dto) {
+    public void updateUser(UUID userId, UUID currentUserId, UserRole role, UserServiceDto.Update dto) {
+
+        validateAccess(userId, currentUserId, role);
 
         User user = findUser(userId);
 
@@ -61,7 +100,9 @@ public class UserService {
     }
 
     /**비밀번호 변경 **/
-    public void changePassword(UUID userId, UserServiceDto.ChangePassword dto) {
+    public void changePassword(UUID userId, UUID currentUserId, UserRole role, UserServiceDto.ChangePassword dto) {
+
+        validateAccess(userId, currentUserId, role);
 
         User user = findUser(userId);
 
@@ -90,10 +131,17 @@ public class UserService {
         } else {
             throw new UserException(UserErrorCode.INVALID_STATUS);
         }
+
+        // 상태 변경 이력 저장 추가
+        userStatusHistoryRepository.save(
+                new UserStatusHistory(userId, status, null)
+        );
     }
 
     /**회원삭제**/
-    public void deleteUser(UUID userId, UUID currentUserId) {
+    public void deleteUser(UUID userId, UUID currentUserId, UserRole role) {
+
+        validateAccess(userId, currentUserId, role);
 
         User user = findUser(userId);
 
@@ -126,6 +174,32 @@ public class UserService {
         // 전화 번호 중복 체크 (코드 리뷰:예외 처리 조건이 명확 하게 드러나도록 분기문 유지)
         if (isAlreadyExistsPhone(dto.getPhone())) {
             throw new UserException(UserErrorCode.EXISTS_PHONE);
+        }
+    }
+
+    //권한 체크 메서드
+    private void validateAccess(UUID targetUserId, UUID currentUserId, UserRole role) {
+        if (!targetUserId.equals(currentUserId) && role != UserRole.MASTER) {
+            throw new UserException(UserErrorCode.FORBIDDEN);
+        }
+    }
+
+    private void validateRoleTarget(UserServiceDto.SignUp dto) {
+
+        // TODO: 현재는 입력값 검증만 수행
+        // - 추후 Feign 연동 후 실제 허브/업체 존재 여부 검증 추가 예정
+
+        boolean hasHub = dto.getHubId() != null;
+        boolean hasCompany = dto.getCompanyId() != null;
+
+        // 둘 다 없으면 에러
+        if (!hasHub && !hasCompany) {
+            throw new UserException(UserErrorCode.INVALID_AFFILIATION_REQUIRED);
+        }
+
+        // 둘 다 있으면 에러
+        if (hasHub && hasCompany) {
+            throw new UserException(UserErrorCode.INVALID_AFFILIATION_DUPLICATE);
         }
     }
 }

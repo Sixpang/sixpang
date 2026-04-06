@@ -5,7 +5,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sixpang.commonserver.entity.BaseEntity;
-import org.sixpang.userservice.domain.model.enums.UserRole;
+import org.sixpang.commonserver.enums.UserRole;
 import org.sixpang.userservice.domain.model.enums.UserStatus;
 import org.sixpang.userservice.exception.UserErrorCode;
 import org.sixpang.userservice.exception.UserException;
