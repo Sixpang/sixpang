@@ -20,7 +20,7 @@ public class RouteController {
 
     @GetMapping("/available")
     public ResponseEntity<ApiResponse<List<AvailableRouteResponseDto>>> getAvailableRoutes(
-            @RequestParam("departureHubId") UUID departureHubId) {
+            @RequestParam UUID departureHubId) {
 
         List<AvailableRouteResponseDto> responseDto = routeService.getAvailableRoutes(departureHubId);
         return ResponseEntity.ok(ApiResponse.of("허브에서 이동 가능한 경로 목록이 조회되었습니다.", responseDto));
@@ -28,8 +28,8 @@ public class RouteController {
 
     @GetMapping("/direct")
     public ResponseEntity<ApiResponse<DirectRouteResponseDto>> getDirectRoute(
-            @RequestParam("departureHubId") UUID departureHubId,
-            @RequestParam("arrivalHubId") UUID arrivalHubId) {
+            @RequestParam UUID departureHubId,
+            @RequestParam UUID arrivalHubId) {
 
         DirectRouteResponseDto responseDto = routeService.getDirectRoutes(departureHubId, arrivalHubId);
         return ResponseEntity.ok(ApiResponse.of("두 허브 간 경로가 조회되었습니다.", responseDto));
@@ -37,8 +37,8 @@ public class RouteController {
 
     @GetMapping("/optimal")
     public ResponseEntity<ApiResponse<OptimalRouteResponseDto>> findOptimalRoute(
-            @RequestParam("departureHubId") UUID departureHubId,
-            @RequestParam("arrivalHubId") UUID arrivalHubId) {
+            @RequestParam UUID departureHubId,
+            @RequestParam UUID arrivalHubId) {
 
         OptimalRouteResponseDto responseDto = routeService.findOptimalRoute(departureHubId, arrivalHubId);
         return ResponseEntity.ok(ApiResponse.of("최적 이동 경로가 조회되었습니다.", responseDto));
