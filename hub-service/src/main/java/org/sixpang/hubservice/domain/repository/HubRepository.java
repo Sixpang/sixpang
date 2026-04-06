@@ -16,5 +16,7 @@ public interface HubRepository {
 
     Page<Hub> findAllByDeletedAtIsNull(Pageable pageable);
 
+    Optional<Hub> findAllByDeletedAtIsNull();
+
     Hub save(Hub hub);
 }
