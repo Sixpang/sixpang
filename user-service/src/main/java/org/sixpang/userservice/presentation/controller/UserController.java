@@ -128,11 +128,28 @@ public class UserController {
     }
 
     /**목록 조회**/
-    @PreAuthorize("hasRole('MASTER')")
+    @PreAuthorize("hasAnyRole('MASTER', 'HUB_MANAGER')")
     @GetMapping
-    public ResponseEntity<ApiResponse<PageResponseDto<List<UserResponseDto.UserResponse>>>> getUsers(Pageable pageable) {
+    public ResponseEntity<ApiResponse<PageResponseDto<List<UserResponseDto.UserResponse>>>> getUsers(
+            @RequestParam(required = false) UserStatus status,
+            Pageable pageable,
+            @AuthenticationPrincipal UserPrincipal user
+    ) {
 
-        Page<UserInfo> users = userQueryService.getUsers(pageable);
+        UserRole role = UserRole.valueOf(user.getRole());
+
+
+        if (status == null && role != UserRole.MASTER) {
+            throw new UserException(UserErrorCode.FORBIDDEN);
+        }
+
+        Page<UserInfo> users;
+
+        if (status != null) {
+            users = userQueryService.getUsersByStatus(status, pageable);
+        } else {
+            users = userQueryService.getUsers(pageable);
+        }
 
         List<UserResponseDto.UserResponse> content =
                 users.map(dto -> new UserResponseDto.UserResponse(

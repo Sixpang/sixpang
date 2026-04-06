@@ -6,6 +6,7 @@ import org.sixpang.userservice.application.dto.query.UserInfo;
 import org.sixpang.userservice.application.dto.query.AuthUser;
 import org.sixpang.userservice.domain.model.entity.User;
 import org.sixpang.userservice.domain.model.entity.UserStatusHistory;
+import org.sixpang.userservice.domain.model.enums.UserStatus;
 import org.sixpang.userservice.domain.repository.UserRepository;
 import org.sixpang.userservice.domain.repository.UserStatusHistoryRepository;
 import org.sixpang.userservice.exception.UserErrorCode;
@@ -44,7 +45,7 @@ public class UserQueryService {
                 .map(UserInfo::from);
     }
 
-    /** 로그인용 이메일 조회 (AuthService에서 사용) **/
+    /**로그인용 이메일 조회 (AuthService에서 사용)**/
     public AuthUser getUserByEmail(String email) {
 
         User user = userRepository.findByEmailAndDeletedAtIsNull(email)
@@ -53,7 +54,15 @@ public class UserQueryService {
         // 코드 리뷰: DTO 생성 책임을 DTO로 이동
         return AuthUser.from(user);
     }
-    /** 회원 상태 변경 이력 조회 **/
+
+    /**회원 상태 대기자 조회**/
+    public Page<UserInfo> getUsersByStatus(UserStatus status, Pageable pageable) {
+        return userRepository
+                .findAllByStatusAndDeletedAtIsNull(status, pageable)
+                .map(UserInfo::from);
+    }
+
+    /**회원 상태 변경 이력 조회**/
     public List<UserStatusHistory> getStatusHistory(UUID userId) {
         return userStatusHistoryRepository
                 .findByUserIdOrderByCreatedAtDesc(userId);

@@ -1,6 +1,7 @@
 package org.sixpang.userservice.infrastructure.repository;
 
 import org.sixpang.userservice.domain.model.entity.User;
+import org.sixpang.userservice.domain.model.enums.UserStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,4 +22,6 @@ public interface UserJpaRepository extends JpaRepository<User, UUID> {
     Optional<User> findByEmailAndDeletedAtIsNull(String email);
 
     Page<User> findAllByDeletedAtIsNull(Pageable pageable);
+
+    Page<User> findAllByStatusAndDeletedAtIsNull(UserStatus status, Pageable pageable);
 }
