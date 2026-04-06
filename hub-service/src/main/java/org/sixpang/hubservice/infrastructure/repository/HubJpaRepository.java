@@ -1,6 +1,7 @@
 package org.sixpang.hubservice.infrastructure.repository;
 
 import org.sixpang.hubservice.domain.model.entity.Hub;
+import org.sixpang.hubservice.domain.model.enums.HubStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,11 +13,11 @@ import java.util.UUID;
 public interface HubJpaRepository extends JpaRepository<Hub, UUID> {
     Optional<Hub> findByIdAndDeletedAtIsNull(UUID id);
 
-    Optional<Hub> findByNameAndDeletedAtIsNull(String name);
-
-    List<Hub> findAllByDeletedAtIsNull();
-
     boolean existsByNameAndDeletedAtIsNull(String name);
 
     Page<Hub> findAllByDeletedAtIsNull(Pageable pageable);
+
+    List<Hub> findAllByDeletedAtIsNull();
+
+    List<Hub> findAllByStatus(HubStatus status);
 }

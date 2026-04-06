@@ -2,6 +2,7 @@ package org.sixpang.hubservice.infrastructure.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.sixpang.hubservice.domain.model.entity.Hub;
+import org.sixpang.hubservice.domain.model.enums.HubStatus;
 import org.sixpang.hubservice.domain.repository.HubRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,11 +23,6 @@ public class HubRepositoryImpl implements HubRepository {
     }
 
     @Override
-    public Optional<Hub> findByNameAndDeletedAtIsNull(String name){
-        return hubJpaRepository.findByNameAndDeletedAtIsNull(name);
-    }
-
-    @Override
     public List<Hub> findAllByDeletedAtIsNull(){
         return hubJpaRepository.findAllByDeletedAtIsNull();
     }
@@ -39,6 +35,11 @@ public class HubRepositoryImpl implements HubRepository {
     @Override
     public Page<Hub> findAllByDeletedAtIsNull(Pageable pageable){
         return hubJpaRepository.findAllByDeletedAtIsNull(pageable);
+    }
+
+    @Override
+    public List<Hub> findAllByStatus(HubStatus status){
+        return hubJpaRepository.findAllByStatus(status);
     }
 
     @Override
