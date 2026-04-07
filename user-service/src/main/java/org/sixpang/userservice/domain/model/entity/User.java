@@ -19,7 +19,7 @@ import java.util.UUID;
 public class User extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    //@GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(nullable = false, unique = true)
@@ -60,6 +60,9 @@ public class User extends BaseEntity {
             UUID companyId
     ) {
         User user = new User();
+
+        user.id = UUID.randomUUID(); //uuid 자동할당하면 시점문제때문에 회원 생성이 불가능
+
         user.email = email;
         user.password = password;
         user.name = name;
@@ -104,5 +107,10 @@ public class User extends BaseEntity {
     //회원 (논리적)삭제
     public void delete(UUID deletedBy) {
         super.softDelete(deletedBy);
+    }
+
+    // 회원 생성은 따로 만듬 ( Createby가 null이라서)
+    public void initCreatedBySelf() {
+        super.setCreatedBy(this.id);
     }
 }

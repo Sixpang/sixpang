@@ -40,7 +40,6 @@ public class UserService {
         //허브id 나 업체id 둘중에 하나는 입력해야함
         validateRoleTarget(dto);
 
-        // TODO: 업체, 허브 서비스 연동 후 활성화
         // 허브 존재 여부 검증(허브가 존재하지 않으면 예외처리)
 
         if (dto.getHubId() != null) {
@@ -55,7 +54,7 @@ public class UserService {
 
 
         // 업체 존재 여부 검증 (업체가 존재하지 않으면 예외처리)
-          if (dto.getCompanyId() != null) {
+        if (dto.getCompanyId() != null) {
             boolean exists = companyServiceClient.exists(dto.getCompanyId());
 
             if (!exists) {
@@ -70,12 +69,14 @@ public class UserService {
         // 코드 리뷰:DTO가 Entity 생성 책임을 갖도록 위임
         User user = dto.toEntity(encodedPassword);
 
+        // save 전에 createdBy 세팅
+        user.initCreatedBySelf();
+
         // 저장
         userRepository.save(user);
 
         return user.getId();
     }
-
     /**회원 정보 수정**/
     public void updateUser(UUID userId, UUID currentUserId, UserRole role, UserServiceDto.Update dto) {
 

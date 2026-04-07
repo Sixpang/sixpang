@@ -40,6 +40,10 @@ public abstract class BaseEntity {
     @Column(name = "deleted_by")
     private UUID deletedBy;
 
+    protected void setCreatedBy(UUID createdBy) {
+        this.createdBy = createdBy;
+    }
+
     //삭제자 UUID를 받기 전 테스트용
     protected void softDelete() {
         this.deletedAt = LocalDateTime.now();
