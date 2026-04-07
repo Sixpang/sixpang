@@ -41,7 +41,13 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         // 회원 가입 허용
         boolean isSignUp = path.equals("/api/users") && HttpMethod.POST.equals(method);
 
-        boolean isPublic = isLogin || isSignUp;
+        // Swagger 허용
+        boolean isSwagger = path.startsWith("/swagger-ui") ||
+                path.startsWith("/v3/api-docs") ||
+                path.startsWith("/docs") ||
+                path.startsWith("/webjars");
+
+        boolean isPublic = isLogin || isSignUp || isSwagger;
 
         // Authorization 헤더에서 토큰 추출
         String token = resolveToken(exchange);

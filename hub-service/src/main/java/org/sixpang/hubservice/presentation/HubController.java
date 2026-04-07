@@ -1,5 +1,7 @@
 package org.sixpang.hubservice.presentation;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.sixpang.commonserver.response.ApiResponse;
@@ -23,9 +25,17 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
+@Tag(name = "허브", description = "허브 관련 API")
 public class HubController {
     private final HubService hubService;
 
+    @Operation(
+            summary = "허브 등록",
+            description = "허브를 등록합니다. <br>" +
+                    "마스터 관리자만 접근 가능합니다. <br>" +
+                    "허브가 등록될 시 다른 허브가 존재할 경우 이동 경로가 생성됩니다. <br>" +
+                    "마스터 관리자 이외의 사용자는 허브를 등록할 수 없습니다."
+    )
     @PreAuthorize("hasRole('MASTER')")
     @PostMapping("/hubs")
     public ResponseEntity<ApiResponse<HubResponseDto>> register(

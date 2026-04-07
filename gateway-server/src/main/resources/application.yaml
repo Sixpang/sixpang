@@ -58,6 +58,72 @@ spring:
           predicates:
             - Path=/api/predictions/**
 
+      # ==========================================
+      # Swagger API 명세서 전용 라우트
+      # ==========================================
+        - id: user-service-docs
+          uri: lb://user-service
+          predicates:
+            - Path=/docs/user-service/**
+          filters:
+            - RewritePath=/docs/user-service/(?<segment>.*), /$\{segment}
+
+        - id: auth-service-docs
+          uri: lb://auth-service
+          predicates:
+            - Path=/docs/auth-service/**
+          filters:
+            - RewritePath=/docs/auth-service/(?<segment>.*), /$\{segment}
+
+        - id: order-service-docs
+          uri: lb://order-service
+          predicates:
+            - Path=/docs/order-service/**
+          filters:
+            - RewritePath=/docs/order-service/(?<segment>.*), /$\{segment}
+
+        - id: product-service-docs
+          uri: lb://product-service
+          predicates:
+            - Path=/docs/product-service/**
+          filters:
+            - RewritePath=/docs/product-service/(?<segment>.*), /$\{segment}
+
+        - id: company-service-docs
+          uri: lb://company-service
+          predicates:
+            - Path=/docs/company-service/**
+          filters:
+            - RewritePath=/docs/company-service/(?<segment>.*), /$\{segment}
+
+        - id: delivery-service-docs
+          uri: lb://delivery-service
+          predicates:
+            - Path=/docs/delivery-service/**
+          filters:
+            - RewritePath=/docs/delivery-service/(?<segment>.*), /$\{segment}
+
+        - id: hub-service-docs
+          uri: lb://hub-service
+          predicates:
+            - Path=/docs/hub-service/**
+          filters:
+            - RewritePath=/docs/hub-service/(?<segment>.*), /$\{segment}
+
+        - id: notification-service-docs
+          uri: lb://notification-service
+          predicates:
+            - Path=/docs/notification-service/**
+          filters:
+            - RewritePath=/docs/notification-service/(?<segment>.*), /$\{segment}
+
+        - id: prediction-service-docs
+          uri: lb://prediction-service
+          predicates:
+            - Path=/docs/prediction-service/**
+          filters:
+            - RewritePath=/docs/prediction-service/(?<segment>.*), /$\{segment}
+
 eureka:
   client:
     service-url:
@@ -70,3 +136,26 @@ eureka:
 jwt:
   secret: my-secret-key-my-secret-key-my-secret-key
   issuer: sixpang-auth
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - name: 유저 서비스 (User)
+        url: /docs/user-service/v3/api-docs
+      - name: 인증 서비스 (Auth)
+        url: /docs/auth-service/v3/api-docs
+      - name: 주문 서비스 (Order)
+        url: /docs/order-service/v3/api-docs
+      - name: 상품 서비스 (Product)
+        url: /docs/product-service/v3/api-docs
+      - name: 업체 서비스 (Company)
+        url: /docs/company-service/v3/api-docs
+      - name: 배송 서비스 (Delivery)
+        url: /docs/delivery-service/v3/api-docs
+      - name: 허브 서비스 (Hub)
+        url: /docs/hub-service/v3/api-docs
+      - name: 알림 서비스 (Notification)
+        url: /docs/notification-service/v3/api-docs
+      - name: AI 예측 서비스 (Prediction)
+        url: /docs/prediction-service/v3/api-docs
