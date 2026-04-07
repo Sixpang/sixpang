@@ -24,7 +24,6 @@ naver:
     id: ${NAVER_CLIENT_ID}
     secret: ${NAVER_CLIENT_SECRET}
 
-
 server:
   port: 0
 eureka:
@@ -34,3 +33,8 @@ eureka:
   instance:
     instance-id:
       ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
+
+springdoc:
+  packages-to-scan: org.sixpang.hubservice.presentation
+  swagger-ui:
+    disable-swagger-default-url: true
