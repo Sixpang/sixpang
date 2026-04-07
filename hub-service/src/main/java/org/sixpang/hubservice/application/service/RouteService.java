@@ -42,7 +42,9 @@ public class RouteService {
     @Transactional(readOnly = true)
     @Cacheable(value = "routes", key = "'available:' + #departureHubId")
     public List<AvailableRouteResponseDto> getAvailableRoutes(UUID departureHubId) {
-        List<Route> routes = routeRepository.findAllByDepartureHubIdAndDeletedAtIsNull(departureHubId);
+        validateHub(departureHubId);
+
+        List<Route> routes = routeRepository.findAllActiveRoutesByDepartureHubId(departureHubId);
 
         if (routes.isEmpty()) {
             throw new CustomException(RouteErrorCode.AVAILABLE_ROUTE_NOT_FOUND);
@@ -55,26 +57,35 @@ public class RouteService {
 
     // 특정 두 허브 간 직통 경로 조회 (거리, 시간)
     @Transactional(readOnly = true)
-    @Cacheable(value = "routes", key = "'direct:' + #startHubId + ':' + #goalHubId")
-    public DirectRouteResponseDto getDirectRoutes(UUID startHubId, UUID goalHubId) {
-        Route route = routeRepository.findByDepartureHubIdAndArrivalHubIdAndDeletedAtIsNull(startHubId, goalHubId)
+    @Cacheable(value = "routes", key = "'direct:' + #departureHubId + ':' + #arrivalHubId")
+    public DirectRouteResponseDto getDirectRoutes(UUID departureHubId, UUID arrivalHubId) {
+        validateHubs(departureHubId, arrivalHubId);
+
+        Route route = routeRepository.findByDepartureHubIdAndArrivalHubIdAndDeletedAtIsNull(departureHubId, arrivalHubId)
                 .orElseThrow(() -> new CustomException(RouteErrorCode.DIRECT_ROUTE_NOT_FOUND));
+
 
         return DirectRouteResponseDto.from(route);
     }
 
-    // 최적 이동 경로 조회 (다익스트라 : 200km 제약 조건)
+    /**
+     * 최적 경로 조회
+     * - 다익스트라 알고리즘 기반
+     * - 200km 제약 조건
+     */
     @Transactional(readOnly = true)
-    @Cacheable(value = "routes", key = "'optimal:' + #startHubId + ':' + #goalHubId")
+    @Cacheable(value = "routes", key = "'optimal:' + #departureHubId + ':' + #arrivalHubId")
     public OptimalRouteResponseDto findOptimalRoute(UUID departureHubId, UUID arrivalHubId) {
+        validateHubs(departureHubId, arrivalHubId);
 
         // 활성화된 모든 경로 조회 및 200km 미만 그래프 생성
-        List<Route> allRoutes = routeRepository.findAllByDeletedAtIsNull();
+        List<Route> allRoutes = routeRepository.findAllActiveRoutes();
 
         if (allRoutes.isEmpty()) {
             throw new CustomException(RouteErrorCode.OPTIMAL_ROUTE_NOT_FOUND);
         }
 
+        // 그래프 생성
         Map<UUID, List<Route>> graph = buildGraphUnderLimit(allRoutes);
 
         Map<UUID, BigDecimal> shortestDistance = new HashMap<>();
@@ -130,7 +141,7 @@ public class RouteService {
 
         Collections.reverse(path);
 
-        // 결과 DTO 조립
+        // 결과 DTO 생성
         BigDecimal totalDistance = BigDecimal.ZERO;
         long totalDuration = 0L;
 
@@ -172,7 +183,7 @@ public class RouteService {
         }
     }
 
-    // 특정 허브 비활성화/삭제 시 관련 경로 삭제
+    // 특정 허브 삭제 시 관련 경로 삭제
     @Transactional
     @CacheEvict(value = "routes", allEntries = true)
     public void disableRoutesForHub(UUID hubId, UUID userId) {
@@ -192,6 +203,7 @@ public class RouteService {
         return graph;
     }
 
+    // 다익스트라용 노드 클래스
     private static class NodeDistance {
         private final UUID hubId;
         private final BigDecimal distance;
@@ -226,7 +238,14 @@ public class RouteService {
             throw new CustomException(RouteErrorCode.ROUTE_GENERATION_FAILED);
         }
 
-        validateResponse(response);
+        if (response == null ||
+                response.route() == null ||
+                response.route().traoptimal() == null ||
+                response.route().traoptimal().isEmpty() ||
+                response.route().traoptimal().get(0).summary() == null) {
+
+            throw new CustomException(RouteErrorCode.NAVER_API_RESPONSE_INVALID);
+        }
 
         var summary = response.route().traoptimal().get(0).summary();
 
@@ -243,15 +262,30 @@ public class RouteService {
         routeRepository.save(route);
     }
 
-    private void validateResponse(DirectionsResponseDto response) {
+    // 허브 유효성 검증
+    private void validateHub(UUID departureHubId){
+        Hub departureHub = hubRepository.findByIdAndDeletedAtIsNull(departureHubId)
+                .orElseThrow(() -> new CustomException(HubErrorCode.HUB_NOT_FOUND));
 
-        if (response == null ||
-                response.route() == null ||
-                response.route().traoptimal() == null ||
-                response.route().traoptimal().isEmpty() ||
-                response.route().traoptimal().get(0).summary() == null) {
+        if (departureHub.getStatus() != HubStatus.ACTIVE) {
+            throw new CustomException(HubErrorCode.HUB_NOT_ACTIVE);
+        }
+    }
 
-            throw new CustomException(RouteErrorCode.NAVER_API_RESPONSE_INVALID);
+    // 출발, 도착 허브 유효성 검증
+    private void validateHubs(UUID departureHubId, UUID arrivalHubId) {
+        if (departureHubId.equals(arrivalHubId)) {
+            throw new CustomException(RouteErrorCode.SAME_HUB);
+        }
+
+        Hub departureHub = hubRepository.findByIdAndDeletedAtIsNull(departureHubId)
+                .orElseThrow(() -> new CustomException(HubErrorCode.HUB_NOT_FOUND));
+
+        Hub arrivalHub = hubRepository.findByIdAndDeletedAtIsNull(arrivalHubId)
+                .orElseThrow(() -> new CustomException(HubErrorCode.HUB_NOT_FOUND));
+
+        if (departureHub.getStatus() != HubStatus.ACTIVE || arrivalHub.getStatus() != HubStatus.ACTIVE) {
+            throw new CustomException(HubErrorCode.HUB_NOT_ACTIVE);
         }
     }
 }
