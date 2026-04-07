@@ -1,8 +1,15 @@
+# SIXPANG
+## 팀원
+| <img src="https://github.com/oni128.png" width="110"> | <img src="https://avatars.githubusercontent.com/u/120404242?v=4" width="110"> | <img src="https://github.com/soo96.png" width="110"> | <img src="https://github.com/jsh9057.png" width="110"> | <img src="https://github.com/hjk2132.png" width="110"> |
+| :-----------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: |
+| 조여진 | 김민진 | 김혜린 | 곽찬홍 | 한소연 |
+| 인증 / 인가<br>회원 | 허브 | 배송 | 업체<br>상품 | 주문 |
+| [<img width="460" height="460" alt="image" src="https://github.com/user-attachments/assets/09ef2083-5b28-41fe-9cb1-104256797ab5" />](https://github.com/guineacodes) | [<img src="https://img.shields.io/badge/Github-Link-181717?logo=Github">](https://github.com/gsemily) | [<img width="420" height="420" alt="image" src="https://github.com/user-attachments/assets/9ad62a07-78a4-4115-aac6-728e5a3e1fb1" />](https://github.com/kimhyerin-dev) | [<img width="420" height="420" alt="image" src="https://github.com/user-attachments/assets/ef1c1637-78cc-49e8-9a59-395c5f54da8c" />](https://github.com/chanhongkwak) | [<img width="420" height="420" alt="image" src="https://github.com/user-attachments/assets/a6faa46c-007d-4cde-983e-6d09fe3c62f8" />](https://github.com/soyeonnan?tab=repositories) |
+<br>
+
 ## 📌 프로젝트 소개
 
-six-pang은 여러 업체의 물류를 관리하고, 허브 기반으로 배송을 처리하는
-MSA(Microservice Architecture) 구조의 백엔드 시스템입니다.
-
+### six-pang은 여러 업체의 물류를 관리하고, 허브 기반으로 배송을 처리하는 MSA(Microservice Architecture) 구조의 백엔드 시스템입니다.
 
 * 허브 중심 물류 관리
 * 주문 기반 재고 차감 및 복구
@@ -13,7 +20,7 @@ MSA(Microservice Architecture) 구조의 백엔드 시스템입니다.
 
 ### Backend
 
-* Java 21
+* Java 17
 * Spring Boot
 * Spring Cloud (Eureka, Gateway)
 
@@ -27,6 +34,20 @@ MSA(Microservice Architecture) 구조의 백엔드 시스템입니다.
 * Docker
 * GitHub
 
+| 분류          | 상세                                                    |
+|---------------|---------------------------------------------------------|
+| IDE           | IntelliJ IDEA                                           |
+| Language      | Java17                                                  |
+| Framework     | Spring Boot 3.5.11                                      |
+| Build Tool    | Gradle                                                  |
+| Spring Module | Spring Cloud                                            |
+| DevOps        | Docker, Docker Compose                                  |
+| DB            | PostgreSQL                                              |
+| Security      | Spring Security, JWT (jjwt 0.12.7)                      |
+| Cache         | Redis                                                   |
+| Testing       | JUnit 5, Testcontainers                                 |
+| Documentation | Swagger                                                 |
+
 ---
 
 ## 🏗 아키텍처
@@ -34,6 +55,7 @@ MSA(Microservice Architecture) 구조의 백엔드 시스템입니다.
 * API Gateway
 * Eureka Server (Service Discovery)
 * User Service
+* Auth Service
 * Order Service
 * Delivery Service
 * Hub Service
@@ -82,26 +104,108 @@ chore: gitignore 설정
 
 ---
 
-## 📂 프로젝트 구조 (예정)
+## 📂 프로젝트 구조
 
-```
-six-pang/
- ┣ eureka-server/
- ┣ gateway/
- ┣ user-service/
- ┣ order-service/
- ┣ delivery-service/
- ┗ hub-service/
+```text
+📂 sixpang (Root)
+ ┣ 📂 auth-service
+ ┣ 📂 common-server
+ ┃ ┗ 📂 src/main/java/org/sixpang/commonserver
+ ┃ ┃ ┣ 📂 config
+ ┃ ┃ ┃ ┣ 📄 JpaConfig.java
+ ┃ ┃ ┃ ┣ 📄 RedisConfig.java
+ ┃ ┃ ┃ ┗ 📄 WebMvcConfig.java
+ ┃ ┃ ┣ 📂 entity
+ ┃ ┃ ┃ ┗ 📄 BaseEntity.java
+ ┃ ┃ ┣ 📂 global
+ ┃ ┃ ┃ ┣ 📄 CustomException.java
+ ┃ ┃ ┃ ┣ 📄 GlobalErrorCode.java
+ ┃ ┃ ┃ ┗ 📄 GlobalExceptionHandler.java
+ ┃ ┃ ┣ 📂 response
+ ┃ ┃ ┃ ┗ 📄 ApiResponse.java
+ ┃ ┃ ┗ 📂 security
+ ┣ 📂 company-service
+ ┣ 📂 delivery-service
+ ┣ 📂 eureka-server
+ ┣ 📂 gateway-server
+ ┣ 📂 hub-service
+ ┃ ┗ 📂 src/main/java/org/sixpang/hubservice
+ ┃ ┃ ┣ 📄 HubServiceApplication.java
+ ┃ ┃ ┣ 📂 application
+ ┃ ┃ ┃ ┣ 📂 dto
+ ┃ ┃ ┃ ┃ ┣ 📄 HubRequestDto.java
+ ┃ ┃ ┃ ┃ ┣ 📄 HubResponseDto.java
+ ┃ ┃ ┃ ┃ ┣ 📄 OptimalRouteResponseDto.java
+ ┃ ┃ ┃ ┃ ┗ 📄 PathResponse.java
+ ┃ ┃ ┃ ┗ 📂 service
+ ┃ ┃ ┃   ┣ 📄 HubService.java
+ ┃ ┃ ┃   ┗ 📄 RouteService.java
+ ┃ ┃ ┣ 📂 domain
+ ┃ ┃ ┃ ┣ 📂 model
+ ┃ ┃ ┃ ┃ ┣ 📂 entity
+ ┃ ┃ ┃ ┃ ┃ ┣ 📄 Hub.java
+ ┃ ┃ ┃ ┃ ┃ ┗ 📄 Route.java
+ ┃ ┃ ┃ ┃ ┗ 📂 enums
+ ┃ ┃ ┃ ┗ 📂 repository
+ ┃ ┃ ┃   ┣ 📄 HubRepository.java
+ ┃ ┃ ┃   ┗ 📄 RouteRepository.java
+ ┃ ┃ ┣ 📂 infrastructure
+ ┃ ┃ ┃ ┣ 📂 repository
+ ┃ ┃ ┃ ┃ ┣ 📄 HubJpaRepository.java
+ ┃ ┃ ┃ ┃ ┣ 📄 HubRepositoryImpl.java
+ ┃ ┃ ┃ ┃ ┣ 📄 RouteJpaRepository.java
+ ┃ ┃ ┃ ┃ ┗ 📄 RouteRepositoryImpl.java
+ ┃ ┃ ┃ ┗ 📄 NaverMapFeignClient.java
+ ┃ ┃ ┗ 📂 presentation
+ ┃ ┃ ┃ ┗ 📂 controller
+ ┃ ┃ ┃   ┣ 📄 HubController.java
+ ┃ ┃ ┃   ┗ 📄 RouteController.java
+ ┃ ┗ 📂 resources
+ ┃ ┃ ┗ 📄 application.yaml
+ ┣ 📂 notification-service
+ ┣ 📂 order-service
+ ┣ 📂 prediction-service
+ ┣ 📂 product-service
+ ┣ 📄 build.gradle
+ ┗ 📄 settings.gradle
 ```
 
 ---
 
-## 📌 향후 계획
+## 실행 방법
 
-* Eureka Server 구축
-* Gateway 라우팅 구성
-* 서비스별 도메인 분리
-* Redis 캐싱 적용
-* Docker 기반 배포
+### 1. 프로젝트 클론
+
+```bash
+git clone https://github.com/Sixpang/sixpang.git
+cd sixpang
+```
+### 2. 환경 설정
+
+**`application.yml` 또는 `.env` 파일에 아래 환경 변수를 설정하세요.**
+
+```properties
+# 🗄️ Database (PostgreSQL)
+DB_NAME=hub
+DB_URL=jdbc:postgresql://localhost:5432/sixpang
+DB_USER=<POSTGRES_USER>
+DB_PASSWORD=<POSTGRES_PASSWORD>
+
+# 🗺️ NAVER Map API
+NAVER_CLIENT_ID=<YOUR_NAVER_CLIENT_ID>
+NAVER_CLIENT_SECRET=<YOUR_CLIENT_SECRET>
+DIRECTIONS_URL=https://maps.apigw.ntruss.com
+
+```
+
+### 3. Docker로 PostgreSQL · Redis 실행
+```bash
+docker compose up -d
+```
+### 4. 애플리케이션 실행
+
+```bash
+./gradlew bootRun
+```
 
 ---
