@@ -80,7 +80,6 @@ public class DeliveryController {
     // 배송 담당자 배정 (허브)
     @PostMapping("/assign/hub")
     public ResponseEntity<DeliveryManagerResponse> assignHubManager() {
-        // 배정 로직에 권한이 필요하다면 여기에 @RequestHeader를 추가하세요.
         return ResponseEntity.ok(DeliveryManagerResponse.fromHub(
                 deliveryManagerService.assignHubManager()));
     }

@@ -23,46 +23,42 @@ public class DeliveryManagerController {
     // 생성
     @PostMapping
     public ResponseEntity<DeliveryManagerResponse> create(
-            @RequestBody @Valid DeliveryManagerCreateRequest request
-            // 수정예약: 회원 인증/인가 완성 후 수정
+            @RequestBody @Valid DeliveryManagerCreateRequest request,
+            @RequestHeader("X-User-Role") String role,
+            @RequestHeader("X-User-Id") UUID userId
     ) {
-        String role = "MASTER";
-        UUID requestUserId = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        return ResponseEntity.status(HttpStatus.CREATED).body(deliveryManagerService.create(request, role, requestUserId));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(deliveryManagerService.create(request, role, userId));
     }
 
     // 상세조회
     @GetMapping("/{managerId}")
     public ResponseEntity<DeliveryManagerResponse> getById(
             @PathVariable UUID managerId,
-            @RequestParam DeliveryManagerType type
+            @RequestParam DeliveryManagerType type,
+            @RequestHeader("X-User-Role") String role,
+            @RequestHeader("X-User-Id") UUID userId
     ) {
-        // 수정예약: 회원 인증/인가 완성 후 수정
-        String role = "MASTER";
-        UUID requestUserId = UUID.fromString("00000000-0000-0000-0000-000000000000");
-
-        return ResponseEntity.ok(deliveryManagerService.getById(managerId, type, role, requestUserId));
+        return ResponseEntity.ok(deliveryManagerService.getById(managerId, type, role, userId));
     }
 
     // 수정
     @PatchMapping("/{managerId}")
     public ResponseEntity<DeliveryManagerResponse> update(
             @PathVariable UUID managerId,
-            @RequestParam DeliveryManagerType type, // 어떤 레포지터리를 볼지 결정하는 기준
-            @RequestBody @Valid DeliveryManagerUpdateRequest request
+            @RequestParam DeliveryManagerType type,
+            @RequestBody @Valid DeliveryManagerUpdateRequest request,
+            @RequestHeader("X-User-Role") String role,
+            @RequestHeader("X-User-Id") UUID userId,
+            @RequestHeader(value = "X-Hub-Id", required = false) UUID hubId
     ) {
-        // 수정예약: 회원 인증/인가 완성 후 수정
-        String role = "MASTER";
-        UUID requestUserId = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        UUID requestHubId = null;
-
         DeliveryManagerResponse response = deliveryManagerService.update(
                 managerId,
                 type,
                 request,
                 role,
-                requestUserId,
-                requestHubId
+                userId,
+                hubId
         );
 
         return ResponseEntity.ok(response);
@@ -72,24 +68,23 @@ public class DeliveryManagerController {
     @DeleteMapping("/{managerId}")
     public ResponseEntity<Void> delete(
             @PathVariable UUID managerId,
-            @RequestParam DeliveryManagerType type
+            @RequestParam DeliveryManagerType type,
+            @RequestHeader("X-User-Role") String role,
+            @RequestHeader("X-User-Id") UUID userId,
+            @RequestHeader(value = "X-Hub-Id", required = false) UUID hubId
     ) {
-        // 수정예약: 회원 인증/인가 완성 후 수정
-        String role = "MASTER";
-        UUID requestUserId = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        UUID requestHubId = null;
-
-        deliveryManagerService.delete(managerId, type, role, requestUserId, requestHubId);
+        deliveryManagerService.delete(managerId, type, role, userId, hubId);
         return ResponseEntity.noContent().build();
     }
 
-    //배송 담당자 배정
+    // 배송 담당자 배정 (허브)
     @PostMapping("/assign/hub")
     public ResponseEntity<DeliveryManagerResponse> assignHubManager() {
         return ResponseEntity.ok(DeliveryManagerResponse.fromHub(
                 deliveryManagerService.assignHubManager()));
     }
 
+    // 배송 담당자 배정 (업체)
     @PostMapping("/assign/company")
     public ResponseEntity<DeliveryManagerResponse> assignCompanyManager(
             @RequestParam UUID hubId
