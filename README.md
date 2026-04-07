@@ -7,14 +7,14 @@
 | [<img src="https://img.shields.io/badge/Github-Link-181717?logo=Github">](https://github.com/guineacodes) | [<img src="https://img.shields.io/badge/Github-Link-181717?logo=Github">](https://github.com/gsemily) | [<img src="https://img.shields.io/badge/Github-Link-181717?logo=Github">](https://github.com/kimhyerin-dev) | [<img src="https://img.shields.io/badge/Github-Link-181717?logo=Github">](https://github.com/chanhongkwak) | [<img src="https://img.shields.io/badge/Github-Link-181717?logo=Github">](https://github.com/soyeonnan?tab=repositories) |
 <br>
 
-## 📌 프로젝트 소개
+# 📌 프로젝트 소개
 
-### six-pang은 여러 업체의 물류를 관리하고, 허브 기반으로 배송을 처리하는 MSA(Microservice Architecture) 구조의 백엔드 시스템입니다.
+### Sixpang은 여러 업체의 물류를 관리하고, 허브 기반으로 배송을 처리하는 MSA(Microservice Architecture) 구조의 백엔드 시스템입니다.
 
-* 허브 중심 물류 관리
-* 주문 기반 재고 차감 및 복구
-* 배송 경로 및 담당자 관리
-* MSA 기반 확장 가능한 구조
+- 허브 중심 물류 관리
+- 주문 기반 재고 차감 및 복구
+- 배송 경로 및 담당자 관리
+- MSA 기반 확장 가능한 구조
 
 ## 🛠 기술 스택
 
