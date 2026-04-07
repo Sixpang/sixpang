@@ -31,7 +31,7 @@ Authorization: Bearer {{accessToken}}
 GET {{host}}/api/users?page=0&size=10
 Authorization: Bearer {{accessToken}}
 
-### 대기 상태인 회원 목록 조회
+### 대기 상태인 회원 목록 조회(마스터,해당 소속 허브 허브매니저 가능)
 GET {{host}}/api/users?status=PENDING&page=0&size=10
 Authorization: Bearer {{accessToken}}
 
@@ -59,7 +59,7 @@ Authorization: Bearer {{accessToken}}
 }
 
 
-### 4. 상태 관리 (마스터, 허브매니저)
+### 4. 상태 관리 (마스터, 해당 허브 소속 허브매니저)
 
 ### 회원 승인
 PATCH {{host}}/api/users/{{userId}}/status?status=APPROVED

@@ -40,9 +40,8 @@ public class UserService {
         //허브id 나 업체id 둘중에 하나는 입력해야함
         validateRoleTarget(dto);
 
-        // TODO: 업체, 허브 서비스 연동 후 활성화
         // 허브 존재 여부 검증(허브가 존재하지 않으면 예외처리)
-        /*
+
         if (dto.getHubId() != null) {
             boolean exists = hubServiceClient.exists(dto.getHubId());
             System.out.println("허브 존재 여부: " + exists);
@@ -51,17 +50,17 @@ public class UserService {
                 throw new UserException(UserErrorCode.INVALID_HUB);
             }
         }
-        */
+
 
 
         // 업체 존재 여부 검증 (업체가 존재하지 않으면 예외처리)
-         /* if (dto.getCompanyId() != null) {
+        if (dto.getCompanyId() != null) {
             boolean exists = companyServiceClient.exists(dto.getCompanyId());
 
             if (!exists) {
                 throw new UserException(UserErrorCode.INVALID_COMPANY);
             }
-        }*/
+        }
 
         // 비밀 번호 암호화
         String encodedPassword = passwordEncoder.encode(dto.getPassword());
@@ -70,12 +69,14 @@ public class UserService {
         // 코드 리뷰:DTO가 Entity 생성 책임을 갖도록 위임
         User user = dto.toEntity(encodedPassword);
 
+        // save 전에 createdBy 세팅
+        user.initCreatedBySelf();
+
         // 저장
         userRepository.save(user);
 
         return user.getId();
     }
-
     /**회원 정보 수정**/
     public void updateUser(UUID userId, UUID currentUserId, UserRole role, UserServiceDto.Update dto) {
 
@@ -117,14 +118,22 @@ public class UserService {
     /**회원 상태 변경(승인, 거절)**/
     // 코드 리뷰: 하드 코딩 문자열 제거 → UserStatus enum 사용
     // 코드 리뷰: 나중에 enum 관련 조건문을 쓰지 않아도 되는 추상 메서드 구현 방식 추후 설명 해주실 예정
-    public void changeStatus(UUID userId, UserStatus status) {
+    public void changeStatus(UUID userId,
+                             UUID currentUserId,
+                             UserRole currentUserRole,
+                             UserStatus status){
 
-        User user = findUser(userId);
+        User targetUser = findUser(userId);
+        User currentUser = findUser(currentUserId);
 
+        validateApprovePermission(currentUser, targetUser);
+
+
+        // 상태 변경
         if (status.isApproved()) {
-            user.approve();
+            targetUser.approve();
         } else if (status.isRejected()) {
-            user.reject();
+            targetUser.reject();
         } else {
             throw new UserException(UserErrorCode.INVALID_STATUS);
         }
@@ -198,5 +207,30 @@ public class UserService {
         if (hasHub && hasCompany) {
             throw new UserException(UserErrorCode.INVALID_AFFILIATION_DUPLICATE);
         }
+    }
+
+    private void validateApprovePermission(User currentUser, User targetUser) {
+
+        // 1. MASTER → 전체 허용
+        if (currentUser.getRole() == UserRole.MASTER) {
+            return;
+        }
+
+        // 2. HUB_MANAGER → 같은 허브만 가능
+        if (currentUser.getRole() == UserRole.HUB_MANAGER) {
+
+            if (currentUser.getHubId() == null || targetUser.getHubId() == null) {
+                throw new UserException(UserErrorCode.FORBIDDEN);
+            }
+
+            if (!currentUser.getHubId().equals(targetUser.getHubId())) {
+                throw new UserException(UserErrorCode.FORBIDDEN);
+            }
+
+            return;
+        }
+
+        // 3. 그 외는 전부 금지
+        throw new UserException(UserErrorCode.FORBIDDEN);
     }
 }

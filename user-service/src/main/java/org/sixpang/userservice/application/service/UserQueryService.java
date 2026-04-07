@@ -67,4 +67,12 @@ public class UserQueryService {
         return userStatusHistoryRepository
                 .findByUserIdOrderByCreatedAtDesc(userId);
     }
+
+    /**허브관리자는 해당 허브로 들어온 회원가입 요청만 승인가능 **/
+    public Page<UserInfo> getUsersByStatusAndHubId(UserStatus status, UUID hubId, Pageable pageable) {
+
+        return userRepository
+                .findAllByStatusAndHubIdAndDeletedAtIsNull(status, hubId, pageable)
+                .map(UserInfo::from);
+    }
 }

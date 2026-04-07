@@ -56,4 +56,14 @@ public class UserRepositoryImpl implements UserRepository {
     public Page<User> findAllByStatusAndDeletedAtIsNull(UserStatus status, Pageable pageable) {
         return userJpaRepository.findAllByStatusAndDeletedAtIsNull(status, pageable);
     }
+
+    @Override
+    public Page<User> findAllByStatusAndHubIdAndDeletedAtIsNull(
+            UserStatus status,
+            UUID hubId,
+            Pageable pageable
+    ) {
+        return userJpaRepository
+                .findAllByStatusAndHubIdAndDeletedAtIsNull(status, hubId, pageable);
+    }
 }

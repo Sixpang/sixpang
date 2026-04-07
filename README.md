@@ -9,8 +9,6 @@ MSA(Microservice Architecture) 구조의 백엔드 시스템입니다.
 * 배송 경로 및 담당자 관리
 * MSA 기반 확장 가능한 구조
 
----
-
 ## 🛠 기술 스택
 
 ### Backend

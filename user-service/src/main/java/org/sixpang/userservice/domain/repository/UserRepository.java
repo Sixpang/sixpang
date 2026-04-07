@@ -27,4 +27,10 @@ public interface UserRepository {
     Page<User> findAllByDeletedAtIsNull(Pageable pageable);
 
     Page<User> findAllByStatusAndDeletedAtIsNull(UserStatus status, Pageable pageable);
+
+    Page<User> findAllByStatusAndHubIdAndDeletedAtIsNull(
+            UserStatus status,
+            UUID hubId,
+            Pageable pageable
+    );
 }
