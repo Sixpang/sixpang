@@ -32,7 +32,7 @@ eureka:
     instance-id:
       ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
 
-#springdoc:
-#  packages-to-scan: org.sixpang.hubservice.presentation
-#  swagger-ui:
-#    disable-swagger-default-url: true
+springdoc:
+  packages-to-scan: org.sixpang.hubservice.presentation
+  swagger-ui:
+    disable-swagger-default-url: true
