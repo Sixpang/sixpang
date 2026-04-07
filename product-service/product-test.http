@@ -1,18 +1,6 @@
 
-POST http://localhost:61046/api/products
-Content-Type: application/json
-X-User-Id: 08826884-0166-433c-a90c-1739ef0749de
-X-User-Role: COMPANY_MANAGER
-
-{
-  "name": "product_test_02",
-  "price": 1000,
-  "companyId": "6fe4dfd8-eb19-49ba-8916-9ad33486a18b",
-  "hubId": "22222222-2222-2222-2222-222222222222"
-}
-
 ### 상품 단건 조회
-GET http://localhost:61046/api/products/f60e3ade-7d4f-4f1d-a58e-adfa75c796f4
+GET http://localhost:51858/api/products/a1e96e1b-18bb-4e37-937d-86777abde1ad
 X-User-Id: 08826884-0166-433c-a90c-1739ef0749de
 X-User-Role: COMPANY_MANAGER
 
@@ -58,3 +46,128 @@ X-User-Role: COMPANY_MANAGER
 DELETE http://localhost:61046/api/products/f60e3ade-7d4f-4f1d-a58e-adfa75c796f4
 X-User-Id: 08826884-0166-433c-a90c-1739ef0749de
 X-User-Role: COMPANY_MANAGER
+
+###
+POST http://localhost:51830/api/users
+Content-Type: application/json
+
+{
+  "email": "huba@test.com",
+  "password": "Abcd1234!",
+  "phone": "01012345678",
+  "name": "hubadminA",
+  "role": "HUB_MANAGER",
+  "hubId": "22222222-2222-2222-2222-222222222222",
+  "companyId": null
+}
+
+###
+GET http://localhost:51830/api/users/internal/1b9de924-8e91-460f-99e8-6e4981ca07f1
+
+###
+POST http://localhost:51858/api/products
+X-User-Id: 1b9de924-8e91-460f-99e8-6e4981ca07f1
+X-User-Role: HUB_MANAGER
+Content-Type: application/json
+
+{
+  "name": "hubAtest02",
+  "price": 1000,
+  "companyId": "6fe4dfd8-eb19-49ba-8916-9ad33486a18b",
+  "hubId": "22222222-2222-2222-2222-222222222222"
+}
+
+###
+POST http://localhost:51858/api/products
+X-User-Id: 1b9de924-8e91-460f-99e8-6e4981ca07f1
+X-User-Role: HUB_MANAGER
+Content-Type: application/json
+
+{
+  "name": "other_hub_auth_test",
+  "price": 1000,
+  "companyId": "64165583-9f54-46ff-9011-02ef1c3eb550",
+  "hubId": "66666666-6666-6666-6666-666666666666"
+}
+
+###
+POST http://localhost:51830/api/users
+Content-Type: application/json
+
+{
+  "email": "companya@test.com",
+  "password": "Abcd1234!",
+  "phone": "01012345670",
+  "name": "compadmin",
+  "role": "COMPANY_MANAGER",
+  "hubId": null,
+  "companyId": "6fe4dfd8-eb19-49ba-8916-9ad33486a18b"
+}
+
+###
+GET http://localhost:51830/api/users/internal/f12ffe12-7f42-40ef-a671-bb22e211faa7
+
+###
+POST http://localhost:51858/api/products
+X-User-Id: f12ffe12-7f42-40ef-a671-bb22e211faa7
+X-User-Role: COMPANY_MANAGER
+Content-Type: application/json
+
+{
+  "name": "companyAuthOk01",
+  "price": 1000,
+  "companyId": "6fe4dfd8-eb19-49ba-8916-9ad33486a18b",
+  "hubId": "22222222-2222-2222-2222-222222222222"
+}
+
+###
+POST http://localhost:51858/api/products
+X-User-Id: f12ffe12-7f42-40ef-a671-bb22e211faa7
+X-User-Role: COMPANY_MANAGER
+Content-Type: application/json
+
+{
+  "name": "companyAuthFail01",
+  "price": 1000,
+  "companyId": "64165583-9f54-46ff-9011-02ef1c3eb550",
+  "hubId": "66666666-6666-6666-6666-666666666666"
+}
+
+###
+POST http://localhost:51830/api/users
+Content-Type: application/json
+
+{
+  "email": "driver@test.com",
+  "password": "Abcd1234!",
+  "phone": "01012345671",
+  "name": "driver1",
+  "role": "DRIVER_MANAGER",
+  "hubId": "22222222-2222-2222-2222-222222222222",
+  "companyId": null
+}
+###
+GET http://localhost:51830/api/users/internal/668c66e4-5263-4504-b80d-7c991c5ed6ed
+
+###
+POST http://localhost:51858/api/products
+X-User-Id: 668c66e4-5263-4504-b80d-7c991c5ed6ed
+X-User-Role: DRIVER_MANAGER
+Content-Type: application/json
+
+{
+  "name": "driverFailTest01",
+  "price": 1000,
+  "companyId": "6fe4dfd8-eb19-49ba-8916-9ad33486a18b",
+  "hubId": "22222222-2222-2222-2222-222222222222"
+}
+
+###
+GET http://localhost:53863/api/products/c94e1604-bdeb-4fba-9e50-cabad262138f
+X-User-Id: 668c66e4-5263-4504-b80d-7c991c5ed6ed
+X-User-Role: DRIVER_MANAGER
+
+###
+GET http://localhost:53863/api/products?page=0&size=10
+X-User-Id: 668c66e4-5263-4504-b80d-7c991c5ed6ed
+X-User-Role: DRIVER_MANAGER

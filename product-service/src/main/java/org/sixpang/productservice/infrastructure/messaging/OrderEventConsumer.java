@@ -1,4 +1,4 @@
-package org.sixpang.productservice.infrastructure.messagin;
+package org.sixpang.productservice.infrastructure.messaging;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,11 +11,15 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class OrderEventConsumer {
 
-    @KafkaListener(
+    /*@KafkaListener(
             topics = "order-created-topic",
             groupId = "product-service-group"
             //containerFactory = "kafkaListenerContainerFactory"
     )
+
+     */
+
+
     public void consumeOrderCreatedEvent(OrderCreatedEvent event) {
         log.info("[Product Service] 주문 생성 이벤트 수신 - orderId={}", event.orderId());
 
