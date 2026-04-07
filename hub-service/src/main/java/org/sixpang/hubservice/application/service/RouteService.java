@@ -42,7 +42,7 @@ public class RouteService {
     @Transactional(readOnly = true)
     @Cacheable(value = "routes", key = "'available:' + #departureHubId")
     public List<AvailableRouteResponseDto> getAvailableRoutes(UUID departureHubId) {
-        List<Route> routes = routeRepository.findAllByDepartureHubIdAndDeletedAtIsNull(departureHubId);
+        List<Route> routes = routeRepository.findAllActiveRoutesByDepartureHubId(departureHubId);
 
         if (routes.isEmpty()) {
             throw new CustomException(RouteErrorCode.AVAILABLE_ROUTE_NOT_FOUND);
@@ -77,7 +77,7 @@ public class RouteService {
         validateHubs(departureHubId, arrivalHubId);
 
         // 활성화된 모든 경로 조회 및 200km 미만 그래프 생성
-        List<Route> allRoutes = routeRepository.findAllByDeletedAtIsNull();
+        List<Route> allRoutes = routeRepository.findAllActiveRoutes();
 
         if (allRoutes.isEmpty()) {
             throw new CustomException(RouteErrorCode.OPTIMAL_ROUTE_NOT_FOUND);
