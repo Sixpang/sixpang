@@ -21,6 +21,11 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
 
+springdoc:
+   packages-to-scan: org.sixpang.userservice.presentation
+   swagger-ui:
+     disable-swagger-default-url: true
+
 server:
   port: 0
 

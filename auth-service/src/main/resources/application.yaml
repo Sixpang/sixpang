@@ -11,6 +11,11 @@ spring:
 server:
   port: 0
 
+springdoc:
+  packages-to-scan: org.sixpang.authservice.presentation
+  swagger-ui:
+    disable-swagger-default-url: true
+
 eureka:
   client:
     service-url:
