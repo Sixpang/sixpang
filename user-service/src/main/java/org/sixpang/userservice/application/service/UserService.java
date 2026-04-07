@@ -42,7 +42,7 @@ public class UserService {
 
         // TODO: 업체, 허브 서비스 연동 후 활성화
         // 허브 존재 여부 검증(허브가 존재하지 않으면 예외처리)
-        /*
+
         if (dto.getHubId() != null) {
             boolean exists = hubServiceClient.exists(dto.getHubId());
             System.out.println("허브 존재 여부: " + exists);
@@ -51,7 +51,7 @@ public class UserService {
                 throw new UserException(UserErrorCode.INVALID_HUB);
             }
         }
-        */
+
 
 
         // 업체 존재 여부 검증 (업체가 존재하지 않으면 예외처리)
