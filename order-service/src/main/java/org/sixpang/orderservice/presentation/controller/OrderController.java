@@ -21,12 +21,6 @@ public class OrderController {
 
     private final OrderService orderService;
 
-//    @GetMapping("/order")
-//    public String createOrder() {
-//        orderService.createOrder();
-//        return "주문 생성 완료";
-//    }
-
     // 주문 생성 - 모든 로그인 사용자
     @PostMapping
     public ResponseEntity<ApiResponse<OrderDetailResponse>> createOrder(
