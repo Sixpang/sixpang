@@ -251,7 +251,7 @@ public class ProductService {
             }
         }
 
-        if ("DELIVERY_MANAGER".equals(role)) {
+        if ("DRIVER_MANAGER".equals(role)) {
             return;
         }
 
@@ -264,7 +264,7 @@ public class ProductService {
         if ("MASTER".equals(role)
                 || "HUB_MANAGER".equals(role)
                 || "COMPANY_MANAGER".equals(role)
-                || "DELIVERY_MANAGER".equals(role)) {
+                || "DRIVER_MANAGER".equals(role)) {
             return;
         }
 
