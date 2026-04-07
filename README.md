@@ -4,7 +4,6 @@
 | :-----------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: |
 | 조여진 | 김민진 | 김혜린 | 곽찬홍 | 한소연 |
 | 인증 / 인가<br>회원 | 허브 | 배송 | 업체<br>상품 | 주문 |
-| [<img width="460" height="460" alt="image" src="https://github.com/user-attachments/assets/09ef2083-5b28-41fe-9cb1-104256797ab5" />](https://github.com/guineacodes) | [<img src="https://img.shields.io/badge/Github-Link-181717?logo=Github">](https://github.com/gsemily) | [<img width="420" height="420" alt="image" src="https://github.com/user-attachments/assets/9ad62a07-78a4-4115-aac6-728e5a3e1fb1" />](https://github.com/kimhyerin-dev) | [<img width="420" height="420" alt="image" src="https://github.com/user-attachments/assets/ef1c1637-78cc-49e8-9a59-395c5f54da8c" />](https://github.com/chanhongkwak) | [<img width="420" height="420" alt="image" src="https://github.com/user-attachments/assets/a6faa46c-007d-4cde-983e-6d09fe3c62f8" />](https://github.com/soyeonnan?tab=repositories) |
 <br>
 
 ## 📌 프로젝트 소개
