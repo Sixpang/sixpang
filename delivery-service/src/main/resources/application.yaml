@@ -45,6 +45,11 @@ kafka:
   topic:
     delivery-created: delivery.created
 
+springdoc:
+  packages-to-scan: org.sixpang.deliveryservice.presentation
+  swagger-ui:
+    disable-swagger-default-url: true
+
 server:
   port: 0
 eureka:
@@ -57,4 +62,4 @@ eureka:
 
 
 feature:
-  user-service: true
+  user-service: false

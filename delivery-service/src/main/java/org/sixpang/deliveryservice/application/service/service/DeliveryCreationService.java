@@ -64,8 +64,7 @@ public class DeliveryCreationService {
         log.info("배송 생성 완료: deliveryId={}, orderId={}, routeCount={}",
                 savedDelivery.getId(), event.orderId(), routes.size());
 
-        // 5. 트랜잭션 커밋 후 이벤트 발행 ⭐ 새로 추가
-        publishDeliveryCreatedEvent(savedDelivery);
+        //publishDeliveryCreatedEvent(savedDelivery);
 
         return savedDelivery.getId();
     }
