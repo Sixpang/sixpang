@@ -57,10 +57,11 @@ public class RouteService {
     @Transactional(readOnly = true)
     @Cacheable(value = "routes", key = "'direct:' + #departureHubId + ':' + #arrivalHubId")
     public DirectRouteResponseDto getDirectRoutes(UUID departureHubId, UUID arrivalHubId) {
+        validateHubs(departureHubId, arrivalHubId);
+
         Route route = routeRepository.findByDepartureHubIdAndArrivalHubIdAndDeletedAtIsNull(departureHubId, arrivalHubId)
                 .orElseThrow(() -> new CustomException(RouteErrorCode.DIRECT_ROUTE_NOT_FOUND));
 
-        HubPair hubs = hubValidator.validateAndGetActiveHubs(departureHubId, arrivalHubId);
 
         return DirectRouteResponseDto.from(route);
     }
@@ -73,25 +74,13 @@ public class RouteService {
     @Transactional(readOnly = true)
     @Cacheable(value = "routes", key = "'optimal:' + #departureHubId + ':' + #arrivalHubId")
     public OptimalRouteResponseDto findOptimalRoute(UUID departureHubId, UUID arrivalHubId) {
-        if (departureHubId.equals(arrivalHubId)) {
-            throw new CustomException(RouteErrorCode.SAME_HUB);
-        }
+        validateHubs(departureHubId, arrivalHubId);
 
         // 활성화된 모든 경로 조회 및 200km 미만 그래프 생성
         List<Route> allRoutes = routeRepository.findAllByDeletedAtIsNull();
 
         if (allRoutes.isEmpty()) {
             throw new CustomException(RouteErrorCode.OPTIMAL_ROUTE_NOT_FOUND);
-        }
-
-        Hub departureHub = hubRepository.findByIdAndDeletedAtIsNull(departureHubId)
-                .orElseThrow(() -> new CustomException(HubErrorCode.HUB_NOT_FOUND));
-
-        Hub arrivalHub = hubRepository.findByIdAndDeletedAtIsNull(arrivalHubId)
-                .orElseThrow(() -> new CustomException(HubErrorCode.HUB_NOT_FOUND));
-
-        if (!departureHub.isActive() || !arrivalHub.isActive()) {
-            throw new CustomException(HubErrorCode.HUB_NOT_ACTIVE);
         }
 
         // 그래프 생성
@@ -150,7 +139,7 @@ public class RouteService {
 
         Collections.reverse(path);
 
-        // 결과 DTO 조립
+        // 결과 DTO 생성
         BigDecimal totalDistance = BigDecimal.ZERO;
         long totalDuration = 0L;
 
@@ -247,7 +236,14 @@ public class RouteService {
             throw new CustomException(RouteErrorCode.ROUTE_GENERATION_FAILED);
         }
 
-        validateResponse(response);
+        if (response == null ||
+                response.route() == null ||
+                response.route().traoptimal() == null ||
+                response.route().traoptimal().isEmpty() ||
+                response.route().traoptimal().get(0).summary() == null) {
+
+            throw new CustomException(RouteErrorCode.NAVER_API_RESPONSE_INVALID);
+        }
 
         var summary = response.route().traoptimal().get(0).summary();
 
@@ -264,15 +260,24 @@ public class RouteService {
         routeRepository.save(route);
     }
 
-    private void validateResponse(DirectionsResponseDto response) {
-
-        if (response == null ||
-                response.route() == null ||
-                response.route().traoptimal() == null ||
-                response.route().traoptimal().isEmpty() ||
-                response.route().traoptimal().get(0).summary() == null) {
-
-            throw new CustomException(RouteErrorCode.NAVER_API_RESPONSE_INVALID);
+    // 허브 ID 유효성 검증
+    private ValidatedHub validateHubs(UUID departureHubId, UUID arrivalHubId) {
+        if (departureHubId.equals(arrivalHubId)) {
+            throw new CustomException(RouteErrorCode.SAME_HUB);
         }
+
+        Hub departureHub = hubRepository.findByIdAndDeletedAtIsNull(departureHubId)
+                .orElseThrow(() -> new CustomException(HubErrorCode.HUB_NOT_FOUND));
+
+        Hub arrivalHub = hubRepository.findByIdAndDeletedAtIsNull(arrivalHubId)
+                .orElseThrow(() -> new CustomException(HubErrorCode.HUB_NOT_FOUND));
+
+        if (departureHub.getStatus() != HubStatus.ACTIVE || arrivalHub.getStatus() != HubStatus.ACTIVE) {
+            throw new CustomException(HubErrorCode.HUB_NOT_ACTIVE);
+        }
+
+        return new ValidatedHub(departureHub, arrivalHub);
     }
+
+    private record ValidatedHub(Hub departureHub, Hub arrivalHub) {}
 }
