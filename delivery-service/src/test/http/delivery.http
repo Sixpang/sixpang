@@ -5,7 +5,7 @@
 @order_id = {{$guid}}
 @departure_hub_id = 550e8400-e29b-41d4-a716-446655440000
 @arrival_hub_id = 660e8400-e29b-41d4-a716-446655441111
-@accessToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhNWM1ZGJiMC1jZWJhLTQxNDktYTY3MC0zNDQ4MzBiODRmMDkiLCJpc3MiOiJzaXhwYW5nLWF1dGgiLCJyb2xlIjoiTUFTVEVSIiwiaWF0IjoxNzc1NTEwNDIyLCJleHAiOjE3NzU1MTQwMjJ9.bZ5UgYh47pA06UmRyJhJ7-GdVC4ZCpRMQlhLD8-gC2k
+@accessToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhNWM1ZGJiMC1jZWJhLTQxNDktYTY3MC0zNDQ4MzBiODRmMDkiLCJpc3MiOiJzaXhwYW5nLWF1dGgiLCJyb2xlIjoiTUFTVEVSIiwiaWF0IjoxNzc1NTI5NjI3LCJleHAiOjE3NzU1MzMyMjd9.H_-_2rOdpx525rkclnuxERLx_gQbYm3BwC9_wRl9snk
 # ---------------------------------------------------------
 # 1. 배송 생성 테스트 (OrderCreatedEvent 기반)
 # ---------------------------------------------------------

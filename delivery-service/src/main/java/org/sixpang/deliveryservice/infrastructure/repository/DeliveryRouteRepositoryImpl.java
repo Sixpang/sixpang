@@ -29,4 +29,12 @@ public class DeliveryRouteRepositoryImpl implements DeliveryRouteRepository {
     public List<DeliveryRoute> findAllByDelivery(Delivery delivery) {
         return jpaRepository.findAllByDeliveryIdOrderByHubSequenceAsc(delivery);
     }
+
+    @Override
+    public List<DeliveryRoute> findByDeliveryIdOrderByHubSequenceAsc(UUID deliveryId) {
+        return jpaRepository.findByDeliveryIdOrderByHubSequenceAsc(deliveryId);
+    }
+
+    ;
+
 }

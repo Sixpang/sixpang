@@ -10,10 +10,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class KafkaOrderEventPublisher implements OrderEventPublisher {
 
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override
     public void publish(OrderCreatedEvent event) {
-        kafkaTemplate.send("order-topic", event.toString());
+        // record 필드 접근은 event.orderId() 등으로
+        kafkaTemplate.send("order-created-topic", event.orderId().toString(), event);
     }
 }
