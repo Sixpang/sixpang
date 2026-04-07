@@ -13,4 +13,7 @@ public interface DeliveryRouteRepository {
     Optional<DeliveryRoute> findById(UUID id);
 
     List<DeliveryRoute> findAllByDelivery(Delivery delivery);
+
+    List<DeliveryRoute> findByDeliveryIdOrderByHubSequenceAsc(UUID deliveryId);
+
 }

@@ -9,4 +9,6 @@ import java.util.UUID;
 
 public interface DeliveryRouteJpaRepository extends JpaRepository<DeliveryRoute, UUID> {
     List<DeliveryRoute> findAllByDeliveryIdOrderByHubSequenceAsc(Delivery delivery);
+
+    List<DeliveryRoute> findByDeliveryIdOrderByHubSequenceAsc(UUID deliveryId);
 }

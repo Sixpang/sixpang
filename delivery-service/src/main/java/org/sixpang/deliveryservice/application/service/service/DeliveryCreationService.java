@@ -4,8 +4,10 @@ import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sixpang.commonserver.global.CustomException;
+import org.sixpang.deliveryservice.application.dto.DeliveryCreatedEvent;
 import org.sixpang.deliveryservice.application.dto.OrderCreatedEvent;
 import org.sixpang.deliveryservice.application.dto.RouteCalculationResult;
+import org.sixpang.deliveryservice.application.messaging.DeliveryEventPublisher;
 import org.sixpang.deliveryservice.application.service.client.DeliveryHubClient;
 import org.sixpang.deliveryservice.application.service.strategy.RouteCalculationStrategy;
 import org.sixpang.deliveryservice.domain.model.entity.CompanyDeliveryManager;
@@ -16,6 +18,7 @@ import org.sixpang.deliveryservice.domain.model.enums.DeliveryStatus;
 import org.sixpang.deliveryservice.domain.repository.DeliveryRepository;
 import org.sixpang.deliveryservice.exception.DeliveryErrorCode;
 import org.sixpang.deliveryservice.exception.DeliveryRouteErrorCode;
+import org.sixpang.deliveryservice.infrastructure.repository.DeliveryRouteRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,9 +32,11 @@ import java.util.UUID;
 public class DeliveryCreationService {
 
     private final DeliveryRepository deliveryRepository;
+    private final DeliveryRouteRepository deliveryRouteRepository;
     private final DeliveryManagerService deliveryManagerService;
     private final RouteCalculationStrategy routeCalculationStrategy;
     private final DeliveryHubClient hubClient;
+    private final DeliveryEventPublisher eventPublisher;
 
     @Transactional
     public UUID createDeliveryFromOrder(OrderCreatedEvent event) {
@@ -59,7 +64,32 @@ public class DeliveryCreationService {
         log.info("배송 생성 완료: deliveryId={}, orderId={}, routeCount={}",
                 savedDelivery.getId(), event.orderId(), routes.size());
 
+        // 5. 트랜잭션 커밋 후 이벤트 발행 ⭐ 새로 추가
+        publishDeliveryCreatedEvent(savedDelivery);
+
         return savedDelivery.getId();
+    }
+
+    private void publishDeliveryCreatedEvent(Delivery delivery) {
+        DeliveryCreatedEvent event = DeliveryCreatedEvent.builder()
+                .deliveryId(delivery.getId())
+                .orderId(delivery.getOrderId())
+                .departureHub(delivery.getDepartureHub())
+                .arrivalHub(delivery.getArrivalHub())
+                .hubDeliveryManagerId(getFirstHubDeliveryManager(delivery.getId()))
+                .status(delivery.getStatus().name())
+                .build();
+
+        eventPublisher.publishDeliveryCreated(event);
+    }
+
+    private UUID getFirstHubDeliveryManager(UUID deliveryId) {
+        return deliveryRouteRepository
+                .findByDeliveryIdOrderByHubSequenceAsc(deliveryId)
+                .stream()
+                .findFirst()
+                .map(DeliveryRoute::getHubDeliveryManagerId)
+                .orElse(null);
     }
 
     private boolean isAlreadyProcessed(UUID orderId) {
