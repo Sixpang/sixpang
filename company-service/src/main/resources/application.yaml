@@ -13,9 +13,14 @@ spring:
       ddl-auto: update
     properties:
       hibernate:
-        default_schema: product_service
+        default_schema: company_service
         show_sql: true
         format_sql: true
+
+springdoc:
+  packages-to-scan: org.sixpang.companyservice.presentation
+  swagger-ui:
+    disable-swagger-default-url: true
 
 server:
   port: 0
