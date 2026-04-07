@@ -8,7 +8,7 @@ services:
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
     ports:
-      - "5433:5432"  # ⚠️ 포트 충돌 방지 (기존 5432 이미 사용 중)
+      - "5432:5432"
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}

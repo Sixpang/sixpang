@@ -1,9 +1,9 @@
-@host = http://localhost:57217
+@host = http://localhost:51261
 @contentType = application/json
 @companyId = 3bfc578e-51bd-4a22-8926-7c368d23498a
 
 ### 회원 생성 - HUB_MANAGER
-POST http://localhost:57217/api/users
+POST http://localhost:51261/api/users
 Content-Type: application/json
 
 {

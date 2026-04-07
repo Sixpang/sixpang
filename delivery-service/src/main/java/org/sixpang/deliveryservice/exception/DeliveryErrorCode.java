@@ -16,6 +16,7 @@ public enum DeliveryErrorCode implements ErrorCode {
     DELIVERY_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 배송 정보를 찾을 수 없습니다."),
     HUB_NOT_FOUND(HttpStatus.NOT_FOUND, "출발 또는 목적지 허브 ID가 존재하지 않습니다."),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 유저입니다."),
+    MANAGER_ASSIGNMENT_FAILED(HttpStatus.BAD_REQUEST, "담당자 배정에 실패하였습니다."),
 
     // [400 BAD_REQUEST] 상태 및 비즈니스 로직 제약
     INVALID_STATUS(HttpStatus.BAD_REQUEST, "현재 상태에서는 변경이 불가능합니다."),

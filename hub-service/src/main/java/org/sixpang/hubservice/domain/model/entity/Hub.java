@@ -15,7 +15,7 @@ import java.util.UUID;
 
 @Entity
 @Getter
-@Table(name = "p_hub", schema = "hub")
+@Table(name = "p_hub", schema = "hub_service")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Hub extends BaseEntity {
     @Id

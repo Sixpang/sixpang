@@ -1,12 +1,16 @@
+@root-path = http://localhost:8080
+@accessToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhNWM1ZGJiMC1jZWJhLTQxNDktYTY3MC0zNDQ4MzBiODRmMDkiLCJpc3MiOiJzaXhwYW5nLWF1dGgiLCJyb2xlIjoiTUFTVEVSIiwiaWF0IjoxNzc1NTAzMTUzLCJleHAiOjE3NzU1MDY3NTN9.HnNSZF0kJRYdpkXFqisxIm4HLPcYT6s2nTxUqBtfH3I
+
 ### POST 허브 등록 API
 POST {{root-path}}/api/hubs
 Content-Type: application/json
+Authorization: Bearer {{accessToken}}
 
 {
-  "name": "서울특별시 센터",
-  "address": "서울특별시 송파구 송파대로 55",
-  "latitude": "37.486215",
-  "longitude": "127.119627",
+  "name": "경기남부센터",
+  "address": "경기도 수원시 광교로 145",
+  "latitude": "37.294338",
+  "longitude": "127.046115",
   "status": "ACTIVE"
 }
 
