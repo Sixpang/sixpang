@@ -137,18 +137,35 @@ public class UserController {
             @AuthenticationPrincipal UserPrincipal user
     ) {
 
-        UserRole role = UserRole.valueOf(user.getRole());
 
-        if (status == null && role != UserRole.MASTER) {
-            throw new UserException(UserErrorCode.FORBIDDEN);
-        }
+        UserRole role = UserRole.valueOf(user.getRole());
 
         Page<UserInfo> users;
 
-        if (status != null) {
-            users = userQueryService.getUsersByStatus(status, pageable);
+        //MASTER → 전체 조회
+        if (role == UserRole.MASTER) {
+
+            if (status != null) {
+                users = userQueryService.getUsersByStatus(status, pageable);
+            } else {
+                users = userQueryService.getUsers(pageable);
+            }
+
+            //HUB_MANAGER → 자기 허브만 조회
         } else {
-            users = userQueryService.getUsers(pageable);
+
+            if (status == null) {
+                throw new UserException(UserErrorCode.FORBIDDEN);
+            }
+
+
+            UserDetail me = userQueryService.getUser(user.getUserId());
+
+            users = userQueryService.getUsersByStatusAndHubId(
+                    status,
+                    me.getHubId(),
+                    pageable
+            );
         }
 
         Page<UserResponseDto.UserResponse> response =
@@ -264,9 +281,16 @@ public class UserController {
     @PatchMapping("/{id}/status")
     public ResponseEntity<ApiResponse<UserResponseDto.UserSimpleResponse>> changeStatus(
             @PathVariable UUID id,
-            @RequestParam UserStatus status
+            @RequestParam UserStatus status,
+            @AuthenticationPrincipal UserPrincipal user
     ) {
-        userService.changeStatus(id, status);
+
+        userService.changeStatus(
+                id,
+                user.getUserId(),
+                UserRole.valueOf(user.getRole()),
+                status
+        );
 
         UserDetail dto = userQueryService.getUser(id);
 
@@ -284,7 +308,7 @@ public class UserController {
     }
 
     /**회원 상태 변경 이력 조회**/
-    @PreAuthorize("hasAnyRole('MASTER', 'HUB_MANAGER')")
+    @PreAuthorize("hasAnyRole('MASTER')")
     @GetMapping("/{userId}/status-history")
     public ResponseEntity<ApiResponse<List<UserStatusHistory>>> getStatusHistory(
             @PathVariable UUID userId
