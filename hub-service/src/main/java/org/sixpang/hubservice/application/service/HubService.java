@@ -6,6 +6,7 @@ import org.sixpang.commonserver.response.PageResponse;
 import org.sixpang.hubservice.application.dto.HubRequestDto;
 import org.sixpang.hubservice.application.dto.HubResponseDto;
 import org.sixpang.hubservice.domain.model.entity.Hub;
+import org.sixpang.hubservice.domain.model.enums.HubStatus;
 import org.sixpang.hubservice.domain.repository.HubRepository;
 import org.sixpang.hubservice.exception.HubErrorCode;
 import org.springframework.cache.annotation.CacheEvict;
@@ -66,8 +67,21 @@ public class HubService {
 
         validateDuplicatedHub(hub, requestDto);
 
+        HubStatus oldStatus = hub.getStatus();
+        HubStatus newStatus = requestDto.getStatus();
+
         hub.updateInfo(requestDto.getName(), requestDto.getAddress(), requestDto.getLatitude(),
                 requestDto.getLongitude(), requestDto.getStatus());
+
+        if (oldStatus != newStatus) {
+            if (newStatus == HubStatus.SUSPENDED) {
+                // 운영 중지로 변경 시: 관련 경로 모두 Soft Delete 처리
+                routeService.disableRoutesForHub(hub.getId(), userId);
+            } else if (newStatus == HubStatus.ACTIVE) {
+                // 활성 상태로 복구 시: 양방향 경로 다시 생성
+                routeService.generateRoutesForNewHub(hub.getId());
+            }
+        }
 
         return HubResponseDto.from(hub);
     }

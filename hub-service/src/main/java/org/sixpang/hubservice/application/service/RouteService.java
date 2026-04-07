@@ -42,6 +42,8 @@ public class RouteService {
     @Transactional(readOnly = true)
     @Cacheable(value = "routes", key = "'available:' + #departureHubId")
     public List<AvailableRouteResponseDto> getAvailableRoutes(UUID departureHubId) {
+        validateHub(departureHubId);
+
         List<Route> routes = routeRepository.findAllActiveRoutesByDepartureHubId(departureHubId);
 
         if (routes.isEmpty()) {
@@ -260,8 +262,18 @@ public class RouteService {
         routeRepository.save(route);
     }
 
-    // 허브 ID 유효성 검증
-    private ValidatedHub validateHubs(UUID departureHubId, UUID arrivalHubId) {
+    // 허브 유효성 검증
+    private void validateHub(UUID departureHubId){
+        Hub departureHub = hubRepository.findByIdAndDeletedAtIsNull(departureHubId)
+                .orElseThrow(() -> new CustomException(HubErrorCode.HUB_NOT_FOUND));
+
+        if (departureHub.getStatus() != HubStatus.ACTIVE) {
+            throw new CustomException(HubErrorCode.HUB_NOT_ACTIVE);
+        }
+    }
+
+    // 출발, 도착 허브 유효성 검증
+    private void validateHubs(UUID departureHubId, UUID arrivalHubId) {
         if (departureHubId.equals(arrivalHubId)) {
             throw new CustomException(RouteErrorCode.SAME_HUB);
         }
@@ -275,9 +287,5 @@ public class RouteService {
         if (departureHub.getStatus() != HubStatus.ACTIVE || arrivalHub.getStatus() != HubStatus.ACTIVE) {
             throw new CustomException(HubErrorCode.HUB_NOT_ACTIVE);
         }
-
-        return new ValidatedHub(departureHub, arrivalHub);
     }
-
-    private record ValidatedHub(Hub departureHub, Hub arrivalHub) {}
 }
