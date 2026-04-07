@@ -8,14 +8,15 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ProducerService {
 
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    // ⚠️ String에서 Object로 타입을 맞춰야 Config와 연결됩니다.
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
-
-    public void sendMessage(String topic, String key, String message) {
+    public void sendMessage(String topic, String key, Object message) {
+        // 테스트용 루프
         for (int i = 0; i < 10; i++) {
-
-            kafkaTemplate.send(topic, key, message + " " + i);
+            // message가 String이면 문자열 뒤에 숫자가 붙고,
+            // 객체라면 그대로 직렬화되어 나갑니다.
+            kafkaTemplate.send(topic, key, message.toString() + " " + i);
         }
-
     }
 }
