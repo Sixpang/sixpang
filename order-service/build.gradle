@@ -1,5 +1,5 @@
 ext {
-    set('springCloudVersion', "2023.0.1")
+    set('springCloudVersion', "2025.0.1")
 }
 
 dependencyManagement {
@@ -11,6 +11,7 @@ dependencyManagement {
 dependencies {
     // 1. Web & Cloud
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
@@ -44,11 +45,5 @@ dependencies {
 
     // 8. client
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
-
-    // 9. swagger
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6'
-
-    // 10. kafka
-    implementation 'org.springframework.kafka:spring-kafka'
 }
 
