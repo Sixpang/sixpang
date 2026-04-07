@@ -8,6 +8,7 @@ import org.sixpang.commonserver.response.PageResponse;
 import org.sixpang.commonserver.security.UserPrincipal;
 import org.sixpang.productservice.application.ProductService;
 import org.sixpang.productservice.application.dto.*;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -112,8 +113,8 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<ProductResponse>>> getProducts(
-            ProductSearchRequest request,
-            Pageable pageable,
+            @ParameterObject ProductSearchRequest request,
+            @ParameterObject Pageable pageable,
             @AuthenticationPrincipal UserPrincipal user
     ){
         PageResponse<ProductResponse> response = productService.getProducts(request, pageable,user);
