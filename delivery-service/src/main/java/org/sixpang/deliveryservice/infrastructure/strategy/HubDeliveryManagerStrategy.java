@@ -9,7 +9,7 @@ import org.sixpang.deliveryservice.application.service.strategy.DeliveryManagerS
 import org.sixpang.deliveryservice.domain.model.entity.HubDeliveryManager;
 import org.sixpang.deliveryservice.domain.model.enums.DeliveryManagerType;
 import org.sixpang.deliveryservice.domain.repository.HubDeliveryManagerRepository;
-import org.sixpang.deliveryservice.exception.DeliveryErrorCode;
+import org.sixpang.deliveryservice.exception.DeliveryManagerErrorCode;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
@@ -29,7 +29,7 @@ public class HubDeliveryManagerStrategy implements DeliveryManagerStrategy {
     @Override
     public DeliveryManagerResponse get(UUID id) {
         HubDeliveryManager manager = repository.findById(id)
-                .orElseThrow(() -> new CustomException(DeliveryErrorCode.MANAGER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(DeliveryManagerErrorCode.MANAGER_NOT_FOUND));
 
         return DeliveryManagerResponse.fromHub(manager);
     }
@@ -52,7 +52,7 @@ public class HubDeliveryManagerStrategy implements DeliveryManagerStrategy {
     @Override
     public DeliveryManagerResponse update(UUID id, DeliveryManagerUpdateRequest request, String role, UUID userId, UUID requestHubId) {
         HubDeliveryManager manager = repository.findById(id)
-                .orElseThrow(() -> new CustomException(DeliveryErrorCode.MANAGER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(DeliveryManagerErrorCode.MANAGER_NOT_FOUND));
 
         validateModifyPermission(role, requestHubId, null);
 

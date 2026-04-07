@@ -12,7 +12,7 @@ import java.util.UUID;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "p_product")
+@Table(name = "p_product",schema = "product_service")
 public class Product extends BaseEntity {
 
     @Id

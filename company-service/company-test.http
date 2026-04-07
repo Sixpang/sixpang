@@ -1,14 +1,42 @@
-@host = http://localhost:54435
-@companyId = 27f6f4dc-9224-4389-a57e-c868374a43fc
+@host = http://localhost:51261
+@contentType = application/json
+@companyId = 3bfc578e-51bd-4a22-8926-7c368d23498a
 
-POST http://localhost:54435/api/companies
+### 회원 생성 - HUB_MANAGER
+POST http://localhost:51261/api/users
 Content-Type: application/json
-X-User-Id: 55555555-5555-5555-5555-555555555555
+
+{
+  "email": "company@test.com",
+  "password": "Test1234!",
+  "name": "업체담당자",
+  "phone": "01033334444",
+  "role": "COMPANY_MANAGER",
+  "hubId": null,
+  "companyId": "22222222-2222-2222-2222-222222222222"
+}
+
+### internal API 테스트
+GET http://localhost:58204/api/users/internal/2471adde-31ac-4274-83c0-cd6b8479a904
+
+### HUB_MANAGER 자기 허브 생성
+POST http://localhost:58509/api/companies
+Content-Type: application/json
+X-User-Id: 2471adde-31ac-4274-83c0-cd6b8479a904
 X-User-Role: HUB_MANAGER
 
 {
-  "name": "테스트업체3",
-  "address": "서울시 마포구",
+  "name": "허브매니저_다른허브_생성실패",
+  "address": "서울시 강서구",
   "type": "RECIVER",
-  "hubId": "66666666-6666-6666-6666-666666666666"
+  "hubId": "22222222-2222-2222-2222-222222222222"
+}
+
+### 로그인
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "hub@test.com",
+  "password": "Test1234!"
 }

@@ -338,7 +338,7 @@ public class UserController {
 
     /**HubId(),CompanyId() 정보 (feign client)**/
     @GetMapping("/internal/{id}")
-    public UserPermissionInfo getUserPermissionInfo(@PathVariable UUID id) {
+    public UserPermissionInfo getUserPermissionInfo(@PathVariable("id") UUID id) {
         UserDetail dto = userQueryService.getUser(id);
 
         return new UserPermissionInfo(

@@ -18,6 +18,7 @@ import org.sixpang.deliveryservice.domain.model.enums.DeliveryManagerType;
 import org.sixpang.deliveryservice.domain.repository.CompanyDeliveryManagerRepository;
 import org.sixpang.deliveryservice.domain.repository.HubDeliveryManagerRepository;
 import org.sixpang.deliveryservice.exception.DeliveryErrorCode;
+import org.sixpang.deliveryservice.exception.DeliveryManagerErrorCode;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -48,7 +49,7 @@ public class DeliveryManagerService {
 
         if (hubDeliveryManagerRepository.existsByUserId(request.userId()) ||
                 companyDeliveryManagerRepository.existsByUserId(request.userId())) {
-            throw new CustomException(DeliveryErrorCode.ALREADY_EXISTS_MANAGER);
+            throw new CustomException(DeliveryManagerErrorCode.ALREADY_EXISTS_MANAGER);
         }
 
         if (request.type() == DeliveryManagerType.HUB) {
@@ -59,7 +60,7 @@ public class DeliveryManagerService {
 
     private DeliveryManagerResponse createHubManager(DeliveryManagerCreateRequest request) {
         if (isHubManagerLimitExceeded())
-            throw new CustomException(DeliveryErrorCode.MANAGER_LIMIT_EXCEEDED);
+            throw new CustomException(DeliveryManagerErrorCode.MANAGER_LIMIT_EXCEEDED);
 
         HubDeliveryManager manager = HubDeliveryManager.create(request.userId());
         return DeliveryManagerResponse.fromHub(hubDeliveryManagerRepository.save(manager));
@@ -67,11 +68,11 @@ public class DeliveryManagerService {
 
     private DeliveryManagerResponse createCompanyManager(DeliveryManagerCreateRequest request) {
         if (request.hubId() == null)
-            throw new CustomException(DeliveryErrorCode.HUB_ID_REQUIRED);
+            throw new CustomException(DeliveryManagerErrorCode.HUB_ID_REQUIRED);
 
         validateHubExists(request.hubId());
         if (isCompanyManagerLimitExceeded(request.hubId()))
-            throw new CustomException(DeliveryErrorCode.MANAGER_LIMIT_EXCEEDED);
+            throw new CustomException(DeliveryManagerErrorCode.MANAGER_LIMIT_EXCEEDED);
 
         CompanyDeliveryManager manager = CompanyDeliveryManager.create(request.userId(), request.hubId());
         return DeliveryManagerResponse.fromCompany(companyDeliveryManagerRepository.save(manager));
@@ -116,11 +117,10 @@ public class DeliveryManagerService {
         return this.strategies.stream()
                 .filter(s -> s.supports(type))
                 .findFirst()
-                .orElseThrow(() -> new CustomException(DeliveryErrorCode.UNSUPPORTED_TYPE));
+                .orElseThrow(() -> new CustomException(DeliveryManagerErrorCode.UNSUPPORTED_TYPE));
     }
 
-    // --- 배송 담당자 배정 로직 (전략 패턴 & DIP 적용) ---
-
+    //배송 담당자 배정 로직
     public HubDeliveryManager assignHubManager() {
         String key = "delivery:hub:all";
 
@@ -128,11 +128,11 @@ public class DeliveryManagerService {
                 .orElseGet(() -> {
                     refreshHubCache(key);
                     return assigner.getNextIdWithRotation(key)
-                            .orElseThrow(() -> new CustomException(DeliveryErrorCode.MANAGER_NOT_FOUND));
+                            .orElseThrow(() -> new CustomException(DeliveryManagerErrorCode.MANAGER_NOT_FOUND));
                 });
 
         HubDeliveryManager manager = hubDeliveryManagerRepository.findById(UUID.fromString(id))
-                .orElseThrow(() -> new CustomException(DeliveryErrorCode.MANAGER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(DeliveryManagerErrorCode.MANAGER_NOT_FOUND));
 
         manager.updateStatus(DeliveryManagerStatus.ON_TASK);
         return manager;
@@ -145,11 +145,11 @@ public class DeliveryManagerService {
                 .orElseGet(() -> {
                     refreshCompanyCache(hubId, key);
                     return assigner.getNextId(key)
-                            .orElseThrow(() -> new CustomException(DeliveryErrorCode.MANAGER_LIMIT_EXCEEDED));
+                            .orElseThrow(() -> new CustomException(DeliveryManagerErrorCode.MANAGER_LIMIT_EXCEEDED));
                 });
 
         CompanyDeliveryManager manager = companyDeliveryManagerRepository.findById(UUID.fromString(id))
-                .orElseThrow(() -> new CustomException(DeliveryErrorCode.MANAGER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(DeliveryManagerErrorCode.MANAGER_NOT_FOUND));
 
         manager.updateStatus(DeliveryManagerStatus.ON_TASK);
         return manager;
@@ -188,7 +188,7 @@ public class DeliveryManagerService {
                 .toList();
 
         if (ids.isEmpty()) {
-            throw new CustomException(DeliveryErrorCode.MANAGER_NOT_FOUND);
+            throw new CustomException(DeliveryManagerErrorCode.MANAGER_NOT_FOUND);
         }
 
         assigner.refreshCache(key, ids);
@@ -201,7 +201,7 @@ public class DeliveryManagerService {
                 .toList();
 
         if (ids.isEmpty()) {
-            throw new CustomException(DeliveryErrorCode.MANAGER_LIMIT_EXCEEDED);
+            throw new CustomException(DeliveryManagerErrorCode.MANAGER_LIMIT_EXCEEDED);
         }
 
         assigner.refreshCache(key, ids);
@@ -230,11 +230,11 @@ public class DeliveryManagerService {
 
     private HubDeliveryManager findHubManagerOrThrow(UUID id) {
         return hubDeliveryManagerRepository.findById(id)
-                .orElseThrow(() -> new CustomException(DeliveryErrorCode.MANAGER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(DeliveryManagerErrorCode.MANAGER_NOT_FOUND));
     }
 
     private CompanyDeliveryManager findCompanyManagerOrThrow(UUID id) {
         return companyDeliveryManagerRepository.findById(id)
-                .orElseThrow(() -> new CustomException(DeliveryErrorCode.MANAGER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(DeliveryManagerErrorCode.MANAGER_NOT_FOUND));
     }
 }
