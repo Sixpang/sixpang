@@ -1,6 +1,7 @@
 package org.sixpang.orderservice.presentation.dto;
 
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,7 @@ import java.util.UUID;
 
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class CreateOrderRequest {
 
     @NotNull(message = "공급 업체 ID는 필수 입니다.")

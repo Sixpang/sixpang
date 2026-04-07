@@ -14,7 +14,7 @@ import java.util.UUID;
 
 @Entity
 @Getter
-@Table(name = "p_order", schema = "order_service")
+@Table(name = "p_order")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Order extends BaseEntity {
 
