@@ -1,5 +1,7 @@
 package org.sixpang.userservice.presentation.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.sixpang.commonserver.response.ApiResponse;
@@ -33,6 +35,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
+@Tag(name = "User API", description = "유저 관련 API")
 public class UserController {
 
     private final UserService userService;
@@ -40,6 +43,7 @@ public class UserController {
 
     /**회원가입**/
     @PostMapping
+    @Operation(summary = "회원가입", description = "사용자가 회원가입을 진행합니다.")
     public ResponseEntity<ApiResponse<UserResponseDto.UserSimpleResponse>> signup(
             @Valid @RequestBody UserRequestDto.SignUpRequest request
     ) {
@@ -72,6 +76,7 @@ public class UserController {
     /**단건 조회**/
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/{id}")
+    @Operation(summary = "회원 단건 조회", description = "본인 또는 MASTER만 조회 가능합니다.")
     public ResponseEntity<ApiResponse<UserResponseDto.UserDetailResponse>> getUser(
             @PathVariable UUID id,
             @AuthenticationPrincipal UserPrincipal user
@@ -106,6 +111,7 @@ public class UserController {
     /**내 정보 조회**/
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/me")
+    @Operation(summary = "내 정보 조회", description = "현재 로그인한 사용자 정보 조회")
     public ResponseEntity<ApiResponse<UserResponseDto.UserDetailResponse>> getMyUser(
             @AuthenticationPrincipal UserPrincipal user
     ) {
@@ -131,6 +137,7 @@ public class UserController {
     /**목록 조회**/
     @PreAuthorize("hasAnyRole('MASTER', 'HUB_MANAGER')")
     @GetMapping
+    @Operation(summary = "회원 목록 조회", description = "회원 목록을 조회합니다.")
     public ResponseEntity<ApiResponse<PageResponse<UserResponseDto.UserResponse>>> getUsers(
             @RequestParam(required = false) UserStatus status,
             Pageable pageable,
@@ -184,6 +191,7 @@ public class UserController {
     }
 
     /**회원 정보 수정***/
+    @Operation(summary = "회원 정보 수정", description = "회원 정보를 수정합니다.")
     @PreAuthorize("isAuthenticated()")
     @PatchMapping("/{id}")
     public ResponseEntity<ApiResponse<UserResponseDto.UserUpdateResponse>> updateUser(
@@ -224,6 +232,7 @@ public class UserController {
     /**내 정보 수정**/
     @PreAuthorize("isAuthenticated()")
     @PatchMapping("/me")
+    @Operation(summary = "내 정보 수정", description = "내 정보를 수정합니다.")
     public ResponseEntity<ApiResponse<UserResponseDto.UserUpdateResponse>> updateMyUser(
             @AuthenticationPrincipal UserPrincipal user,
             @Valid @RequestBody UserRequestDto.UpdateUserRequest request
@@ -259,6 +268,7 @@ public class UserController {
     /**내 비밀번호 변경**/
     @PreAuthorize("isAuthenticated()")
     @PatchMapping("/me/password")
+    @Operation(summary = "비밀번호 변경", description = "비밀번호를 변경합니다.")
     public ResponseEntity<ApiResponse<Void>> changeMyPassword(
             @AuthenticationPrincipal UserPrincipal user,
             @Valid @RequestBody UserRequestDto.ChangePasswordRequest request
@@ -279,6 +289,7 @@ public class UserController {
     /**회원 상태 변경**/
     @PreAuthorize("hasAnyRole('MASTER', 'HUB_MANAGER')")
     @PatchMapping("/{id}/status")
+    @Operation(summary = "회원 상태 변경", description = "회원 상태를 변경합니다.")
     public ResponseEntity<ApiResponse<UserResponseDto.UserSimpleResponse>> changeStatus(
             @PathVariable UUID id,
             @RequestParam UserStatus status,
@@ -310,6 +321,7 @@ public class UserController {
     /**회원 상태 변경 이력 조회**/
     @PreAuthorize("hasAnyRole('MASTER')")
     @GetMapping("/{userId}/status-history")
+    @Operation(summary = "회원 상태 이력 조회", description = "회원 상태 변경 이력을 조회합니다.")
     public ResponseEntity<ApiResponse<List<UserStatusHistory>>> getStatusHistory(
             @PathVariable UUID userId
     ) {
@@ -324,6 +336,7 @@ public class UserController {
     /**회원 삭제**/
     @PreAuthorize("hasRole('MASTER')")
     @DeleteMapping("/{userId}")
+    @Operation(summary = "회원 삭제", description = "회원을 삭제합니다.")
     public ResponseEntity<ApiResponse<Void>> deleteUser(
             @PathVariable UUID userId,
             @AuthenticationPrincipal UserPrincipal user
@@ -340,6 +353,7 @@ public class UserController {
 
     /**회원 탈퇴**/
     @DeleteMapping("/me")
+    @Operation(summary = "회원 탈퇴", description = "사용자가 탈퇴합니다.")
     public ResponseEntity<ApiResponse<Void>> deleteMyAccount(
             @AuthenticationPrincipal UserPrincipal user
     ) {
@@ -352,6 +366,7 @@ public class UserController {
 
     /** 이메일 조회 (feign client) **/
     @GetMapping("/email")
+    @Operation(summary = "이메일 조회", description = "이메일로 사용자 조회")
     public ResponseEntity<ApiResponse<AuthUser>> getUserByEmail(
             @RequestParam String email
     ) {
@@ -362,6 +377,7 @@ public class UserController {
 
     /**HubId(),CompanyId() 정보 (feign client)**/
     @GetMapping("/internal/{id}")
+    @Operation(summary = "권한 정보 조회", description = "사용자 권한 정보 조회")
     public UserPermissionInfo getUserPermissionInfo(@PathVariable("id") UUID id) {
         UserDetail dto = userQueryService.getUser(id);
 
