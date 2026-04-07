@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @FeignClient(name = "hub-service", contextId = "hubRouteClient")
 public interface HubRouteClient {
-    @GetMapping("/api/hub-routes/optimal")
+    @GetMapping("/api/hubs/routes/optimal")
     HubRouteInfo findOptimalRoute(
             @RequestParam UUID departureHubId,
             @RequestParam UUID arrivalHubId

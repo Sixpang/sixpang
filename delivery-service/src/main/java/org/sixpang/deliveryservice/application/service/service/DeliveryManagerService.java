@@ -120,8 +120,7 @@ public class DeliveryManagerService {
                 .orElseThrow(() -> new CustomException(DeliveryManagerErrorCode.UNSUPPORTED_TYPE));
     }
 
-    // --- 배송 담당자 배정 로직 (전략 패턴 & DIP 적용) ---
-
+    //배송 담당자 배정 로직
     public HubDeliveryManager assignHubManager() {
         String key = "delivery:hub:all";
 

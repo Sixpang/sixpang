@@ -1,8 +1,16 @@
+@root-path = http://localhost:8080
+@accessToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhNWM1ZGJiMC1jZWJhLTQxNDktYTY3MC0zNDQ4MzBiODRmMDkiLCJpc3MiOiJzaXhwYW5nLWF1dGgiLCJyb2xlIjoiTUFTVEVSIiwiaWF0IjoxNzc1NTA0NzU2LCJleHAiOjE3NzU1MDgzNTZ9.yWGkWTsSxYAp0lTxTq89EjUmTcu2XDP75VH4pxQg-fE
+@hubId = e68b78cb-75cd-4adf-b241-0151d39fced6
+@hubId2 = b3f98e53-0595-473e-9abf-5c1058f0d05a
+
 ### GET 특정 허브에서 이동 가능한 경로 목록 조회 API
-GET {{root-path}}/api/hubs/routes/available?departureHubId=
+GET http://localhost:8080/api/hubs/routes/direct?departureHubId={{hubId}}&arrivalHubId={{hubId2}}
+Authorization: Bearer {{accessToken}}
 
 ### GET 특정 허브 간 이동 경로 조회 API
 GET {{root-path}}/api/hubs/routes/direct?departureHubId=&arrivalHubId=
+
+
 
 ### GET 특정 허브 간 최적의 이동 경로 조회 API
 GET {{root-path}}/api/hubs/routes/optimal?departureHubId=&arrivalHubId=

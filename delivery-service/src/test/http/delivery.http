@@ -1,0 +1,90 @@
+### [변수 설정] 환경에 맞춰 수정하세요
+@baseUrl = http://localhost:8080/api/deliveries
+@hubServerUrl = http://localhost:8081/api/hubs
+@managerId_hub = {{delivery_manager_id}}
+@order_id = {{$guid}}
+@departure_hub_id = 550e8400-e29b-41d4-a716-446655440000
+@arrival_hub_id = 660e8400-e29b-41d4-a716-446655441111
+@accessToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhNWM1ZGJiMC1jZWJhLTQxNDktYTY3MC0zNDQ4MzBiODRmMDkiLCJpc3MiOiJzaXhwYW5nLWF1dGgiLCJyb2xlIjoiTUFTVEVSIiwiaWF0IjoxNzc1NTEwNDIyLCJleHAiOjE3NzU1MTQwMjJ9.bZ5UgYh47pA06UmRyJhJ7-GdVC4ZCpRMQlhLD8-gC2k
+# ---------------------------------------------------------
+# 1. 배송 생성 테스트 (OrderCreatedEvent 기반)
+# ---------------------------------------------------------
+
+### [C-1] 새로운 배송 생성
+# 서비스 내부에서 hubClient.checkExists()를 호출하므로 유효한 허브 ID여야 합니다.
+POST {{baseUrl}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "orderId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "departureHub": "e68b78cb-75cd-4adf-b241-0151d39fced6",
+  "arrivalHub": "b3f98e53-0595-473e-9abf-5c1058f0d05a",
+  "address": "서울특별시 강남구 테헤란로 123",
+  "receiverId": "550e8400-e29b-41d4-a716-446655440000",
+  "supplierId": "660e8400-e29b-41d4-a716-446655441111"
+}
+
+> {%
+    client.global.set("delivery_id", response.body.id);
+    client.test("배송 생성 성공", function () {
+        client.assert(response.status === 200 || response.status === 201, "Status should be 200 or 201");
+    });
+%}
+
+### [C-2] 중복 주문 생성 테스트 (Idempotency 확인)
+# 코드의 isAlreadyProcessed() 로직에 의해 기존 생성된 배송 ID가 반환되어야 합니다.
+POST {{baseUrl}}
+Content-Type: application/json
+
+{
+  "orderId": "{{order_id}}",
+  "departureHub": "{{departure_hub_id}}",
+  "arrivalHub": "{{arrival_hub_id}}",
+  "address": "서울특별시 강남구 테헤란로 123",
+  "receiverId": "770e8400-e29b-41d4-a716-446655442222"
+}
+
+
+# ---------------------------------------------------------
+# 2. 배송 조회 테스트 (Role-based Access Control)
+# ---------------------------------------------------------
+
+### [Q-1] MASTER 권한으로 상세 조회 (전체 접근 가능)
+GET {{baseUrl}}/{{delivery_id}}
+X-User-Role: MASTER
+X-User-Id: {{$guid}}
+
+### [Q-2] HUB_MANAGER 권한으로 상세 조회
+# 출발/도착 허브 중 하나라도 본인 담당 허브면 접근 가능
+GET {{baseUrl}}/{{delivery_id}}
+X-User-Role: HUB_MANAGER
+X-User-Id: {{$guid}}
+X-Hub-Id: {{departure_hub_id}}
+
+### [Q-3] DELIVERY_MANAGER 권한으로 상세 조회
+# 경로(Route)에 배정된 담당자 ID가 본인이어야 접근 가능
+GET {{baseUrl}}/{{delivery_id}}
+X-User-Role: DELIVERY_MANAGER
+X-User-Id: {{managerId_hub}}
+
+### [Q-4] 배송 경로를 포함한 상세 조회
+GET {{baseUrl}}/{{delivery_id}}/routes
+X-User-Role: MASTER
+X-User-Id: {{$guid}}
+
+
+# ---------------------------------------------------------
+# 3. 배송 검색/목록 테스트 (SearchByRole)
+# ---------------------------------------------------------
+
+### [S-1] HUB_MANAGER 담당 허브 배송 목록 검색
+GET {{baseUrl}}?page=0&size=10
+X-User-Role: HUB_MANAGER
+X-User-Id: {{$guid}}
+X-Hub-Id: {{departure_hub_id}}
+
+### [S-2] COMPANY_MANAGER(수령인) 배송 목록 검색
+GET {{baseUrl}}?page=0&size=10
+X-User-Role: COMPANY_MANAGER
+X-User-Id: 770e8400-e29b-41d4-a716-446655442222
