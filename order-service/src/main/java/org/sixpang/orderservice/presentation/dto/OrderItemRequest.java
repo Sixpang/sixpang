@@ -2,6 +2,7 @@ package org.sixpang.orderservice.presentation.dto;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -9,6 +10,7 @@ import java.util.UUID;
 
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class OrderItemRequest {
 
     @NotNull(message = "상품 ID는 필수입니다.")

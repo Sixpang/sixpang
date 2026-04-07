@@ -79,12 +79,8 @@ class OrderServiceImplTest {
         productId = UUID.randomUUID();
         userId = UUID.randomUUID();
 
-        mockOrder = Order.create(
-                supplierId,
-                receiverId,
-                Timestamp.from(Instant.now().plusSeconds(86400)),
-                BigDecimal.ZERO
-        );
+        // 헬퍼를 사용하여 상태는 CONFIRMED, 작성자는 userId로 세팅
+        mockOrder = createOrderWithMetadata(OrderStatus.CONFIRMED, userId);
 
         mockOrderItem = OrderItem.create(orderId, productId, 5);
 
@@ -96,11 +92,9 @@ class OrderServiceImplTest {
                 List.of(itemRequest)
         );
 
-        // MASTER 권한 유저
-        masterUser = new UserPrincipal(userId, "MASTER");
-
-        // 일반 유저 (주문 createdBy와 다른 ID → 접근 거부 시나리오용)
-        normalUser = new UserPrincipal(UUID.randomUUID(), "HUB_MANAGER");
+        /// 유저 권한 설정
+        masterUser = new UserPrincipal(userId, "MASTER"); // 작성자와 동일 ID
+        normalUser = new UserPrincipal(UUID.randomUUID(), "HUB_MANAGER"); // 작성자와 다른 ID
     }
 
     // ================================================================
@@ -115,7 +109,7 @@ class OrderServiceImplTest {
         void createOrder_success() {
             // given
             given(productClient.getInventory(productId))
-                    .willReturn(new InventoryResponse(productId, 100));
+                    .willReturn(new InventoryResponse(productId, 100L));
             given(orderRepository.save(any(Order.class))).willReturn(mockOrder);
             given(orderItemRepository.save(any(OrderItem.class))).willReturn(mockOrderItem);
             willDoNothing().given(eventPublisher).publish(any(OrderCreatedEvent.class));
@@ -140,7 +134,7 @@ class OrderServiceImplTest {
         void createOrder_outOfStock() {
             // given: 재고 1개, 요청 수량 3개
             given(productClient.getInventory(productId))
-                    .willReturn(new InventoryResponse(productId, 1));
+                    .willReturn(new InventoryResponse(productId, 1L));
 
             // when & then
             assertThatThrownBy(() -> orderService.createOrder(createRequest))
@@ -175,7 +169,7 @@ class OrderServiceImplTest {
         void createOrder_decreaseInventoryFails() {
             // given
             given(productClient.getInventory(productId))
-                    .willReturn(new InventoryResponse(productId, 100));
+                    .willReturn(new InventoryResponse(productId, 100L));
             given(orderRepository.save(any(Order.class))).willReturn(mockOrder);
             willThrow(new RuntimeException("Feign error"))
                     .given(productClient)
@@ -284,8 +278,10 @@ class OrderServiceImplTest {
         @Test
         @DisplayName("CANCELLED 상태 주문 → ORDER_CANNOT_UPDATE 예외")
         void updateOrder_cancelledStatus() {
-            // given: CANCELLED 상태의 주문 (리플렉션으로 상태 변경)
-            Order cancelledOrder = createOrderWithStatus(OrderStatus.CANCELLED);
+            // AS-IS: Order cancelledOrder = createOrderWithMetadata(OrderStatus.CANCELLED);
+            // TO-BE: 두 번째 인자인 userId(또는 임의의 UUID)를 추가해야 합니다.
+            Order cancelledOrder = createOrderWithMetadata(OrderStatus.CANCELLED, userId);
+
             given(orderRepository.findByIdAndDeletedAtIsNull(orderId))
                     .willReturn(Optional.of(cancelledOrder));
 
@@ -370,18 +366,25 @@ class OrderServiceImplTest {
     // ────────────────────────────────────────────────────────────────
     // 헬퍼: 리플렉션으로 OrderStatus 강제 세팅
     // ────────────────────────────────────────────────────────────────
-    private Order createOrderWithStatus(OrderStatus status) {
+    private Order createOrderWithMetadata(OrderStatus status, UUID createdBy) {
         Order order = Order.create(
                 supplierId, receiverId,
                 Timestamp.from(Instant.now().plusSeconds(86400)),
                 BigDecimal.ZERO
         );
         try {
-            var field = Order.class.getDeclaredField("orderStatus");
-            field.setAccessible(true);
-            field.set(order, status);
+            // 1. 주문 상태(orderStatus) 강제 주입
+            var statusField = Order.class.getDeclaredField("orderStatus");
+            statusField.setAccessible(true);
+            statusField.set(order, status);
+
+            // 2. 작성자(createdBy) 강제 주입 (BaseEntity 필드 접근)
+            // getSuperclass()를 통해 BaseEntity에 선언된 필드를 가져옵니다.
+            var createdByField = Order.class.getSuperclass().getDeclaredField("createdBy");
+            createdByField.setAccessible(true);
+            createdByField.set(order, createdBy);
         } catch (Exception e) {
-            throw new RuntimeException("리플렉션 실패", e);
+            throw new RuntimeException("리플렉션 세팅 실패", e);
         }
         return order;
     }
