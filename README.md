@@ -1,7 +1,6 @@
 # SIXPANG
 ## 팀원
-| <img src="https://github.com/user-attachments/assets/09ef2083-5b28-41fe-9cb1-104256797ab5" width="110"> | <img src="https://github.com/user-attachments/assets/7c53ea79-82c0-417e-b6f8-318d01e58b35"
- width="110"> | <img src="https://github.com/user-attachments/assets/9ad62a07-78a4-4115-aac6-728e5a3e1fb1" width="110"> | <img src="https://github.com/user-attachments/assets/ef1c1637-78cc-49e8-9a59-395c5f54da8c" width="110"> | <img src="https://github.com/user-attachments/assets/a6faa46c-007d-4cde-983e-6d09fe3c62f8" width="110"> |
+| <img src="https://github.com/user-attachments/assets/09ef2083-5b28-41fe-9cb1-104256797ab5" width="110"> | <img src="https://github.com/user-attachments/assets/7c53ea79-82c0-417e-b6f8-318d01e58b35" width="110"> | <img src="https://github.com/user-attachments/assets/9ad62a07-78a4-4115-aac6-728e5a3e1fb1" width="110"> | <img src="https://github.com/user-attachments/assets/ef1c1637-78cc-49e8-9a59-395c5f54da8c" width="110"> | <img src="https://github.com/user-attachments/assets/a6faa46c-007d-4cde-983e-6d09fe3c62f8" width="110"> |
 | :-----------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: |
 | 조여진 | 김민진 | 김혜린 | 곽찬홍 | 한소연 |
 | 인증 / 인가<br>회원 | 허브 | 배송 | 업체<br>상품 | 주문 |
